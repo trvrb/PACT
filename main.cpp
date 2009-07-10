@@ -17,7 +17,7 @@
 		What sort of primitives would be necessary to make this work?
 	Build in command-line options.
 	Tests?  Error checking in general.
-
+	Run time forwards.
 */
 
 using namespace std;
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 //	cout << "a = " << a << endl;
 //	cout << "b = " << b << endl;	
 	
-	Skyline skl;
+//	Skyline skl;
 	
 	string parenString;
 	ifstream inputFile ("trees.txt");
@@ -82,12 +82,14 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		lsum.incrWeights(ct.getRevMigWeights());
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
+				ct.pushTimesBack(2003);
+
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(1);
 		//		ct.trimEnds(a,b);
 		
 		//		ct.printRuleList();
-		//		ct.printTimeTree();
+				ct.printTimeTree();
 		//		ct.printMigTotal();
 		//		ct.printMigRates();
 		//		ct.printCoalRates();
@@ -95,10 +97,10 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
 		//		lsum.printRates();
 		
-				ct.setStepSize(0.001);
-				ct.tajimaSkyline();
+		//		ct.setStepSize(0.001);
+		//		ct.tajimaSkyline();
 		//		ct.labelSkyline(a);													
-				skl.appendIteration(ct.getSkylineIndex(),ct.getSkylineValue());
+		//		skl.appendIteration(ct.getSkylineIndex(),ct.getSkylineValue());
 			}
 			
 		}
@@ -108,7 +110,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		cout << "Unable to open tree file, expecting trees.txt";
 
 
-	skl.printMeans();
+//	skl.printMeans();
 	
 	return 0;
 }

@@ -416,6 +416,33 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 
 }
 
+/* push dates to agree with a most recent sample date at t */
+void CoalescentTree::pushTimesBack(double time) {
+
+	tree<int>::iterator it;
+
+	// find most recent node
+	double mint = *tlist.begin();
+	for (it = ctree.begin(); it != ctree.end(); it++) {
+		if (tmap[*it] < mint ) {
+			mint = tmap[*it];
+		}	
+	}
+	
+	// need to adjust times by this amount
+	double diff = time - mint;
+		
+	// modifying tmap and tlist
+	tlist.clear();
+	for (it = ctree.begin(); it != ctree.end(); it++) {
+		tmap[*it] += diff;
+		tlist.insert(tmap[*it]);
+		
+	}	
+		  	
+	constructPaddedTree();
+
+}
 
 /* padded with extra nodes at coalescent time points */
 /* causing problems with migration tree */

@@ -65,6 +65,7 @@ public:
 	vector<double> getSkylineValue();	// go through skyline object and print medians
 																	
 	void setStepSize(double);			// sets the window at which to take parameter values
+	void pushTimesBack(double);			// push dates to agree with a most recent sample date at t
 		
 private:
 	int leafCount;						// number of leafs in the tree (sample size n)
@@ -102,7 +103,7 @@ private:
 		
 	vector<double> skylineindex;
 	vector<double> skylinevalue;
-	
+		
 	tree<int> extractSubtree(set<int>);	// takes a set of node labels and walks up the coalescent tree
 										// returning a tree object, tmap still works with this object											
 	double getTreeLength(tree<int> &);	// takes a tree object and returns the total tree length, works with tmap
