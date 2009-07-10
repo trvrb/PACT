@@ -61,20 +61,6 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				CoalescentTree ct(parenString, "beast");
 	//			LabelSummary lsum(ct.getLabelSet());
 
-				// winter 5.0833
-				// spring 4.8333
-				// summer 4.5833
-				// fall 4.3333
-				// january to march 5.0
-				// april to june 4.75
-				// july to september 4.5
-				// october to december 4.25
-				// jan-feb 5.0
-				// mar-apr 4.8333
-				// may-jun 4.6666
-				// jul-aug 4.5
-				// sep-oct 4.3333
-				// nov-dec 4.1666
 /*
 				for (double i = a; i > 0; i -= 1.0 ) {
 				
