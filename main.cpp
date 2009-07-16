@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 //	cout << "a = " << a << endl;
 //	cout << "b = " << b << endl;	
 	
-//	Skyline skl;
+	Skyline skl;
 	
 	string parenString;
 	ifstream inputFile ("trees.txt");
@@ -82,23 +82,29 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		lsum.incrWeights(ct.getRevMigWeights());
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
-				ct.pushTimesBack(2003);
+		//		ct.pushTimesBack(2003);
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(1);
 		//		ct.trimEnds(a,b);
 		
 		//		ct.printRuleList();
-				ct.printTimeTree();
+		//		ct.printTimeTree();
 		//		ct.printMigTotal();
 		//		ct.printMigRates();
-		//		ct.printCoalRates();
+
+				cout << "total rate = ";
+				ct.printCoalRates();
+		
+				cout << "trunk rate = ";
+				ct.printTrunkRates();
+
 		//		ct.printLabelProportions();
 		
 		//		lsum.printRates();
 		
 		//		ct.setStepSize(0.001);
-		//		ct.tajimaSkyline();
+		//		ct.divSkyline();
 		//		ct.labelSkyline(a);													
 		//		skl.appendIteration(ct.getSkylineIndex(),ct.getSkylineValue());
 			}

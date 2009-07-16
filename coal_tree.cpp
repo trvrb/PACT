@@ -1326,7 +1326,6 @@ map<int,int> CoalescentTree::getRevMigCounts() {
 /* go through tree and print the coalescent rate for each label */
 void CoalescentTree::printCoalRates() {
 
-	double step = 0.0001;
 	tree<int>::iterator it;
 	
 	/* go through tree and find end points */
@@ -1338,8 +1337,11 @@ void CoalescentTree::printCoalRates() {
 			start = tmap[*it];
 		}
 	}
-	
-//	cout << "start = " << start << ", stop = " << stop << endl;
+
+	// setting step to be 1/1000 of the total length of the tree
+	double step = (stop - start) / (double) 1000;
+
+//	cout << "start = " << start << ", stop = " << stop << ", step = " << step << endl;
 	
 	set<int>::const_iterator lit;
 	for ( lit=labelSet.begin(); lit != labelSet.end(); lit++ ) {
@@ -1374,6 +1376,82 @@ void CoalescentTree::printCoalRates() {
 		int count = 0;
 		for (it = ctree.begin(); it != ctree.end(); it++) {
 			if (ctree.number_of_children(it) == 2 && lmap[*it] == *lit) {		
+				count++;
+			}
+		}
+//		cout << "label = " << *lit << ", weight = " << labelWeight << ", count = " << count << ", rate = " << count / labelWeight << ", timescale = " << labelWeight / count << endl;
+		cout << count / labelWeight << " ";
+
+	}
+	cout << endl;
+	
+}
+
+/* go through tree and print the coalescent rate for each label */
+/* only concerned with coalescent events that include the trunk */
+void CoalescentTree::printTrunkRates() {
+
+	tree<int>::iterator it;
+	
+	/* go through tree and find end points */
+	double start, stop;
+	start = tmap[*ctree.begin()];
+	stop = tmap[*ctree.begin()];
+	for (it = ctree.begin(); it != ctree.end(); it++) {
+		if (start > tmap[*it]) {
+			start = tmap[*it];
+		}
+	}
+	
+	// setting step to be 1/1000 of the total length of the tree
+	double step = (stop - start) / (double) 1000;	
+	
+//	cout << "start = " << start << ", stop = " << stop << endl;
+	
+	set<int>::const_iterator lit;
+	for ( lit=labelSet.begin(); lit != labelSet.end(); lit++ ) {
+	
+//		cout << "label = " << *lit << endl;
+	
+		// go through tree and count concurrent lineages
+		// if there is 1 trunk lineage and 1 branch lineage, this will mean an opportunity of 1
+		// 1 trunk, 2 branch = opportunity of 2
+		// 1 trunk, 3 branch =  opportunity of 3
+		// 2 trunk, 3 branch = opportunity of 7
+		// trunk x, branch y =  x*y + 0.5*(x-1)*(x)
+		double labelWeight = 0.0;
+		for (double t = start; t <= stop; t += step) {
+		
+//			cout << "time = " << t << endl;
+			int branchCount = 0;
+			int trunkCount = 0;
+			for (it = ctree.begin(); it != ctree.end(); it++) {
+				if (tmap[*it] < t && tmap[ancMap[*it]] >= t && lmap[*it] == *lit) {			// found a lineage
+					if (trunkSet.end() != trunkSet.find(*it)) {								// lineage is trunk
+//						cout << "trunk = "<< *it << endl;
+						trunkCount++;
+					}
+					else {
+//						cout << "branch = "<< *it << endl;
+						branchCount++;					
+					}
+				}
+			}
+			double weight;
+			if (trunkCount > 0)
+				weight = ( trunkCount*branchCount + 0.5 * (trunkCount-1) * trunkCount ) * step;
+			else
+				weight = 0;
+//			cout << "trunkCount = " << trunkCount << ", branchCount = " << branchCount << ", weight = " << weight << endl;
+			labelWeight += weight;
+		
+		}
+		
+		
+		/* count trunk coalescent events, these are trunk nodes with two children */
+		int count = 0;
+		for (it = ctree.begin(); it != ctree.end(); it++) {
+			if (ctree.number_of_children(it) == 2 && lmap[*it] == *lit && trunkSet.end() != trunkSet.find(*it) ) {		
 				count++;
 			}
 		}

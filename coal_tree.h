@@ -42,6 +42,8 @@ public:
 	void printMigTotal();				// print overall migration rate across tree 
 	void printMigRates();				// print list of posterior migration rates 
 	void printCoalRates();				// print list of coalescent rates for each label
+	void printTrunkRates();				// print list of coalescent rates for each label 
+										// only considering coalescent events that include the trunk
 	
 	map<int,double> getCoalWeights();	// return map of coalescent weights for each label	
 	map<int,int> getCoalCounts();		// return map of coalescent counts for each label
