@@ -88,24 +88,18 @@ private:
 	map<int,double>	rmap;				// maps a node to the rate of the branch leading into the node
 	map<int,double>	tmap;				// maps a node to the age of the node
 	map<int,int>	lmap;				// maps a node to a numeric label
-	map<int,int>	ancMap;				// maps a node to its parent	
+	map<int,int>	ancmap;				// maps a node to its parent	
 	set<double> tlist;					// sorted list of times starting with root		
 	bool blCheck;						// whether branch lengths exist in input tree
 	bool brCheck;						// whether branch rates exist in input tree
 	bool nlCheck;						// whether node labels exist in input tree	
 	double stepsize;					// length of time between samples of parameter values
-	
-	void constructPaddedTree();			// takes a coalescent tree and pads with internal nodes at every event
-	tree<int> paddedTree;				// padded with extra nodes at coalescent time points
-	int paddedNodeCount;
-	map<int,double>	paddedbmap;
-	map<int,double>	paddedrmap;
-	map<int,double> paddedtmap;
-	map<int,int> 	paddedlmap;	
-	map<int,int>	paddedAncMap;		// takes a node and maps it to its parent
-		
+			
 	vector<double> skylineindex;
 	vector<double> skylinevalue;
+
+	void padTree();						// pads CoalescentTre with additional nodes at each coalescent event
+										// included mainly for compatibility with TreePlot
 		
 	tree<int> extractSubtree(set<int>);	// takes a set of node labels and walks up the coalescent tree
 										// returning a tree object, tmap still works with this object											

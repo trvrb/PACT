@@ -384,19 +384,17 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 		tlist.insert(tmap[*pre_it]);
 	}	
 	
-	/* construct ancMap */
-	ancMap.clear();
+	/* construct ancmap */
+	ancmap.clear();
 	it = ctree.begin();
 	end = ctree.end();
 	while (it != end) {
 		if (*it != 0) {
-			ancMap[*it] = *ctree.parent(it);
+			ancmap[*it] = *ctree.parent(it);
 		}
 		it++;
 	}
-  	
-//	constructPaddedTree();  	
-		
+  			
 	/* go through tree and append to trunk set */
 	it = ctree.begin();
 	end = ctree.end();
@@ -440,27 +438,20 @@ void CoalescentTree::pushTimesBack(double time) {
 		
 	}	
 		  	
-//	constructPaddedTree();
-
 }
 
 /* padded with extra nodes at coalescent time points */
 /* causing problems with migration tree */
-void CoalescentTree::constructPaddedTree() { 
+void CoalescentTree::padTree() { 
 
-	/* don't want to modify the original tree */
-
-	paddedTree = ctree;
-  	paddedtmap = tmap;
-  	paddedrmap = rmap;
-  	paddedlmap = lmap;
+	/* modifying the original tree */
 
 	tree<int>::pre_order_iterator it, end, iterTemp, iterN;
 
-	it = paddedTree.begin();
-	end = paddedTree.end();
+	it = ctree.begin();
+	end = ctree.end();
    
-	if(!paddedTree.is_valid(it)) return;
+	if(!ctree.is_valid(it)) return;
 	
 	set<double>::const_iterator depth_it;
 	int newDepth;
@@ -471,38 +462,38 @@ void CoalescentTree::constructPaddedTree() {
 	
 		/* finding what the correct depth of the node should be */
 		newDepth = -1;
-		for ( depth_it=tlist.end(); depth_it != tlist.find(paddedtmap[*it]); depth_it-- )
+		for ( depth_it=tlist.end(); depth_it != tlist.find(tmap[*it]); depth_it-- )
     		newDepth++;
     	
     	depth_it++;
 	
-		if (newDepth > paddedTree.depth(it)) {
+		if (newDepth > ctree.depth(it)) {
 		
 			/* padding with number of nodes equal to the difference in depth levels */
-			for(int i=0; i<newDepth-paddedTree.depth(it); i++) {
+			for(int i=0; i<newDepth-ctree.depth(it); i++) {
 	
-				double rtemp = paddedrmap[*it];
-				int ltemp = paddedlmap[*it];
+				double rtemp = rmap[*it];
+				int ltemp = lmap[*it];
 	
 				/* need to make a new sibling for a subtree with less than the correct depth */
-				iterN = paddedTree.insert(it, currentNode);
-				paddedtmap[currentNode] = *depth_it;
+				iterN = ctree.insert(it, currentNode);
+				tmap[currentNode] = *depth_it;
 				
 				/* create a temporary child for this new node */
-				iterTemp = paddedTree.append_child(iterN,0);
+				iterTemp = ctree.append_child(iterN,0);
 				
 				/* replace this child with the subtree it */
-				paddedTree.replace(iterTemp,it);	
+				ctree.replace(iterTemp,it);	
 			
 				/* erase copied nodes */
-				paddedTree.erase(it);
+				ctree.erase(it);
 				
 				it = iterN;
 				currentNode++;
 				depth_it++;
 				
-				paddedrmap[*it] = rtemp;
-				paddedlmap[*it] = ltemp;
+				rmap[*it] = rtemp;
+				lmap[*it] = ltemp;
 				
 			}
 	
@@ -512,17 +503,17 @@ void CoalescentTree::constructPaddedTree() {
 	
 	}
 	
-	/* construct paddedAncMap */
-	paddedNodeCount = 0;
-	paddedAncMap.clear();
-	it = paddedTree.begin();
-	end = paddedTree.end();
+	/* updating ancmap and nodeCount */
+	nodeCount = 0;
+	ancmap.clear();
+	it = ctree.begin();
+	end = ctree.end();
 	while (it != end) {
 		if (*it != 0) {
-			paddedAncMap[*it] = *paddedTree.parent(it);
-			paddedbmap[*it] = paddedtmap[*paddedTree.parent(it)] - paddedtmap[*it];
+			ancmap[*it] = *ctree.parent(it);
+			bmap[*it] = tmap[*ctree.parent(it)] - tmap[*it];
 		}
-		paddedNodeCount++;
+		nodeCount++;
 		it++;
 	}
 	
@@ -558,9 +549,7 @@ void CoalescentTree::pruneToTrunk() {
 		if (ctree.number_of_children(it)==0)
 			leafCount++;
 	}
-		
-	constructPaddedTree(); 	
-	
+			
 }
 
 /* reduces a tree to samples with a single label */
@@ -615,9 +604,7 @@ void CoalescentTree::pruneToLabel(int label) {
     tlist.clear();
 	for (it=ctree.begin(); it!=ctree.end(); it++)
 		tlist.insert(tmap[*it]);
-		
-	constructPaddedTree(); 	
-	
+			
 }
 
 /* trims a tree at its edges */
@@ -636,18 +623,18 @@ void CoalescentTree::trimEnds(double start, double stop) {
 	root = ctree.begin();
 	while(it!=end) {	
 		/* if node < start and anc[node] > start, erase children and prune node back to start */
-		if (tmap[*it] < start && tmap[ancMap[*it]] >= start) {
+		if (tmap[*it] < start && tmap[ancmap[*it]] >= start) {
 			tmap[*it] = start;
-			bmap[*it] = tmap[ancMap[*it]] - tmap[*it];
+			bmap[*it] = tmap[ancmap[*it]] - tmap[*it];
 			ctree.erase_children(it);
 			it++;
 		}
 		/* if node < stop and anc[node] > stop, push anc[node] up to stop */
 		/* and reparent anc[node] to be a child of root */
 		/* neither node nore anc[node] can be root */
-		else if (tmap[*it] < stop && tmap[ancMap[*it]] > stop && *it != 0 && ancMap[*it] != 0) {
-			tmap[ancMap[*it]] = stop;
-			bmap[ancMap[*it]] = 0;
+		else if (tmap[*it] < stop && tmap[ancmap[*it]] > stop && *it != 0 && ancmap[*it] != 0) {
+			tmap[ancmap[*it]] = stop;
+			bmap[ancmap[*it]] = 0;
 			itertemp = ctree.append_child(root);
 			ctree.move_ontop(itertemp, ctree.parent(it));
 			it = ctree.begin();
@@ -680,7 +667,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 	map<int,double>	rmap;				
 	map<int,double>	tmap;				
 	map<int,int>	lmap;				
-	map<int,int>	ancMap;	
+	map<int,int>	ancmap;	
 */
 
 	/* want to reduce maps to just the subset dealing with these nodes */
@@ -698,7 +685,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 			rmap.erase(i);
 			tmap.erase(i);
 			lmap.erase(i);
-			ancMap.erase(i);
+			ancmap.erase(i);
 		}
 	}
 
@@ -712,10 +699,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 		if (ctree.number_of_children(it)==0)
 			leafCount++;
 	}
-	
-	/* this isn't working for some reason */
-	constructPaddedTree(); 	
-	
+		
 }
 
 
@@ -817,12 +801,15 @@ void CoalescentTree::printTimeTree() {
 /* print mapping of nodes to rates if rates exist */
 void CoalescentTree::printPaddedRuleList() { 
 
+	/* pad tree with extra internal nodes */
+	padTree();
+
 	/* print tip count */
 	cout << leafCount << endl;
 	
 	/* print nodes that exist at present */
 	for (int i=1; i<leafCount; i++) {
-		if (paddedtmap[i] < 0.01)				// should specify this better
+		if (tmap[i] < 0.01)				// should specify this better
 			cout << i << " ";
 	}
 	cout << endl;
@@ -832,17 +819,17 @@ void CoalescentTree::printPaddedRuleList() {
 	set<int> trunk; 
 	
 	tree<int>::iterator it, jt, end;
-	it = paddedTree.begin();
-	end = paddedTree.end();
+	it = ctree.begin();
+	end = ctree.end();
    
 	while(it!=end) {
 		/* find leaf nodes at present */
-		if (paddedtmap[*it] < 0.01) {
+		if (tmap[*it] < 0.01) {
 			jt = it;
 			/* move up tree adding nodes to trunk set */
 			while (*jt != 0) {
 				trunk.insert(*jt);
-				jt = paddedTree.parent(jt);
+				jt = ctree.parent(jt);
 			}
 		}
 		it++;
@@ -856,14 +843,14 @@ void CoalescentTree::printPaddedRuleList() {
 	/* print the tree in rule list (Mathematica-ready) format */
 	/* print only upward links */
 	tree<int>::pre_order_iterator iterTemp, iterN;
-	it = paddedTree.begin();
-	end = paddedTree.end();
+	it = ctree.begin();
+	end = ctree.end();
 	
 	it++;
-	cout << *it << "->" << *paddedTree.parent(it);
+	cout << *it << "->" << *ctree.parent(it);
 	it++;
 	while(it!=end) {
-		cout << " " << *it << "->" << *paddedTree.parent(it);
+		cout << " " << *it << "->" << *ctree.parent(it);
 		it++;
 	}
 	cout << endl;
@@ -877,12 +864,12 @@ void CoalescentTree::printPaddedRuleList() {
 	
 	/* print mapping of rates in Mathematica format */
 	if (brCheck) {
-		it = paddedTree.begin();
+		it = ctree.begin();
 		it++;
-		cout << *it << "->" << paddedrmap[*it];
+		cout << *it << "->" << rmap[*it];
 		it++;
 		while(it!=end) {
-			cout << " " << *it << "->" << paddedrmap[*it];
+			cout << " " << *it << "->" << rmap[*it];
 			it++;
 		}
 		cout << endl;
@@ -890,12 +877,12 @@ void CoalescentTree::printPaddedRuleList() {
 	
 	/* print mapping of labels in Mathematica format */
 	if (nlCheck) {
-		it = paddedTree.begin();
+		it = ctree.begin();
 		it++;
-		cout << *it << "->" << paddedlmap[*it];
+		cout << *it << "->" << lmap[*it];
 		it++;
 		while(it!=end) {
-			cout << " " << *it << "->" << paddedlmap[*it];
+			cout << " " << *it << "->" << lmap[*it];
 			it++;
 		}
 		cout << endl;
@@ -1085,12 +1072,12 @@ void CoalescentTree::printMigTotal() {
 			if (*lit != *ljt) {
 				
 				/* go through tree and find situations where parent matches lit and child matches ljt */
-				/* using ancMap for speed */
+				/* using ancmap for speed */
 				for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {	
-					if ( lmap[*it] == *ljt && lmap[ancMap[*it]] == *lit 
-					&& *it != 0 && ancMap[*it] != 0) {						// exclude root
+					if ( lmap[*it] == *ljt && lmap[ancmap[*it]] == *lit 
+					&& *it != 0 && ancmap[*it] != 0) {						// exclude root
 						count++;
-//						cout << "from " << i << " [" << *lit << "]" << " to " << paddedAncMap[i] << " [" << *ljt << "]" << endl;
+//						cout << "from " << i << " [" << *lit << "]" << " to " << ancmap[i] << " [" << *ljt << "]" << endl;
 					}
 				}
 				
@@ -1139,13 +1126,13 @@ void CoalescentTree::printMigRates() {
 			if (*lit != *ljt) {
 				
 				/* go through tree and find situations where parent matches lit and child matches ljt */
-				/* using ancMap for speed */
+				/* using ancmap for speed */
 				int count = 0;
 				for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {	
-					if ( lmap[*it] == *ljt && lmap[ancMap[*it]] == *lit 
-					&& *it != 0 && ancMap[*it] != 0) {						// exclude root
+					if ( lmap[*it] == *ljt && lmap[ancmap[*it]] == *lit 
+					&& *it != 0 && ancmap[*it] != 0) {						// exclude root
 						count++;
-//						cout << "from " << i << " [" << *lit << "]" << " to " << paddedAncMap[i] << " [" << *ljt << "]" << endl;
+//						cout << "from " << i << " [" << *lit << "]" << " to " << ancmap[i] << " [" << *ljt << "]" << endl;
 					}
 				}
 		
@@ -1219,14 +1206,14 @@ map<int,int> CoalescentTree::getMigCounts() {
 			if (*lit != *ljt) {
 				
 				/* go through tree and find situations where parent matches lit and child matches ljt */
-				/* using ancMap for speed */
+				/* using ancmap for speed */
 				int count = 0;
 				for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {	
-					if ( lmap[*it] == *ljt && lmap[ancMap[*it]] == *lit 
-					&& *it != 0 && ancMap[*it] != 0					// exclude root
-					&& bmap[*it] > 0 && bmap[ancMap[*it]] > 0) {	// correcting for the occasional negative branch length			
+					if ( lmap[*it] == *ljt && lmap[ancmap[*it]] == *lit 
+					&& *it != 0 && ancmap[*it] != 0					// exclude root
+					&& bmap[*it] > 0 && bmap[ancmap[*it]] > 0) {	// correcting for the occasional negative branch length			
 						count++;
-//						cout << "from " << i << " [" << *lit << "]" << " to " << paddedAncMap[i] << " [" << *ljt << "]" << endl;
+//						cout << "from " << i << " [" << *lit << "]" << " to " << ancmap[i] << " [" << *ljt << "]" << endl;
 					}
 				}
 		
@@ -1297,15 +1284,15 @@ map<int,int> CoalescentTree::getRevMigCounts() {
 			if (*lit != *ljt) {
 				
 				/* go through tree and find situations where parent matches lit and child matches ljt */
-				/* using ancMap for speed */
+				/* using ancmap for speed */
 				int count = 0;
 				for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {	
 					if ( lmap[*it] == *lit	 						// from deme is child
-					&& lmap[ancMap[*it]] == *ljt 					// to deme is parent
-					&& *it != 0 && ancMap[*it] != 0					// exclude root
-					&& bmap[*it] > 0 && bmap[ancMap[*it]] > 0) {	// correcting for the occasional negative branch length			
+					&& lmap[ancmap[*it]] == *ljt 					// to deme is parent
+					&& *it != 0 && ancmap[*it] != 0					// exclude root
+					&& bmap[*it] > 0 && bmap[ancmap[*it]] > 0) {	// correcting for the occasional negative branch length			
 						count++;
-//						cout << "from " << i << " [" << *lit << "]" << " to " << paddedAncMap[i] << " [" << *ljt << "]" << endl;
+//						cout << "from " << i << " [" << *lit << "]" << " to " << ancmap[i] << " [" << *ljt << "]" << endl;
 					}
 				}
 		
@@ -1356,7 +1343,7 @@ void CoalescentTree::printCoalRates() {
 //			cout << t << endl;
 			int count = 0;
 			for (it = ctree.begin(); it != ctree.end(); it++) {
-				if (tmap[*it] < t && tmap[ancMap[*it]] >= t && lmap[*it] == *lit) {		
+				if (tmap[*it] < t && tmap[ancmap[*it]] >= t && lmap[*it] == *lit) {		
 //					cout << *it << " ";
 					count++;
 				}
@@ -1426,7 +1413,7 @@ void CoalescentTree::printTrunkRates() {
 			int branchCount = 0;
 			int trunkCount = 0;
 			for (it = ctree.begin(); it != ctree.end(); it++) {
-				if (tmap[*it] < t && tmap[ancMap[*it]] >= t && lmap[*it] == *lit) {			// found a lineage
+				if (tmap[*it] < t && tmap[ancmap[*it]] >= t && lmap[*it] == *lit) {			// found a lineage
 					if (trunkSet.end() != trunkSet.find(*it)) {								// lineage is trunk
 //						cout << "trunk = "<< *it << endl;
 						trunkCount++;
@@ -1491,7 +1478,7 @@ map<int,double> CoalescentTree::getCoalWeights() {
 //			cout << t << endl;
 			int count = 0;
 			for (it = ctree.begin(); it != ctree.end(); it++) {
-				if (tmap[*it] < t && tmap[ancMap[*it]] >= t && lmap[*it] == *lit) {		
+				if (tmap[*it] < t && tmap[ancmap[*it]] >= t && lmap[*it] == *lit) {		
 //					cout << *it << " ";
 					count++;
 				}
@@ -1555,16 +1542,16 @@ void CoalescentTree::NeSkyline() {
 
 	vector<int> lineages (tlist.size());
 	tree<int>::iterator it, end;
-	it = paddedTree.begin();
-	end = paddedTree.end(); 		
-	int rootdepth=paddedTree.depth(it);
+	it = ctree.begin();
+	end = ctree.end(); 		
+	int rootdepth=ctree.depth(it);
 	
 	while(it!=end) {
-		lineages.at(paddedTree.depth(it)-rootdepth)++;
+		lineages.at(ctree.depth(it)-rootdepth)++;
 		it++;
 	}
 	
-	int loc = paddedTree.max_depth();
+	int loc = ctree.max_depth();
 	double ne;
 	int count;
 	double step = stepsize;
@@ -1599,19 +1586,19 @@ void CoalescentTree::subRateSkyline() {
 	tree<int>::iterator it, jt, end;
 	vector<int> lineages (tlist.size());
 	vector<double> rates (tlist.size());	
-	it = paddedTree.end();
-	end = paddedTree.end(); 		
-	int rootdepth=paddedTree.depth(it);
+	it = ctree.end();
+	end = ctree.end(); 		
+	int rootdepth=ctree.depth(it);
 	
 	/* lineages contains a running tally of mean rate at this depth */
-	while(it!=paddedTree.begin()) {
-		lineages.at(paddedTree.depth(it)-rootdepth)++;
-		rates.at(paddedTree.depth(it)-rootdepth) += paddedrmap[*it];
-//		cout << *it << " " << paddedrmap[*it] << endl;
+	while(it!=ctree.begin()) {
+		lineages.at(ctree.depth(it)-rootdepth)++;
+		rates.at(ctree.depth(it)-rootdepth) += rmap[*it];
+//		cout << *it << " " << rmap[*it] << endl;
 		it--;
 	}
 	
-	int loc = paddedTree.max_depth();
+	int loc = ctree.max_depth();
 	double rate;
 	int count;
 	double step = stepsize;
@@ -1648,17 +1635,17 @@ void CoalescentTree::divSkyline() {
 	/* have a vector[time points] of sets[node labels] */
 	tree<int>::iterator it, jt, end;
 	vector< set<int> > lineages (tlist.size());
-	it = paddedTree.end();
-	end = paddedTree.end(); 		
-	int rootdepth=paddedTree.depth(it);
+	it = ctree.end();
+	end = ctree.end(); 		
+	int rootdepth=ctree.depth(it);
 	
 	/* go through tree and add to set */
-	while(it!=paddedTree.begin()) {
-		(lineages.at(paddedTree.depth(it)-rootdepth)).insert(*it);
+	while(it!=ctree.begin()) {
+		(lineages.at(ctree.depth(it)-rootdepth)).insert(*it);
 		it--;
 	}
 	
-	int loc = paddedTree.max_depth();
+	int loc = ctree.max_depth();
 	double rate;
 	int count;
 	double step = stepsize;
@@ -1708,17 +1695,17 @@ void CoalescentTree::tmrcaSkyline() {
 	/* have a vector[time points] of sets[node labels] */
 	tree<int>::iterator it, jt, end;
 	vector< set<int> > lineages (tlist.size());
-	it = paddedTree.end();
-	end = paddedTree.end(); 		
-	int rootdepth=paddedTree.depth(it);
+	it = ctree.end();
+	end = ctree.end(); 		
+	int rootdepth=ctree.depth(it);
 	
 	/* go through tree and add to set */
-	while(it!=paddedTree.begin()) {
-		(lineages.at(paddedTree.depth(it)-rootdepth)).insert(*it);
+	while(it!=ctree.begin()) {
+		(lineages.at(ctree.depth(it)-rootdepth)).insert(*it);
 		it--;
 	}
 	
-	int loc = paddedTree.max_depth();
+	int loc = ctree.max_depth();
 	double rate;
 	int count;
 	double step = stepsize;
@@ -1738,7 +1725,7 @@ void CoalescentTree::tmrcaSkyline() {
 				int n = *jter;
 				while (n != 0) {
 					sharedMap[n]++;
-					n = paddedAncMap[n];
+					n = ancmap[n];
 				}
 			
 			}
@@ -1752,13 +1739,13 @@ void CoalescentTree::tmrcaSkyline() {
 			}
 				
 			// go through sharedMap and find most recent node with count matching highest count
-			double tmrca = paddedtmap[0];			
+			double tmrca = tmap[0];			
 			for( map<int,int>::iterator jter = sharedMap.begin(); jter != sharedMap.end(); jter++ ) {
 				
 			//	cout << "node = " <<  (*jter).first << ", count = " << (*jter).second << endl;
 				
-				if (paddedtmap[(*jter).first] < tmrca && (*jter).second == count) {
-					tmrca = paddedtmap[(*jter).first];
+				if (tmap[(*jter).first] < tmrca && (*jter).second == count) {
+					tmrca = tmap[(*jter).first];
 				}
 			
 			}
@@ -1789,17 +1776,17 @@ void CoalescentTree::tajimaSkyline() {
 	/* have a vector[time points] of sets[node labels] */
 	tree<int>::iterator it, jt, end;
 	vector< set<int> > lineages (tlist.size());
-	it = paddedTree.end();
-	end = paddedTree.end(); 		
-	int rootdepth=paddedTree.depth(it);
+	it = ctree.end();
+	end = ctree.end(); 		
+	int rootdepth=ctree.depth(it);
 	
 	/* go through tree and add to set */
-	while(it!=paddedTree.begin()) {
-		(lineages.at(paddedTree.depth(it)-rootdepth)).insert(*it);
+	while(it!=ctree.begin()) {
+		(lineages.at(ctree.depth(it)-rootdepth)).insert(*it);
 		it--;
 	}
 	
-	int loc = paddedTree.max_depth();
+	int loc = ctree.max_depth();
 	double rate;
 	int count;
 	double step = stepsize;
@@ -1906,20 +1893,20 @@ void CoalescentTree::labelSkyline(int label) {
 	tree<int>::iterator it, jt, end;
 	vector<int> lineages (tlist.size());
 	vector<double> proportions (tlist.size());	
-	it = paddedTree.end();
-	end = paddedTree.end(); 		
-	int rootdepth=paddedTree.depth(it);
+	it = ctree.end();
+	end = ctree.end(); 		
+	int rootdepth=ctree.depth(it);
 	
 	/* lineages contains a running tally of mean rate at this depth */
-	while(it!=paddedTree.begin()) {
-		lineages.at(paddedTree.depth(it)-rootdepth)++;
-		if (paddedlmap[*it] == label)
-			proportions.at(paddedTree.depth(it)-rootdepth) += 1;
-//		cout << *it << " " << paddedrmap[*it] << endl;
+	while(it!=ctree.begin()) {
+		lineages.at(ctree.depth(it)-rootdepth)++;
+		if (lmap[*it] == label)
+			proportions.at(ctree.depth(it)-rootdepth) += 1;
+//		cout << *it << " " << rmap[*it] << endl;
 		it--;
 	}
 	
-	int loc = paddedTree.max_depth();
+	int loc = ctree.max_depth();
 	double proportion;
 	int count;
 	double step = stepsize;
@@ -1983,7 +1970,7 @@ tree<int> CoalescentTree::extractSubtree(set<int> subset) {
 			
 		/* update stree based upon this mapping */
 		for (tree<int>::sibling_iterator st = stree.begin(stree.begin()); st != stree.end(stree.begin()); st++) {
-			st = stree.wrap(st,paddedAncMap[*st]);
+			st = stree.wrap(st,ancmap[*st]);
 		}	
 		
 		/* compare all pairs of nodes at top level of stree, if match, merge children of these nodes */	
@@ -2033,7 +2020,7 @@ double CoalescentTree::getTreeLength(tree<int> &tr) {
 	end = tr.end();
 	while(it!=end) {
 		if (tr.depth(it) > 0 )
-			length += paddedtmap[*tr.parent(it)] - paddedtmap[*it];
+			length += tmap[*tr.parent(it)] - tmap[*it];
 		it++;
 	}
 	

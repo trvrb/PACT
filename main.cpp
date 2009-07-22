@@ -94,8 +94,8 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.pruneToLabel(1);
 		//		ct.trimEnds(a,b);
 		
-		//		ct.printRuleList();
-				ct.printTimeTree();
+				ct.printRuleList();
+		//		ct.printTimeTree();
 		//		ct.printMigTotal();
 		//		ct.printMigRates();
 		//		ct.printCoalRates();
@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		lsum.printRates();
 		
 		//		ct.setStepSize(0.001);
-		//		ct.divSkyline();
+		//		ct.NeSkyline();
 		//		ct.labelSkyline(a);													
 		//		skl.appendIteration(ct.getSkylineIndex(),ct.getSkylineValue());
 			}
