@@ -366,7 +366,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	// use tree and bmap to get tmap
 	double t;
 	for (pre_it = ++ctree.begin(); pre_it != ctree.end(); pre_it++) {
-		t = tmap[*ctree.parent(pre_it)] - bmap[*pre_it];
+		t = tmap[*ctree.parent(pre_it)] + bmap[*pre_it];
 		tmap[*pre_it] = t;
 	}
 
@@ -395,7 +395,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 		it++;
 	}
   	
-	constructPaddedTree();  	
+//	constructPaddedTree();  	
 		
 	/* go through tree and append to trunk set */
 	it = ctree.begin();
@@ -424,7 +424,7 @@ void CoalescentTree::pushTimesBack(double time) {
 	// find most recent node
 	double mint = *tlist.begin();
 	for (it = ctree.begin(); it != ctree.end(); it++) {
-		if (tmap[*it] < mint ) {
+		if (tmap[*it] > mint ) {
 			mint = tmap[*it];
 		}	
 	}
@@ -440,7 +440,7 @@ void CoalescentTree::pushTimesBack(double time) {
 		
 	}	
 		  	
-	constructPaddedTree();
+//	constructPaddedTree();
 
 }
 
@@ -1699,6 +1699,87 @@ void CoalescentTree::divSkyline() {
     }
    
 }
+
+/* Skyline for TMRCA */
+/* At every event, take concurrent lineages and roll back until they share a common ancestor */
+/* compare tmap of this common ancestor to the current time in phylogeny */
+void CoalescentTree::tmrcaSkyline() { 
+
+	/* have a vector[time points] of sets[node labels] */
+	tree<int>::iterator it, jt, end;
+	vector< set<int> > lineages (tlist.size());
+	it = paddedTree.end();
+	end = paddedTree.end(); 		
+	int rootdepth=paddedTree.depth(it);
+	
+	/* go through tree and add to set */
+	while(it!=paddedTree.begin()) {
+		(lineages.at(paddedTree.depth(it)-rootdepth)).insert(*it);
+		it--;
+	}
+	
+	int loc = paddedTree.max_depth();
+	double rate;
+	int count;
+	double step = stepsize;
+  	for( set<double>::const_iterator iter = tlist.begin(); iter != --tlist.end(); iter++ ) {
+  		set<int> nodes = lineages.at(loc);
+  		double a = *iter;
+  		iter++;
+  		double b = *iter;
+  		iter--;
+  		if (a < b - 0.00000001) {
+//			cout << "{" << a << "," << b << "} ";
+
+			// take each node and add all its ancestors to the sharedSet;
+			map<int,int> sharedMap;		// maps a node to its number of occurences
+			for( set<int>::iterator jter = nodes.begin(); jter != nodes.end(); jter++ ) {
+	
+				int n = *jter;
+				while (n != 0) {
+					sharedMap[n]++;
+					n = paddedAncMap[n];
+				}
+			
+			}
+						
+			// go through sharedMap and find highest count	
+			int count = 0;	
+			for( map<int,int>::iterator jter = sharedMap.begin(); jter != sharedMap.end(); jter++ ) {
+				if ((*jter).second > count){
+					count = (*jter).second;
+				}
+			}
+				
+			// go through sharedMap and find most recent node with count matching highest count
+			double tmrca = paddedtmap[0];			
+			for( map<int,int>::iterator jter = sharedMap.begin(); jter != sharedMap.end(); jter++ ) {
+				
+			//	cout << "node = " <<  (*jter).first << ", count = " << (*jter).second << endl;
+				
+				if (paddedtmap[(*jter).first] < tmrca && (*jter).second == count) {
+					tmrca = paddedtmap[(*jter).first];
+				}
+			
+			}
+			
+			// difference in time now and back to TMRCA
+			tmrca -= step;		
+			
+			while (step > a && step < b) {
+				skylineindex.push_back(step);
+				skylinevalue.push_back(tmrca);
+				step += stepsize;
+			}
+			skylineindex.push_back(step);
+			skylinevalue.push_back(tmrca);
+			step += stepsize;
+		}
+		loc--;
+    }
+   
+}
+
 
 /* Skyline for segregating site (S/a1) */
 /* At every event, take concurrent lineages and calculate total tree length */

@@ -58,6 +58,7 @@ public:
 	void subRateSkyline();				// updates skyline with substitution rate on phylogeny	
 										// takes mean rate across all concurrent lineages
 	void divSkyline();					// updates skyline with diversity (pi) estimates
+	void tmrcaSkyline();				// updates skyline with TMRCA estimates	
 	void tajimaSkyline();				// updates skyline with estimates of Tajima's D
 	void tcSkyline();					// updates skyline with time for each sampled lineage to coalesce with phylogeny trunk
 	void labelSkyline(int);				// updates skyline with proportion of branches with label	

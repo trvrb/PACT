@@ -20,6 +20,12 @@
 	Run time forwards.
 */
 
+/*	
+	Times runs forward starting at 0, unless othewise indicated.	
+
+
+*/
+
 using namespace std;
 
 #include <iostream>
@@ -82,22 +88,18 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		lsum.incrWeights(ct.getRevMigWeights());
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
-		//		ct.pushTimesBack(2003);
+				ct.pushTimesBack(2004);
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(1);
 		//		ct.trimEnds(a,b);
 		
 		//		ct.printRuleList();
-		//		ct.printTimeTree();
+				ct.printTimeTree();
 		//		ct.printMigTotal();
 		//		ct.printMigRates();
-
-				cout << "total rate = ";
-				ct.printCoalRates();
-		
-				cout << "trunk rate = ";
-				ct.printTrunkRates();
+		//		ct.printCoalRates();
+		//		ct.printTrunkRates();
 
 		//		ct.printLabelProportions();
 		
