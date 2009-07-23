@@ -22,9 +22,8 @@ Member function definitions for CoalescentTree class
 /* Takes NEWICK parentheses tree as string input */
 CoalescentTree::CoalescentTree(string paren, string options) {
 
-	prunetime = 0.01;
 	stepsize = 0.1;	
-	mp = 1.0;			// 1.927 for mig within coal, 1.47 for mig outside coal
+//	mp = 1.0;			// 1.927 for mig within coal, 1.47 for mig outside coal
 
 	nlCheck = false;	
 	
@@ -90,19 +89,15 @@ CoalescentTree::CoalescentTree(string paren, string options) {
     	    	if (options == "migrate") {
     				tips.insert( make_pair(tempNode,leafCount ) );
     				leafSet.insert(leafCount);	
+      				lmap[ leafCount ] = atoi(tempNode.substr(0,1).c_str()) + 1;	// label is the first character of node string
+    				labelSet.insert(atoi(tempNode.substr(0,1).c_str()) + 1);  	// incremented by 1		
     			}
    				if (options == "beast") {
     				tips.insert( make_pair(tempNode,atoi(tempNode.c_str()) ) );
     				leafSet.insert(atoi(tempNode.c_str()));	
-    			}		
-    			if (nlCheck) {													// filling lmap and labelSet if labels exist
-    				lmap[ leafCount ] = atoi(tempNode.substr(0,1).c_str()) + 1;	// label is the first character of node string
-    				labelSet.insert(atoi(tempNode.substr(0,1).c_str()) + 1);	// incremented by 1
-    			}						
-    			else {															// if not labelled set all labels to 1
      				lmap[ leafCount ] = 1;
-    				labelSet.insert(1);   			
-    			}
+    				labelSet.insert(1);   	    				
+    			}	   			
     		}
     		if (!brCheck && nlCheck && blCheck && *iterStr == '[')
     			nl = true;
@@ -319,11 +314,8 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 				/* update the label map with new node */
 				leftLabel = lmap[leftNode];
 				rightLabel = lmap[rightNode];
-			
-				if (leftLabel == rightLabel)
-					lmap[currentNode] = leftLabel;
-				else
-					cout << "left and right labels don't match" << endl;
+							
+				lmap[currentNode] = leftLabel;
 				
 				lmaptemp.clear();
 				
@@ -356,12 +348,8 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	ctree.erase(ctree.begin_post());	
 	*ctree.begin() = 0;
 	lmap[0] = leftLabel;
-		
-	// go through bmap and multiply by mp	
-	tree<int>::pre_order_iterator pre_it;
-	for (pre_it = ++ctree.begin(); pre_it != ctree.end(); pre_it++) {
-		bmap[*pre_it] *= mp;
-	}	
+			
+	tree<int>::pre_order_iterator pre_it;	
 	
 	// use tree and bmap to get tmap
 	double t;
@@ -370,18 +358,14 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 		tmap[*pre_it] = t;
 	}
 
-	// push ages up so most recent time = 0
-	double mint = 0;
-	for (pre_it = ctree.begin(); pre_it != ctree.end(); pre_it++) {
-		if (tmap[*pre_it] < mint ) {
-			mint = tmap[*pre_it];
-		}	
-	}
-	
 	// fill tlist
-	for (pre_it = ctree.begin(); pre_it != ctree.end(); pre_it++) {
-		tmap[*pre_it] -= mint;	
+	// find most recent time
+	mostRecentTime = 0.0;
+	for (pre_it = ctree.begin(); pre_it != ctree.end(); pre_it++) {	
 		tlist.insert(tmap[*pre_it]);
+		if (tmap[*pre_it] > mostRecentTime) {
+			mostRecentTime = tmap[*pre_it];
+		}
 	}	
 	
 	/* construct ancmap */
@@ -396,11 +380,13 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	}
   			
 	/* go through tree and append to trunk set */
+	/* only the last 1/100 of the time span is considered */
+	double pruneTime = mostRecentTime / (double) 100;
 	it = ctree.begin();
 	end = ctree.end();
 	while(it!=end) {
 		/* find leaf nodes at present */
-		if (tmap[*it] < prunetime && *it <= leafCount) {
+		if (tmap[*it] > mostRecentTime - pruneTime && *it <= leafCount) {
 			jt = it;
 			/* move up tree adding nodes to trunk set */
 			while (*jt != 0) {
@@ -414,30 +400,71 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 
 }
 
-/* push dates to agree with a most recent sample date at t */
-void CoalescentTree::pushTimesBack(double time) {
-
-	tree<int>::iterator it;
-
-	// find most recent node
-	double mint = *tlist.begin();
-	for (it = ctree.begin(); it != ctree.end(); it++) {
-		if (tmap[*it] > mint ) {
-			mint = tmap[*it];
-		}	
-	}
+/* push dates to agree with a most recent sample date at endTime */
+void CoalescentTree::pushTimesBack(double endTime) {
 	
 	// need to adjust times by this amount
-	double diff = time - mint;
+	double diff = endTime - mostRecentTime;
 		
 	// modifying tmap and tlist
+	mostRecentTime += diff;
 	tlist.clear();
-	for (it = ctree.begin(); it != ctree.end(); it++) {
+	for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++) {
 		tmap[*it] += diff;
 		tlist.insert(tmap[*it]);
-		
 	}	
 		  	
+}
+
+/* push dates to agree with a most recent sample date at endTime and oldest sample date is startTime */
+void CoalescentTree::pushTimesBack(double startTime, double endTime) {
+	
+		 
+	// STRETCH OR SHRINK //////////////	 
+		 
+	// find oldest sample
+	double mostAncientTime = mostRecentTime;
+	for (set<int>::iterator is = leafSet.begin(); is != leafSet.end(); is++) {
+		if (tmap[*is] < mostAncientTime) {
+			mostAncientTime = tmap[*is];
+		}
+	}	
+	
+	double mp = (endTime - startTime) / (mostRecentTime - mostAncientTime);
+	
+	// go through bmap and multiply by mp	
+	for (tree<int>::iterator it = ++ctree.begin(); it != ctree.end(); it++) {
+		bmap[*it] *= mp;
+	}	
+	
+	// use tree and bmap to get tmap
+	for (tree<int>::iterator it = ++ctree.begin(); it != ctree.end(); it++) {
+		tmap[*it] = tmap[*ctree.parent(it)] + bmap[*it];
+	}
+
+	// fill tlist
+	// find most recent time
+	mostRecentTime = 0.0;
+	for (tree<int>::iterator it = ++ctree.begin(); it != ctree.end(); it++) {	
+		tlist.insert(tmap[*it]);
+		if (tmap[*it] > mostRecentTime) {
+			mostRecentTime = tmap[*it];
+		}
+	}	
+	
+	// PUSH BACK /////////////////////
+
+	// need to adjust times by this amount
+	double diff = endTime - mostRecentTime;
+		
+	// modifying tmap and tlist
+	mostRecentTime += diff;
+	tlist.clear();
+	for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++) {
+		tmap[*it] += diff;
+		tlist.insert(tmap[*it]);
+	}		
+		 
 }
 
 /* padded with extra nodes at coalescent time points */
@@ -456,7 +483,7 @@ void CoalescentTree::padTree() {
 	set<double>::const_iterator depth_it;
 	int newDepth;
 	int currentNode = nodeCount;
-
+	
 	/* pad tree with extra nodes, make sure there is a node at each time slice correspoding to coalescent event */
 	while(it!=end) {
 	
@@ -502,21 +529,28 @@ void CoalescentTree::padTree() {
 		it++;
 	
 	}
-	
+		
 	/* updating ancmap and nodeCount */
 	nodeCount = 0;
 	ancmap.clear();
 	it = ctree.begin();
 	end = ctree.end();
+
+//	cout << "test 1" << endl;		
+	it++;							// root is not at 0
+	
 	while (it != end) {
 		if (*it != 0) {
+//			cout << *it << endl;
+//			cout << *ctree.parent(it) << endl;
 			ancmap[*it] = *ctree.parent(it);
-			bmap[*it] = tmap[*ctree.parent(it)] - tmap[*it];
+			bmap[*it] = tmap[*it] - tmap[*ctree.parent(it)];
 		}
 		nodeCount++;
 		it++;
 	}
-	
+
+//	cout << "test 2" << endl;		
 	  	
 }
 
@@ -524,30 +558,34 @@ void CoalescentTree::padTree() {
 void CoalescentTree::pruneToTrunk() {
 	
 	/* erase other nodes from the tree */
-	tree<int>::iterator it, end;	
+	/* as well as their maps */
+	tree<int>::iterator it;	
 	it = ctree.begin();
-	end = ctree.end();
-	while(it!=end) {
+	while(it!=ctree.end()) {
 		if (trunkSet.end() == trunkSet.find(*it)) {
+			tmap.erase(*it);
+			bmap.erase(*it);
+			rmap.erase(*it);	
+			lmap.erase(*it);			
+			ancmap.erase(*it);
 			it = ctree.erase(it);
-	//		tmap.erase(*it);			// cannot do this for some reason
-	//		bmap.erase(*it);
-	//		rmap.erase(*it);
 		}
 		else {
     		it++;
     	}
     }
-        
+            
     /* update other private data */
-	/* maps don't need updating */
     nodeCount = ctree.size();
     tlist.clear();
+    leafSet.clear();    
     leafCount = 0;
 	for (it=ctree.begin(); it!=ctree.end(); it++) {
 		tlist.insert(tmap[*it]);
-		if (ctree.number_of_children(it)==0)
+		if (ctree.number_of_children(it)==0) {
 			leafCount++;
+			leafSet.insert(*it);			
+		}
 	}
 			
 }
@@ -563,14 +601,12 @@ void CoalescentTree::pruneToLabel(int label) {
 	it = ctree.begin();
 	end = ctree.end();
    
-	if(!ctree.is_valid(it)) return;
-
 	while(it!=end) {
 		/* find leaf nodes at present */
 		if (lmap[*it] == label) {     
 			newLeafs++;
 			jt = it;
-			/* move up tree adding nodes to trunk set */
+			/* move up tree adding nodes to label set */
 			while (*jt != 0) {
 				labelset.insert(*jt);
 				jt = ctree.parent(jt);
@@ -587,10 +623,12 @@ void CoalescentTree::pruneToLabel(int label) {
 	end = ctree.end();
 	while(it!=end) {
 		if (labelset.end() == labelset.find(*it)) {
+			tmap.erase(*it);
+			bmap.erase(*it);
+			rmap.erase(*it);
+			lmap.erase(*it);
+			ancmap.erase(*it);
 			it = ctree.erase(it);
-	//		tmap.erase(*it);
-	//		bmap.erase(*it);
-	//		rmap.erase(*it);
 		}
 		else {
     		it++;
@@ -598,12 +636,17 @@ void CoalescentTree::pruneToLabel(int label) {
     }
         
     /* update other private data */
-	/* maps don't need updating */
-    leafCount = newLeafs;
     nodeCount = ctree.size();
     tlist.clear();
-	for (it=ctree.begin(); it!=ctree.end(); it++)
+    leafSet.clear();    
+    leafCount = 0;
+	for (it=ctree.begin(); it!=ctree.end(); it++) {
 		tlist.insert(tmap[*it]);
+		if (ctree.number_of_children(it)==0) {
+			leafCount++;
+			leafSet.insert(*it);			
+		}
+	}
 			
 }
 
@@ -622,18 +665,18 @@ void CoalescentTree::trimEnds(double start, double stop) {
 	end = ctree.end();
 	root = ctree.begin();
 	while(it!=end) {	
-		/* if node < start and anc[node] > start, erase children and prune node back to start */
-		if (tmap[*it] < start && tmap[ancmap[*it]] >= start) {
-			tmap[*it] = start;
-			bmap[*it] = tmap[ancmap[*it]] - tmap[*it];
+		/* if node > stop and anc[node] < stop, erase children and prune node back to stop */
+		if (tmap[*it] > stop && tmap[ancmap[*it]] <= stop) {
+			tmap[*it] = stop;
+			bmap[*it] = tmap[*it] - tmap[ancmap[*it]];
 			ctree.erase_children(it);
 			it++;
 		}
-		/* if node < stop and anc[node] > stop, push anc[node] up to stop */
+		/* if node > start and anc[node] < start, push anc[node] up to start */
 		/* and reparent anc[node] to be a child of root */
 		/* neither node nore anc[node] can be root */
-		else if (tmap[*it] < stop && tmap[ancmap[*it]] > stop && *it != 0 && ancmap[*it] != 0) {
-			tmap[ancmap[*it]] = stop;
+		else if (tmap[*it] > start && tmap[ancmap[*it]] < start && *it != 0 && ancmap[*it] != 0) {	
+			tmap[ancmap[*it]] = start;
 			bmap[ancmap[*it]] = 0;
 			itertemp = ctree.append_child(root);
 			ctree.move_ontop(itertemp, ctree.parent(it));
@@ -644,32 +687,19 @@ void CoalescentTree::trimEnds(double start, double stop) {
     	}
     }
     
-    /* second pass for nodes < stop */
+    /* second pass for nodes < start */
     it = ctree.begin();
 	end = ctree.end();
 	while(it!=end) {	
-		if (tmap[*it] > stop && *it != 0) {
+		if (tmap[*it] < start && *it != 0) {
 			it = ctree.erase(it);
 		}
 		else {
     		it++;
     	}
     }
-    tmap[0] = stop;
-        
-/*
-	int leafCount;						
-	int nodeCount;						
-	set<int> leafSet;					
-	set<int> trunkSet;					
-	set<int> labelSet;															
-	map<int,double>	bmap;				
-	map<int,double>	rmap;				
-	map<int,double>	tmap;				
-	map<int,int>	lmap;				
-	map<int,int>	ancmap;	
-*/
-
+    tmap[0] = start;
+               
 	/* want to reduce maps to just the subset dealing with these nodes */
 	/* set of remaining nodes */
 	set<int> nodeSet;
@@ -690,7 +720,6 @@ void CoalescentTree::trimEnds(double start, double stop) {
 	}
 
     /* update other private data */
-	/* maps don't need updating */
     nodeCount = ctree.size();
     tlist.clear();
     leafCount = 0;
@@ -897,12 +926,12 @@ void CoalescentTree::printPaddedRuleList() {
 /* print mapping of nodes to rates if rates exist */
 void CoalescentTree::printRuleList() { 
 
-	tree<int>::iterator it, jt, end;
+	tree<int>::iterator it, jt;
 
-	/* reorder tree so that the bottom node of two sister nodes always has more children */
+	/* reorder tree so that the bottom node of two sister nodes always has the most recent child more children */
+	/* this combined with preorder traversal will insure the trunk follows a rough diagonal */
 	it = ctree.begin();
-	end = ctree.end();	
-	while(it!=end) {
+	while(it!=ctree.end()) {
 		jt = ctree.next_sibling(it);
 		if (ctree.is_valid(jt)) {
 			int cit = ctree.size(it);
@@ -915,25 +944,20 @@ void CoalescentTree::printRuleList() {
 		it++;
 	}
 
-	/* print tip count */
-	cout << leafCount << endl;
-		
-	/* print trunk nodes */
-	for ( set<int>::const_iterator lit=trunkSet.begin(); lit != trunkSet.end(); lit++ ) {
+	/* print leaf nodes */
+	for ( set<int>::const_iterator lit=leafSet.begin(); lit != leafSet.end(); lit++ ) {
 		cout << *lit << " ";
 	}
 	cout << endl;
-	
+			
 	/* print the tree in rule list (Mathematica-ready) format */
 	/* print only upward links */
-	tree<int>::pre_order_iterator iterTemp, iterN;
-	it = ctree.begin();
-	end = ctree.end();
-	
+	tree<int>::iterator iterTemp, iterN;
+	it = ctree.begin();	
 	it++;
 	cout << *it << "->" << *ctree.parent(it);
 	it++;
-	while(it!=end) {
+	while(it!=ctree.end()) {
 		cout << " " << *it << "->" << *ctree.parent(it);
 		it++;
 	}
@@ -941,26 +965,24 @@ void CoalescentTree::printRuleList() {
 	
 	
 	/* print mapping of labels in Mathematica format */
-	if (nlCheck) {
-		it = ctree.begin();
+	it = ctree.begin();
+	it++;
+	cout << *it << "->" << lmap[*it];
+	it++;
+	while(it!=ctree.end()) {
+		cout << " " << *it << "->" << lmap[*it];
 		it++;
-		cout << *it << "->" << lmap[*it];
-		it++;
-		while(it!=end) {
-			cout << " " << *it << "->" << lmap[*it];
-			it++;
-		}
-		cout << endl;
-	}	
+	}
+	cout << endl;
 	
 	/* print mapping of nodes to coordinates */
   	it = ctree.begin();
   	int count = 0;
-  	cout << *it << "->{" << -1 * tmap[*it] << "," << count << "}";
+  	cout << *it << "->{" << tmap[*it] << "," << count << "}";
 	it++;
 	count++;
-	while(it!=end) {
-		cout << " " << *it << "->{" << -1 * tmap[*it] << "," << count << "}";
+	while(it!=ctree.end()) {
+		cout << " " << *it << "->{" << tmap[*it] << "," << count << "}";
 		it++;
 		count++;
 	}

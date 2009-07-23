@@ -30,9 +30,12 @@ public:
 	void printTree();					// print indented tree
 	void printTimeTree();				// print indented tree with coalescent times
 	void printParenTree();				// print parentheses tree
-	void printPaddedRuleList();			// print tree in Mathematica suitable format, 1->2,1->3, etc...
+	
+	void printPaddedRuleList();			// broken
+										// print tree in Mathematica suitable format
 										// padded with extra nodes at coalescent time points
 										// used with TreePlot
+
 	void printRuleList();				// print tree in Mathematica rule list format with times included
 										// used with Graphics primitives
 										
@@ -69,6 +72,7 @@ public:
 																	
 	void setStepSize(double);			// sets the window at which to take parameter values
 	void pushTimesBack(double);			// push dates to agree with a most recent sample date at t
+	void pushTimesBack(double,double);
 		
 private:
 	int leafCount;						// number of leafs in the tree (sample size n)
@@ -77,8 +81,8 @@ private:
 	set<int> trunkSet;					// set of trunk nodes
 	set<int> labelSet;					// set of distinct node labels
 	
-	double prunetime;					// time back from present with which to consider nodes as trunk
-	double mp;							// multiplier to convert branch lengths into years
+	double mostRecentTime;				// most recent time in the tree
+//	double mp;							// multiplier to convert branch lengths into years
 										// set externally
 	
 	tree<int> ctree;					// coalescent tree, has n leaf nodes (labelled 1..n) and n-1 internal nodes

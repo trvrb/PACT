@@ -18,6 +18,7 @@
 	Build in command-line options.
 	Tests?  Error checking in general.
 	Run time forwards.
+	Always labeled.  Just sometimes labelled with all 0s.
 */
 
 /*	
@@ -64,7 +65,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 			
 			if (parenString.size() > 1) {
 	
-				CoalescentTree ct(parenString, "beast");
+				CoalescentTree ct(parenString, "migrate");
 	//			LabelSummary lsum(ct.getLabelSet());
 
 /*
@@ -88,12 +89,13 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		lsum.incrWeights(ct.getRevMigWeights());
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
-				ct.pushTimesBack(2004);
+				ct.pushTimesBack(2007);
 
 		//		ct.pruneToTrunk();					
-		//		ct.pruneToLabel(1);
-		//		ct.trimEnds(a,b);
+		//		ct.pruneToLabel(5);
+				ct.trimEnds(2003,2005);
 		
+		//		ct.printPaddedRuleList();
 				ct.printRuleList();
 		//		ct.printTimeTree();
 		//		ct.printMigTotal();
