@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2002,2003);
 		
-				ct.printRuleList();
+				ct.printNodeTree();
 		
 		//		ct.printMigTotal();
 		//		ct.printMigRates();

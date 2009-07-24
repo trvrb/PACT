@@ -19,15 +19,26 @@ public:
 	Node(int);						// creation requires a name
 	
 	// GET FUNCTIONS
-	int getName();
+	int getNumber();
+	string getName();
 	double getLength();
 	double getTime();
 	int getLabel();
 	bool getLeaf();
 	bool getTrunk();
+
+	// SET FUNCTIONS
+	void setNumber(int);
+	void setName(string);
+	void setLength(double);
+	void setTime(double);
+	void setLabel(int);
+	void setLeaf(bool);
+	void setTrunk(bool);	
 																		
 private:
-	int name;						// name of node, must be unique
+	int number;						// number of node, must be unique
+	string name;					// name of node, doesn't have to exist
 	double length;					// length of the branch leading into the node
 	double time;					// date of the node	
 	int label;						// numeric label associated with node

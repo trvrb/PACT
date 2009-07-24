@@ -736,18 +736,16 @@ void CoalescentTree::printTree() {
 /* Print tree with times */
 void CoalescentTree::printNodeTree() { 
 
-	tree<int>::iterator it;
-	it = ctree.begin();
-	int rootdepth=ctree.depth(it);
-	
-	while(it!=ctree.end()) {
-		for(int i=0; i<ctree.depth(it)-rootdepth; ++i) 
+	int rootdepth = nodetree.depth(nodetree.begin());
+		
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
+		for(int i=0; i<nodetree.depth(it)-rootdepth; ++i) 
 			cout << "  ";
-		cout << (*it) << " (" << tmap[*it] << ")";
-		cout << " [" << lmap[*it] << "]";			
-		cout << " {" << bmap[*it] << "}";		
+		cout << (*it).getName();
+		cout << " (" << (*it).getTime()<< ")";
+		cout << " [" << (*it).getLabel() << "]";			
+		cout << " {" << (*it).getLength() << "}";		
 		cout << endl << flush;
-		it++;
 	}
 	
 }
