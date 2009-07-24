@@ -113,6 +113,8 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	// construct starting point for tree (multifurcation from root)
 	ctree.set_head(0);
 	tmap[0] = 0.0;
+	Node root(0);
+	nodetree.set_head(root);
 	
 	map<string,int>::iterator iter;
 	for( iter = tips.begin(); iter != tips.end(); iter++ ) {
@@ -714,6 +716,25 @@ void CoalescentTree::printParenTree() {
 
 /* Print tree with times */
 void CoalescentTree::printTree() { 
+
+	tree<int>::iterator it;
+	it = ctree.begin();
+	int rootdepth=ctree.depth(it);
+	
+	while(it!=ctree.end()) {
+		for(int i=0; i<ctree.depth(it)-rootdepth; ++i) 
+			cout << "  ";
+		cout << (*it) << " (" << tmap[*it] << ")";
+		cout << " [" << lmap[*it] << "]";			
+		cout << " {" << bmap[*it] << "}";		
+		cout << endl << flush;
+		it++;
+	}
+	
+}
+
+/* Print tree with times */
+void CoalescentTree::printNodeTree() { 
 
 	tree<int>::iterator it;
 	it = ctree.begin();

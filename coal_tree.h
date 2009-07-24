@@ -31,6 +31,7 @@ public:
 	
 	// TREE STRUCTURE
 	void printTree();					// print indented tree with coalescent times
+	void printNodeTree();
 	void printParenTree();				// print parentheses tree
 										// only prints structure at the moment, no branch lengths or migration events
 	void printPaddedRuleList();			// ****** completely broken ******
@@ -84,6 +85,7 @@ private:
 	tree<int> ctree;					// coalescent tree, has n leaf nodes (labelled 1..n) and n-1 internal nodes
 										// root is labelled 0, other internal nodes continue with n+1
 										// each node contains its label
+	tree<Node> nodetree;						
 										
 	int leafCount;						// number of leafs in the tree (sample size n)
 	int nodeCount;						// number of nodes in the tree

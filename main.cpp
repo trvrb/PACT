@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				CoalescentTree ct(parenString, "migrate");
 				ct.pushTimesBack(2007);
 				
-				ct.pruneToTrunk();
+		//		ct.pruneToTrunk();
 			/*	
 				double step = 1;
 				for (double t = 2002; t <= 2007 - step; t += step ) {
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2002,2003);
 		
-				ct.printTree();
+				ct.printRuleList();
 		
 		//		ct.printMigTotal();
 		//		ct.printMigRates();

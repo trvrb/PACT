@@ -16,9 +16,23 @@ using std::vector;
 class Node {
 
 public:
-	Node();							// constructor
+	Node(int);						// creation requires a name
+	
+	// GET FUNCTIONS
+	int getName();
+	double getLength();
+	double getTime();
+	int getLabel();
+	bool getLeaf();
+	bool getTrunk();
 																		
 private:
+	int name;						// name of node, must be unique
+	double length;					// length of the branch leading into the node
+	double time;					// date of the node	
+	int label;						// numeric label associated with node
+	bool leaf;						// is this node a leaf?
+	bool trunk;						// is this node part of the trunk?
 
 
 };
