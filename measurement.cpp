@@ -1,8 +1,8 @@
-/* stat.cpp
-Member function definitions for Statistic class
+/* measurement.cpp
+Member function definitions for Measurement class
 */
 
-#include "stat.h"
+#include "measurement.h"
 
 #include <iostream>
 #include <fstream>
@@ -15,13 +15,13 @@ Member function definitions for Statistic class
 #include <cmath>
 #include <sstream>
 
-Statistic::Statistic() {
+Measurement::Measurement() {
 	
 	n = 0;
 	
 }
 
-void Statistic::print() {
+void Measurement::print() {
 
 	for (int i = 0; i < n - 1; i++) {
 		cout << values[i] << " ";
@@ -30,20 +30,20 @@ void Statistic::print() {
 
 }
 
-vector<double> Statistic::get() { 
+vector<double> Measurement::get() { 
 	return values; 
 }
 
-int Statistic::size() {
+int Measurement::size() {
 	return n;
 }
 
-void Statistic::clear() {
+void Measurement::clear() {
 	n = 0;
 	values.clear();
 }
 
-void Statistic::increment(vector<double> in) {
+void Measurement::increment(vector<double> in) {
 
 	if (n > 0) {			// already have data going
 	
@@ -63,7 +63,7 @@ void Statistic::increment(vector<double> in) {
 
 }
 
-void Statistic::divideBy(double in) {
+void Measurement::divideBy(double in) {
 
 	for (int i = 0; i < n; i++) {
 		values[i] /= in;
@@ -71,7 +71,7 @@ void Statistic::divideBy(double in) {
 	
 }
 
-void Statistic::divideBy(vector<double> in) {
+void Measurement::divideBy(vector<double> in) {
 
 	for (int i = 0; i < n; i++) {
 		values[i] /= in[i];
@@ -79,7 +79,7 @@ void Statistic::divideBy(vector<double> in) {
 	
 }
 
-double Statistic::total() {
+double Measurement::total() {
 
 	double v;
 	for (int i = 0; i < n; i++) {
@@ -90,7 +90,7 @@ double Statistic::total() {
 	
 }
 
-double Statistic::mean() {
+double Measurement::mean() {
 
 	double v;
 	for (int i = 0; i < n; i++) {

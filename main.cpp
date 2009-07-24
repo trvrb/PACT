@@ -38,11 +38,22 @@ using namespace std;
 #include <vector>
 #include <set>
 
+// Template class for standard library style tree
 #include "tree.hh"
+
+// Extension of the tree class to deal specifically with coalescent trees
 #include "coal_tree.h"
 #include "coal_tree.cpp"
-#include "stat.h"
-#include "stat.cpp"
+
+// Measurements done on a CoalescentTree
+#include "measurement.h"
+#include "measurement.cpp"
+
+// Collects a series of measurement objects, usually from multiple trees
+#include "series.h"
+#include "series.cpp"
+
+// Soon to be deprecated
 #include "lsum.h"
 #include "lsum.cpp"
 #include "skyline.h"
@@ -67,36 +78,33 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 			
 			if (parenString.size() > 1) {
 	
-				Statistic stat;
+				Measurement ms;
 				CoalescentTree ct(parenString, "migrate");
 				ct.pushTimesBack(2007);
-		/*		
-				ct.pruneToTrunk();
 				
+				ct.pruneToTrunk();
+			/*	
 				double step = 1;
 				for (double t = 2002; t <= 2007 - step; t += step ) {
 				
 					CoalescentTree temptree = ct;
 					temptree.trimEnds(t,t+step);
 					
-					stat.increment(temptree.getLabelPro());
+					ms.increment(temptree.getLabelPro());
 					
 					cout << t << " " << t + step << " ";
-					stat.print();
-					stat.clear();
+					ms.print();
+					ms.clear();
 				
 				}
-		*/		
-
-		//		stat.increment(ct.getLabelPro());
-		//		stat.print();
+			*/	
 
 		//		lsum.incrWeights(ct.getRevMigWeights());
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
 		//		ct.pruneToTrunk();					
-				ct.pruneToLabel(2);
-		//		ct.trimEnds(2005,2006);
+		//		ct.pruneToLabel(2);
+				ct.trimEnds(2002,2003);
 		
 				ct.printRuleList();
 		

@@ -1,11 +1,11 @@
-/* stat.h
-Statistic class definition
-This object represents a tree statistic, like TMRCA or migration rates
+/* measurement.h
+Measurement class definition
+This object represents a tree measurement, like TMRCA or migration rates
 Mainly exists to ease working with seasonal averages
 */
 
-#ifndef STAT_H
-#define STAT_H
+#ifndef MEASURE_H
+#define MEASURE_H
 
 #include <map>
 using std::map;
@@ -14,10 +14,10 @@ using std::set;
 #include <vector>
 using std::vector;
 
-class Statistic {
+class Measurement {
 
 public:
-	Statistic();						// constructor
+	Measurement();						// constructor
 	
 	void print();						// print space deliminated
 	vector<double> get();				// returns vector of values	
