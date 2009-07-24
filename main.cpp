@@ -23,8 +23,13 @@
 
 /*	
 	Times runs forward starting at 0, unless othewise indicated.	
+*/
 
-
+/*
+	Refactoring 7/24/09
+	I have a lot of simple for loops to inspect nodes.  This assumes that nodes are labeled consecutively from 
+	0 to nodeCount.  This is not always the case (specifically after pruning the tree).  Need to rewrite these operations
+	to work with a set of nodes.  Or, might be easier to cleanup tree and maps to be consecutive.
 */
 
 using namespace std;
@@ -104,9 +109,9 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
-				ct.trimEnds(2002,2003);
+		//		ct.trimEnds(2002,2003);
 		
-				ct.printRuleList();
+				ct.printTree();
 		
 		//		ct.printMigTotal();
 		//		ct.printMigRates();

@@ -723,10 +723,8 @@ void CoalescentTree::printTree() {
 		for(int i=0; i<ctree.depth(it)-rootdepth; ++i) 
 			cout << "  ";
 		cout << (*it) << " (" << tmap[*it] << ")";
-		if (brCheck)
-			cout << " {" << rmap[*it] << "}";
-		if (nlCheck)
-			cout << " [" << lmap[*it] << "]";			
+		cout << " [" << lmap[*it] << "]";			
+		cout << " {" << bmap[*it] << "}";		
 		cout << endl << flush;
 		it++;
 	}
@@ -1915,28 +1913,23 @@ void CoalescentTree::cleanup() {
 		if (ctree.number_of_children(it) == 1) {			// no coalescence
 			jt = ctree.child(it,0);
 			if (lmap[*it] == lmap[*jt]) {					// no migration
+//				cout << "it = " << *it << ", jt = " << *jt << endl;
 				bmap[*jt] += bmap[*it];
-				ancmap[*jt] = ancmap[*it];
-				ctree.append_child(ctree.parent(it),jt);	// push child node up to be sibling of node
-				ctree.erase(it);							// erase node
+				ancmap[*jt] = ancmap[*it];	
+ 				ctree.reparent(ctree.parent(it),it);		// push child node up to be sibling of node
+ 				ctree.erase(it);							// erase node									
+				it = ctree.begin();
 			}
 		}
 	}
 
-/*		else if (tmap[*it] > start && tmap[ancmap[*it]] < start && *it != 0 && ancmap[*it] != 0) {	
-			tmap[ancmap[*it]] = start;
-			bmap[ancmap[*it]] = 0;
-			itertemp = ctree.append_child(root);
-			ctree.move_ontop(itertemp, ctree.parent(it));
-			it = ctree.begin();
-		}*/
 
 	/* want to reduce maps to just the subset dealing with these nodes */
 	set<int> nodeSet;
 	for (it = ctree.begin(); it != ctree.end(); it++) {
 		nodeSet.insert(*it);
 	}
-	
+		
 	/* go through and erase nonfunctionaling map elements */
 	for (int i = 0; i < nodeCount; i++) {
 		if (nodeSet.count(i) == 0) {
