@@ -1074,7 +1074,29 @@ vector<double> CoalescentTree::getLabelPro() {
 	
 }
 
-
+/* get length of tree with each label */
+vector<double> CoalescentTree::getLabelLengths() { 
+	
+	vector<double> labelLengths;	
+	
+	for ( set<int>::const_iterator is = labelSet.begin(); is != labelSet.end(); is++ ) {
+   
+		/* sum branch lengths */
+		/* have to go through tree structure, nodes can be non-consecutive */
+		double length = 0.0;
+		for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {
+			if (*is == lmap[*it]) {
+				length += bmap[*it];
+			}
+		}
+	
+		labelLengths.push_back(length);
+		
+	}
+	
+	return labelLengths;
+	
+}
 
 /* print total rate of migration across tree, measured as events/year */
 void CoalescentTree::printMigTotal() { 

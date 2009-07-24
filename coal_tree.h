@@ -46,6 +46,7 @@ public:
 	
 	void printLabelPro();				// print proportion of tree with each label
 	vector<double> getLabelPro();
+	vector<double> getLabelLengths();	
 	
 	void printMigTotal();				// print overall migration rate across tree 
 	void printMigRates();				// print list of posterior migration rates 

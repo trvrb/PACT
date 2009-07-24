@@ -41,6 +41,8 @@ using namespace std;
 #include "tree.hh"
 #include "coal_tree.h"
 #include "coal_tree.cpp"
+#include "stat.h"
+#include "stat.cpp"
 #include "lsum.h"
 #include "lsum.cpp"
 #include "skyline.h"
@@ -66,38 +68,42 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 			if (parenString.size() > 1) {
 	
 				CoalescentTree ct(parenString, "migrate");
-	//			LabelSummary lsum(ct.getLabelSet());
-
-/*
-				for (double i = a; i > 0; i -= 1.0 ) {
+				ct.pushTimesBack(2007);
 				
-					double j;
-					if (i - 0.1666 > 0)
-						j = i - 0.1666;
-					else
-						j = 0.0;
-						
-					CoalescentTree temptree = ct;
-					temptree.trimEnds(j,i);
-					lsum.incrWeights(temptree.getRevMigWeights());
-					lsum.incrCounts(temptree.getRevMigCounts());
+				Statistic stat;
+				double step = 1;
+				for (double t = 2002; t <= 2006; t += step ) {
+				
+					cout << "start: " << t << ", stop: " << t + step << endl;
 					
+					CoalescentTree temptree = ct;
+					temptree.trimEnds(t,t+step);
+					
+					stat.increment(temptree.getLabelLengths());
+					
+					cout << "label lengths: ";
+					stat.print();
+					
+					cout << "total length: " << stat.total() << endl;
+					
+					cout << endl;
 				
 				}
-*/
+				
+				stat.divideBy(stat.total());
+				stat.print();
+				
 
 		//		lsum.incrWeights(ct.getRevMigWeights());
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
-				ct.pushTimesBack(2007);
+			
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(5);
 		//		ct.trimEnds(2003,2005);
 		
 		//		ct.printRuleList();
-		
-				ct.printLabelPro();
 		
 		//		ct.printMigTotal();
 		//		ct.printMigRates();
