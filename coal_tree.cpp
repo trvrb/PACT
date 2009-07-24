@@ -679,7 +679,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 			tmap[*it] = stop;
 			bmap[*it] = tmap[*it] - tmap[ancmap[*it]];
 			ctree.erase_children(it);
-			it++;
+			it = ctree.begin();
 		}
 		/* if node > start and anc[node] < start, push anc[node] up to start */
 		/* and reparent anc[node] to be a child of root */
@@ -731,11 +731,14 @@ void CoalescentTree::trimEnds(double start, double stop) {
     /* update other private data */
     nodeCount = ctree.size();
     tlist.clear();
+    leafSet.clear();
     leafCount = 0;
 	for (it=ctree.begin(); it!=ctree.end(); it++) {
 		tlist.insert(tmap[*it]);
-		if (ctree.number_of_children(it)==0)
+		if (ctree.number_of_children(it)==0) {
 			leafCount++;
+			leafSet.insert(*it);
+		}
 	}
 	
 	rootTime = *tlist.begin();
@@ -1041,39 +1044,6 @@ void CoalescentTree::printLabelPro() {
 	
 }
 
-/* get proportion of tree with each label, works with Skyline object */
-vector<double> CoalescentTree::getLabelPro() { 
-
-	/* calculation is to get the total length of each label */
-	
-	double totalLength = 0.0;
-	map <int,double> labelLengths;
-	set<int>::const_iterator is;
-
-	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
-   
-		/* sum branch lengths */
-		/* have to go through tree structure, nodes can be non-consecutive */
-		double length = 0.0;
-		for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {
-			if (*is == lmap[*it]) {
-				length += bmap[*it];
-			}
-		}
-		totalLength += length;
-		labelLengths.insert( make_pair(*is,length ) );
-		
-	}
-	
-	vector<double> proportions;	
-	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
-		proportions.push_back(labelLengths[*is] / totalLength);
-	}
-	
-	return proportions;
-	
-}
-
 /* get length of tree with each label */
 vector<double> CoalescentTree::getLabelLengths() { 
 	
@@ -1092,6 +1062,26 @@ vector<double> CoalescentTree::getLabelLengths() {
 	
 		labelLengths.push_back(length);
 		
+	}
+	
+	return labelLengths;
+	
+}
+
+/* get proportion of tree with each label, works with Skyline object */
+vector<double> CoalescentTree::getLabelPro() { 
+
+	vector<double> labelLengths = getLabelLengths();
+	
+	/* calculate total length */
+	double totalLength = 0.0;
+	for (int i = 0; i < labelLengths.size(); i++) {
+		totalLength += labelLengths[i];
+	}
+	
+	/* divide by this length to get frequencies */
+	for (int i = 0; i < labelLengths.size(); i++) {
+		labelLengths[i] /= totalLength;
 	}
 	
 	return labelLengths;

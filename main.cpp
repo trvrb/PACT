@@ -67,41 +67,37 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 			
 			if (parenString.size() > 1) {
 	
+				Statistic stat;
 				CoalescentTree ct(parenString, "migrate");
 				ct.pushTimesBack(2007);
 				
-				Statistic stat;
-				double step = 1;
-				for (double t = 2002; t <= 2006; t += step ) {
+				ct.pruneToTrunk();
 				
-					cout << "start: " << t << ", stop: " << t + step << endl;
-					
+				double step = 0.1;
+				for (double t = 2002; t <= 2007 - step; t += step ) {
+				
 					CoalescentTree temptree = ct;
 					temptree.trimEnds(t,t+step);
 					
-					stat.increment(temptree.getLabelLengths());
+					stat.increment(temptree.getLabelPro());
 					
-					cout << "label lengths: ";
+					cout << t << " " << t + step << " ";
+				//	temptree.printLabelPro();
 					stat.print();
-					
-					cout << "total length: " << stat.total() << endl;
-					
-					cout << endl;
+					stat.clear();
 				
 				}
 				
-				stat.divideBy(stat.total());
-				stat.print();
-				
+
+		//		stat.increment(ct.getLabelPro());
+		//		stat.print();
 
 		//		lsum.incrWeights(ct.getRevMigWeights());
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
-			
-
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(5);
-		//		ct.trimEnds(2003,2005);
+		//		ct.trimEnds(2005.9,2006.1);
 		
 		//		ct.printRuleList();
 		

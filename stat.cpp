@@ -30,10 +30,17 @@ void Statistic::print() {
 
 }
 
-vector<double> Statistic::get() {
+vector<double> Statistic::get() { 
+	return values; 
+}
 
-	return values;
+int Statistic::size() {
+	return n;
+}
 
+void Statistic::clear() {
+	n = 0;
+	values.clear();
 }
 
 void Statistic::increment(vector<double> in) {

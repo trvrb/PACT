@@ -1,6 +1,7 @@
 /* stat.h
 Statistic class definition
 This object represents a tree statistic, like TMRCA or migration rates
+Mainly exists to ease working with seasonal averages
 */
 
 #ifndef STAT_H
@@ -20,6 +21,8 @@ public:
 	
 	void print();						// print space deliminated
 	vector<double> get();				// returns vector of values	
+	int size();							// returns size of vector
+	void clear();						// clears data
 	
 	void increment(vector<double>);		// increment
 	void divideBy(double);				// divide all values by the same amount
