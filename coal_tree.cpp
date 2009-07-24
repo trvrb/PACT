@@ -629,7 +629,7 @@ from  ------			 	to	--
 void CoalescentTree::trimEnds(double start, double stop) {
 		
 	/* erase nodes from the tree where neither the node nor its parent are between start and stop */
-	tree<int>::iterator it, root, itertemp;	
+	tree<int>::iterator it, root, jt;	
 	it = ctree.begin();
 	root = ctree.begin();
 	while(it!=ctree.end()) {	
@@ -646,8 +646,8 @@ void CoalescentTree::trimEnds(double start, double stop) {
 		else if (tmap[*it] > start && tmap[ancmap[*it]] < start && *it != 0 && ancmap[*it] != 0) {	
 			tmap[ancmap[*it]] = start;
 			bmap[ancmap[*it]] = 0;
-			itertemp = ctree.append_child(root);
-			ctree.move_ontop(itertemp, ctree.parent(it));
+			jt = ctree.append_child(root);
+			ctree.move_ontop(jt, ctree.parent(it));
 			it = ctree.begin();
 		}
 		else {
@@ -873,39 +873,27 @@ void CoalescentTree::printRuleList() {
 			
 	/* print the tree in rule list (Mathematica-ready) format */
 	/* print only upward links */
-	tree<int>::iterator iterTemp, iterN;
-	it = ctree.begin();	
-	it++;
-	cout << *it << "->" << *ctree.parent(it);
-	it++;
-	while(it!=ctree.end()) {
-		cout << " " << *it << "->" << *ctree.parent(it);
-		it++;
+	for (it = ++ctree.begin(); it != ctree.end(); it++) {		// increment past root
+		cout << *it << "->" << *ctree.parent(it) << " ";
 	}
 	cout << endl;
 	
 	
 	/* print mapping of labels in Mathematica format */
-	it = ctree.begin();
-	it++;
-	cout << *it << "->" << lmap[*it];
-	it++;
-	while(it!=ctree.end()) {
-		cout << " " << *it << "->" << lmap[*it];
-		it++;
+	for (it = ctree.begin(); it != ctree.end(); it++) {	
+		cout << *it << "->" << lmap[*it] << " ";
 	}
 	cout << endl;
 	
 	/* print mapping of nodes to coordinates */
-  	it = ctree.begin();
   	int count = 0;
-  	cout << *it << "->{" << tmap[*it] << "," << count << "}";
-	it++;
-	count++;
-	while(it!=ctree.end()) {
-		cout << " " << *it << "->{" << tmap[*it] << "," << count << "}";
-		it++;
-		count++;
+	for (it = ctree.begin(); it != ctree.end(); it++) {
+		cout << *it << "->{" << tmap[*it] << "," << count << "} ";
+		
+		// count should only increase when a coalescent event occurs
+		if (ctree.number_of_children(it) == 2) {	
+			count++;
+		}
 	}
 	cout << endl;	
 	  	  	
@@ -1919,9 +1907,32 @@ void CoalescentTree::setStepSize(double ss) {
 /* removes cruft from maps and other data, based on current nodes in tree */
 void CoalescentTree::cleanup() {
 
+	tree<int>::iterator it, jt;
+
+	/* removing pointless nodes, ie nodes that have no coalecent
+	events or migration events associated with them */
+	for (it = ctree.begin(); it != ctree.end(); it++) {
+		if (ctree.number_of_children(it) == 1) {			// no coalescence
+			jt = ctree.child(it,0);
+			if (lmap[*it] == lmap[*jt]) {					// no migration
+				bmap[*jt] += bmap[*it];
+				ancmap[*jt] = ancmap[*it];
+				ctree.append_child(ctree.parent(it),jt);	// push child node up to be sibling of node
+				ctree.erase(it);							// erase node
+			}
+		}
+	}
+
+/*		else if (tmap[*it] > start && tmap[ancmap[*it]] < start && *it != 0 && ancmap[*it] != 0) {	
+			tmap[ancmap[*it]] = start;
+			bmap[ancmap[*it]] = 0;
+			itertemp = ctree.append_child(root);
+			ctree.move_ontop(itertemp, ctree.parent(it));
+			it = ctree.begin();
+		}*/
+
 	/* want to reduce maps to just the subset dealing with these nodes */
 	set<int> nodeSet;
-	tree<int>::iterator it;
 	for (it = ctree.begin(); it != ctree.end(); it++) {
 		nodeSet.insert(*it);
 	}

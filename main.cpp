@@ -95,8 +95,8 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		lsum.incrCounts(ct.getRevMigCounts());
 
 		//		ct.pruneToTrunk();					
-		//		ct.pruneToLabel(5);
-				ct.trimEnds(2005,2006);
+				ct.pruneToLabel(2);
+		//		ct.trimEnds(2005,2006);
 		
 				ct.printRuleList();
 		
