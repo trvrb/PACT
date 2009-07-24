@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
 		//		ct.printRuleList();
 		
-		//		cout << ct.getLabelPro() << endl;
+				ct.printLabelPro();
 		
 		//		ct.printMigTotal();
 		//		ct.printMigRates();
