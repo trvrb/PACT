@@ -54,43 +54,71 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	
 	vector<Node> tipsList;
 	
-	string tempNode = "";
+	// GATHER TIPS ////////////////
+	/* go through paren string and collect tips, at the same time replace names with matching numbers in paren string */
+	string thisString = "";
 	bool nl = false;
-	for ( iterStr=paren.begin() ; iterStr < paren.end(); iterStr++ ) {
-		if ( (*iterStr >= '0' && *iterStr <= '9') || (*iterStr >= 'A' && *iterStr <= 'Z') || (*iterStr >= 'a' && *iterStr <= 'z') ) {
-    		tempNode += *iterStr;
-    	}
-    	else {
-    	    if (*iterStr == ':' && tempNode.length()>0 && !nl) {
-    	    	leafCount++;
-    	    	if (options == "migrate") {
-    	    	
-    	    		Node thisNode(leafCount);
-    	    		thisNode.setName(tempNode);
-    	    		thisNode.setLabel(atoi(tempNode.substr(0,1).c_str()) + 1);
-    	    		tipsList.push_back(thisNode);
-    	    	
-    				tips.insert( make_pair(tempNode,leafCount ) );
-    				leafSet.insert(leafCount);	
-      				lmap[ leafCount ] = atoi(tempNode.substr(0,1).c_str()) + 1;	// label is the first character of node string
-    				labelSet.insert(atoi(tempNode.substr(0,1).c_str()) + 1);  	// incremented by 1		
-    			
-    			}
-   				if (options == "beast") {
-    				tips.insert( make_pair(tempNode,atoi(tempNode.c_str()) ) );
-    				leafSet.insert(atoi(tempNode.c_str()));	
-     				lmap[ leafCount ] = 1;
-    				labelSet.insert(1);   	    				
-    			}	   			
-    		}
-    		if (*iterStr == '[')
-    			nl = true;
-    		if (*iterStr == ']')
-    			nl = false;		
-    		tempNode = "";
-    	}	
-	}
+	bool puredigits = true;
+	int stringPos = 0;
+	iterStr = paren.begin();
 
+	if (options == "migrate") {	
+	
+		while (iterStr < paren.end()) {
+				
+			if ( (*iterStr >= 'A' && *iterStr <= 'Z') || (*iterStr >= 'a' && *iterStr <= 'z') || (*iterStr >= '0' && *iterStr <= '9') ) {
+				thisString += *iterStr;
+			} 	  	
+			
+			else {
+			
+				bool letters = false;
+				for (int i = 0; i < thisString.length(); i++) {
+					if ( (thisString[i] >= 'A' && thisString[i] <= 'Z') || (thisString[i] >= 'a' && thisString[i] <= 'z') ) {
+						letters = true;
+					}
+				}
+			
+				if (*iterStr == ':' && letters) {
+					
+					leafCount++;
+						
+					/* nodetree update */	
+					Node thisNode(leafCount);
+					thisNode.setName(thisString);
+					// label is the first character of node string, incremented by 1
+					// if the first character is not a digit, this will go to 1 automatically
+					thisNode.setLabel(atoi(thisString.substr(0,1).c_str()) + 1);
+					tipsList.push_back(thisNode);
+		
+					/* ctree update */
+					tips.insert( make_pair(thisString,leafCount ) );
+					leafSet.insert(leafCount);	
+					lmap[ leafCount ] = atoi(thisString.substr(0,1).c_str()) + 1;	// label is the first character of node string
+					labelSet.insert(atoi(thisString.substr(0,1).c_str()) + 1);  	// incremented by 1		
+				
+					/* replace name with number */	
+					stringstream out;
+					out << leafCount;
+					paren = paren.substr(0,stringPos - thisString.size()) + out.str() + paren.substr(stringPos,paren.length());
+					
+					// reset counts
+					stringPos = 0;
+					iterStr = paren.begin();	
+					puredigits = true;
+					continue;
+						
+				}
+			
+				thisString = "";
+			
+			}	
+			stringPos++;
+			iterStr++;
+		}
+		
+	}
+		
 	nodeCount = leafCount;
 	int currentNode = nodeCount + 1;
 
@@ -118,7 +146,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	// fill bmap / update lengths of nodes
 	
 	tree<int>::iterator it, jt, end, iterLeft, iterRight, iterN, iterTemp;
-	int leftNode, rightNode, openParen, closeParen, openMig, closeMig, stringPos;	
+	int leftNode, rightNode, openParen, closeParen, openMig, closeMig;	
 	vector<int> nodeList;
 	vector<double> blList;
 	string tempBl, tempBr;
@@ -135,14 +163,17 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 		stringPos = 0;
 	
 		// will need to keep track of this across iterations
-		int thisNode, from, to;
+		int tempN, from, to;
 		double migBranch;
 	
 		// fill nodeList until a close parenthesis is hit
-		tempNode = "";
+		thisString = "";
 		tempBl = "";
 		tempBr = "";
 		nl = false; 
+		
+		// temporarily holds left and right nodes
+		Node leftNodeN(-1), rightNodeN(-1);
 		
 		for ( iterStr=paren.begin(); iterStr < paren.end(); iterStr++ ) {
 
@@ -151,46 +182,46 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 				openMig = stringPos;
 			}
 			if ( (*iterStr >= '0' && *iterStr <= '9') || (*iterStr >= 'A' && *iterStr <= 'Z') || (*iterStr >= 'a' && *iterStr <= 'z') || *iterStr == '.' || *iterStr == '-' ) {
-				tempNode += *iterStr;
+				thisString += *iterStr;
 				tempBl += *iterStr;
 				tempBr += *iterStr;
 			}	
 			else {
 				
-				if (*iterStr == '[' && tempNode.length()>0 && !nl) {
+				if (*iterStr == '[' && thisString.length()>0 && !nl) {
 					bmap[nodeList.back()] = atof(tempBl.c_str());
 //						cout << "  bl = " << tempBl.c_str() << endl;
 					nl = true;
 				}
-				if (*iterStr == ':' && tempNode.length()>0 && !nl) {
-					if (tips.end() == tips.find(tempNode))				// not found, direct insert
-						nodeList.push_back(atoi(tempNode.c_str()));
-					else
-						nodeList.push_back(tips[tempNode]);				// found, insert mapped int
-//						cout << "node = " << tempNode.c_str() << endl;
+				if (*iterStr == ':' && thisString.length()>0 && !nl) {
+				//	if (tips.end() == tips.find(thisString))				// not found, direct insert
+						nodeList.push_back(atoi(thisString.c_str()));
+				//	else
+				//		nodeList.push_back(tips[thisString]);				// found, insert mapped int
+//						cout << "node = " << thisString.c_str() << endl;
 				}
-				if (*iterStr != ':' && tempNode.length()>0 && !nl) {
+				if (*iterStr != ':' && thisString.length()>0 && !nl) {
 					bmap[nodeList.back()] = atof(tempBl.c_str());
 //						cout << "  bl = " << tempBl.c_str() << endl;
 				}
 				if (*iterStr == ',') {
 					openMig = stringPos;
 				}	
-				if (*iterStr == '[' && tempNode.length()==0) {
+				if (*iterStr == '[' && thisString.length()==0) {
 					nl = true;
 				}						
 				if (*iterStr == ']') {
 				
 					closeMig = stringPos; 
 				
-					migBranch = atof(tempNode.c_str());
-				//	cout << thisNode << " mig from " << from << " to " << to << ", at " << migBranch << endl;
+					migBranch = atof(thisString.c_str());
+				//	cout << tempN << " mig from " << from << " to " << to << ", at " << migBranch << endl;
 				
 					/* wrapping a new node */
 					tree<int>::iterator iterTo, iterFrom;
 					it = ctree.begin();
 					while(it!=end) {
-						if (*it == thisNode) { 
+						if (*it == tempN) { 
 							iterFrom = it; 
 							break;
 						}
@@ -204,10 +235,10 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 					/* this sometimes results in a negative branch length */
 					/* however, I'm fairly certain this is a problem with Migrate */
 					/* rather than a problem with my code */
-					bmap[thisNode] = bmap[thisNode] - migBranch;		// this places the migration event 
+					bmap[tempN] = bmap[tempN] - migBranch;		// this places the migration event 
 																		// on the coalescent branch
 			
-				//	bmap[thisNode] = bmap[thisNode];					// this makes a new branch for the 
+				//	bmap[tempN] = bmap[tempN];					// this makes a new branch for the 
 																		// migration event 					
 					
 					/* replace parenthesis with new node label */	
@@ -229,21 +260,21 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 				/* need to extend ctree here */
 				/* can only deal with migration events that effect a tip node */
 				/* this section is only called when brackets follow a tip node */
-				if (*iterStr == ':' && tempNode.length()>0 && nl) {
+				if (*iterStr == ':' && thisString.length()>0 && nl) {
 				
 					/* grabbing migration event */
-					string labelString = tempNode;
-					thisNode = *--nodeList.end();
+					string labelString = thisString;
+					tempN = *--nodeList.end();
 					labelString.erase(0,1);
 					from = atoi(labelString.c_str()) + 1;
-					labelString = tempNode;
+					labelString = thisString;
 					labelString.erase(1,1);		
 					to = atoi(labelString.c_str()) + 1;
-					lmaptemp[thisNode] = to;
+					lmaptemp[tempN] = to;
 					
 				}
 				
-				tempNode = "";
+				thisString = "";
 				tempBl = "";
 				tempBr = "";
 			}				
