@@ -93,11 +93,12 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(5);
-				ct.trimEnds(2003,2005);
+		//		ct.trimEnds(2003,2005);
 		
-		//		ct.printPaddedRuleList();
-				ct.printRuleList();
-		//		ct.printTimeTree();
+		//		ct.printRuleList();
+		
+		//		cout << ct.getLabelPro() << endl;
+		
 		//		ct.printMigTotal();
 		//		ct.printMigRates();
 		//		ct.printCoalRates();

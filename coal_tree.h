@@ -20,28 +20,33 @@ public:
 	CoalescentTree(string,string);		// constructor, takes a parentheses string as input as well as an options string
 										// can only be "migrate" or "beast"
 
+	// TREE MANIPULATION
 	void pruneToTrunk();				// reduces CoalescentTree object to trunk
-										// updates all relevant variables
 	void pruneToLabel(int);				// reduces CoalescentTree object to only include a particular set of tips
-										// updates all relevant variables
 	void trimEnds(double,double);		// reduces CoalescentTree object to only those nodes between
 										// time start and time stop
-			
-	void printTree();					// print indented tree
-	void printTimeTree();				// print indented tree with coalescent times
-	void printParenTree();				// print parentheses tree
+//	TODO:	
+//	void timeSlice(double);				// reduces CoalescentTree to all the ancestors of time slice
+
 	
-	void printPaddedRuleList();			// broken
+	// TREE STRUCTURE
+	void printTree();					// print indented tree with coalescent times
+	void printParenTree();				// print parentheses tree
+										// only prints structure at the moment, no branch lengths or migration events
+	void printPaddedRuleList();			// ****** completely broken ******
 										// print tree in Mathematica suitable format
 										// padded with extra nodes at coalescent time points
 										// used with TreePlot
-
 	void printRuleList();				// print tree in Mathematica rule list format with times included
 										// used with Graphics primitives
-										
-	void printTrunkRatio();				// print proportion of tree that can trace its history forward
-										// to present day samples
-	void printLabelProportions();		// print list of proportions with label i										
+					
+					
+	// SUMMARY STATISTICS			
+	void printTrunkRatio();				// proportion of tree that can trace its history from present day samples
+	
+	void printLabelPro();				// print proportion of tree with each label
+	vector<double> getLabelPro();
+	
 	void printMigTotal();				// print overall migration rate across tree 
 	void printMigRates();				// print list of posterior migration rates 
 	void printCoalRates();				// print list of coalescent rates for each label
@@ -75,30 +80,33 @@ public:
 	void pushTimesBack(double,double);
 		
 private:
+	tree<int> ctree;					// coalescent tree, has n leaf nodes (labelled 1..n) and n-1 internal nodes
+										// root is labelled 0, other internal nodes continue with n+1
+										// each node contains its label
+										
 	int leafCount;						// number of leafs in the tree (sample size n)
 	int nodeCount;						// number of nodes in the tree
 	set<int> leafSet;					// set of leaf nodes
 	set<int> trunkSet;					// set of trunk nodes
 	set<int> labelSet;					// set of distinct node labels
-	
-	double mostRecentTime;				// most recent time in the tree
-//	double mp;							// multiplier to convert branch lengths into years
-										// set externally
-	
-	tree<int> ctree;					// coalescent tree, has n leaf nodes (labelled 1..n) and n-1 internal nodes
-										// root is labelled 0, other internal nodes continue with n+1
-										// each node contains its label
+					
 	map<int,double>	bmap;				// maps a node to the length of the branch leading into the node
 	map<int,double>	rmap;				// maps a node to the rate of the branch leading into the node
 	map<int,double>	tmap;				// maps a node to the age of the node
 	map<int,int>	lmap;				// maps a node to a numeric label
 	map<int,int>	ancmap;				// maps a node to its parent	
-	set<double> tlist;					// sorted list of times starting with root		
+	set<double> tlist;					// sorted list of times starting with root
+	
+	double presentTime;					// most recent time in the tree
+	double rootTime;					// most ancient time in the tree
+	double trunkTime;					// time back from mostRecentTime to consider nodes as part of the trunk
+										// defaults to 1/100 of mostRecentTime
+	double stepsize;					// length of time between samples of parameter values										
+	
 	bool blCheck;						// whether branch lengths exist in input tree
 	bool brCheck;						// whether branch rates exist in input tree
 	bool nlCheck;						// whether node labels exist in input tree	
-	double stepsize;					// length of time between samples of parameter values
-			
+
 	vector<double> skylineindex;
 	vector<double> skylinevalue;
 

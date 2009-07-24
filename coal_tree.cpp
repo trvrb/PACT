@@ -360,11 +360,12 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 
 	// fill tlist
 	// find most recent time
-	mostRecentTime = 0.0;
+	rootTime = 0.0;
+	presentTime = 0.0;
 	for (pre_it = ctree.begin(); pre_it != ctree.end(); pre_it++) {	
 		tlist.insert(tmap[*pre_it]);
-		if (tmap[*pre_it] > mostRecentTime) {
-			mostRecentTime = tmap[*pre_it];
+		if (tmap[*pre_it] > presentTime) {
+			presentTime = tmap[*pre_it];
 		}
 	}	
 	
@@ -380,13 +381,13 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	}
   			
 	/* go through tree and append to trunk set */
-	/* only the last 1/100 of the time span is considered */
-	double pruneTime = mostRecentTime / (double) 100;
+	/* only the last 1/100 of the time span is considered by default */
+	trunkTime = presentTime / (double) 100;
 	it = ctree.begin();
 	end = ctree.end();
 	while(it!=end) {
 		/* find leaf nodes at present */
-		if (tmap[*it] > mostRecentTime - pruneTime && *it <= leafCount) {
+		if (tmap[*it] > presentTime - trunkTime && *it <= leafCount) {
 			jt = it;
 			/* move up tree adding nodes to trunk set */
 			while (*jt != 0) {
@@ -404,10 +405,11 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 void CoalescentTree::pushTimesBack(double endTime) {
 	
 	// need to adjust times by this amount
-	double diff = endTime - mostRecentTime;
+	double diff = endTime - presentTime;
 		
 	// modifying tmap and tlist
-	mostRecentTime += diff;
+	presentTime += diff;
+	rootTime += diff;
 	tlist.clear();
 	for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++) {
 		tmap[*it] += diff;
@@ -423,14 +425,14 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 	// STRETCH OR SHRINK //////////////	 
 		 
 	// find oldest sample
-	double mostAncientTime = mostRecentTime;
+	double mostAncientTime = presentTime;
 	for (set<int>::iterator is = leafSet.begin(); is != leafSet.end(); is++) {
 		if (tmap[*is] < mostAncientTime) {
 			mostAncientTime = tmap[*is];
 		}
 	}	
 	
-	double mp = (endTime - startTime) / (mostRecentTime - mostAncientTime);
+	double mp = (endTime - startTime) / (presentTime - mostAncientTime);
 	
 	// go through bmap and multiply by mp	
 	for (tree<int>::iterator it = ++ctree.begin(); it != ctree.end(); it++) {
@@ -444,21 +446,22 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 
 	// fill tlist
 	// find most recent time
-	mostRecentTime = 0.0;
+	presentTime = 0.0;
 	for (tree<int>::iterator it = ++ctree.begin(); it != ctree.end(); it++) {	
 		tlist.insert(tmap[*it]);
-		if (tmap[*it] > mostRecentTime) {
-			mostRecentTime = tmap[*it];
+		if (tmap[*it] > presentTime) {
+			presentTime = tmap[*it];
 		}
 	}	
 	
 	// PUSH BACK /////////////////////
 
 	// need to adjust times by this amount
-	double diff = endTime - mostRecentTime;
+	double diff = endTime - presentTime;
 		
 	// modifying tmap and tlist
-	mostRecentTime += diff;
+	presentTime += diff;
+	rootTime += diff;
 	tlist.clear();
 	for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++) {
 		tmap[*it] += diff;
@@ -587,6 +590,9 @@ void CoalescentTree::pruneToTrunk() {
 			leafSet.insert(*it);			
 		}
 	}
+	
+	rootTime = *tlist.begin();
+	presentTime = *tlist.end();	
 			
 }
 
@@ -647,7 +653,10 @@ void CoalescentTree::pruneToLabel(int label) {
 			leafSet.insert(*it);			
 		}
 	}
-			
+	
+	rootTime = *tlist.begin();
+	presentTime = *tlist.end();	
+				
 }
 
 /* trims a tree at its edges */
@@ -728,30 +737,10 @@ void CoalescentTree::trimEnds(double start, double stop) {
 		if (ctree.number_of_children(it)==0)
 			leafCount++;
 	}
-		
-}
-
-
-/* Print indented tree */
-void CoalescentTree::printTree() { 
-
-	tree<int>::pre_order_iterator it;
-	tree<int>::pre_order_iterator end;
-
-	it = ctree.begin();
-	end = ctree.end();
-   
-	if(!ctree.is_valid(it)) return;
 	
-	int rootdepth=ctree.depth(it);
-	cout << "-----" << endl;
-	while(it!=end) {
-		for(int i=0; i<ctree.depth(it)-rootdepth; ++i) 
-			cout << "  ";
-		cout << (*it) << endl << flush;
-		it++;
-	}
-	cout << "-----" << endl;
+	rootTime = *tlist.begin();
+	presentTime = *tlist.end();
+		
 }
 
 /* Print parentheses tree */
@@ -797,31 +786,23 @@ void CoalescentTree::printParenTree() {
 }
 
 /* Print tree with times */
-void CoalescentTree::printTimeTree() { 
+void CoalescentTree::printTree() { 
 
-	tree<int>::pre_order_iterator it;
-	tree<int>::pre_order_iterator end;
-
+	tree<int>::iterator it;
 	it = ctree.begin();
-	end = ctree.end();
-   
-	if(!ctree.is_valid(it)) return;
-		
 	int rootdepth=ctree.depth(it);
-	cout << "-----" << endl;
-	while(it!=end) {
+	
+	while(it!=ctree.end()) {
 		for(int i=0; i<ctree.depth(it)-rootdepth; ++i) 
 			cout << "  ";
 		cout << (*it) << " (" << tmap[*it] << ")";
 		if (brCheck)
-			cout << " [" << rmap[*it] << "]";
+			cout << " {" << rmap[*it] << "}";
 		if (nlCheck)
 			cout << " [" << lmap[*it] << "]";			
 		cout << endl << flush;
 		it++;
 	}
-	cout << "-----" << endl;
-	cout << "leafs = " << leafCount << ", nodes = " << nodeCount << endl;
 	
 }
 
@@ -924,6 +905,13 @@ void CoalescentTree::printPaddedRuleList() {
 /* print tree in Mathematica suitable format, 1->2,1->3, etc... */
 /* padded with extra nodes at coalescent time points */
 /* print mapping of nodes to rates if rates exist */
+/* Output is:
+	leaf list
+	trunk list
+	tree rules
+	label rules
+	coordinate rules
+*/	
 void CoalescentTree::printRuleList() { 
 
 	tree<int>::iterator it, jt;
@@ -946,6 +934,12 @@ void CoalescentTree::printRuleList() {
 
 	/* print leaf nodes */
 	for ( set<int>::const_iterator lit=leafSet.begin(); lit != leafSet.end(); lit++ ) {
+		cout << *lit << " ";
+	}
+	cout << endl;
+	
+	/* print trunk nodes */
+	for ( set<int>::const_iterator lit=trunkSet.begin(); lit != trunkSet.end(); lit++ ) {
 		cout << *lit << " ";
 	}
 	cout << endl;
@@ -991,6 +985,7 @@ void CoalescentTree::printRuleList() {
 }
 
 /* print proportion of tree that can trace its history forward to present day samples */
+/* trunk traced back from the last 1/100 of the time width */
 void CoalescentTree::printTrunkRatio() { 
 
 	double totalLength = 0.0;
@@ -1004,31 +999,10 @@ void CoalescentTree::printTrunkRatio() {
 		totalLength += bmap[i];
 	}
 	cout << "total tree length: " << totalLength << endl;
-	
-	/* print nodes that exist at present */
-	cout << "leaf nodes at present:" << endl;
-	
-	it = ctree.begin();
-	end = ctree.end();
-   
-	if(!ctree.is_valid(it)) return;
-
-	while(it!=end) {
-		/* find leaf nodes at present */
-		if (tmap[*it] < 1 && *it <= leafCount) {
-			jt = it;
-			/* move up tree adding nodes to trunk set */
-			while (*jt != 0) {
-				trunk.insert(*jt);
-				jt = ctree.parent(jt);
-			}
-		}
-		it++;
-	}
-	
+		
 	/* move through trunk nodes and total branch lengths */
-	for ( set<int>::const_iterator t=trunk.begin(); t != trunk.end(); t++ ) {
-		trunkLength += bmap[*t];
+	for ( set<int>::const_iterator is = trunkSet.begin(); is != trunkSet.end(); is++ ) {
+		trunkLength += bmap[*is];
     }
     
     cout << "trunk length: " << trunkLength << endl;
@@ -1037,37 +1011,70 @@ void CoalescentTree::printTrunkRatio() {
 }
 
 /* print proportion of tree with each label */
-void CoalescentTree::printLabelProportions() { 
+void CoalescentTree::printLabelPro() { 
 
-	/* calculation is to get the total length in years of each label */
-
-	double totalLength = 0;
+	/* calculation is to get the total length of each label */
+	
+	double totalLength = 0.0;
 	map <int,double> labelLengths;
-	set<int>::const_iterator lit, ljt;
+	set<int>::const_iterator is;
 
-	for ( lit=labelSet.begin(); lit != labelSet.end(); lit++ ) {
+	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
    
 		/* sum branch lengths */
 		/* have to go through tree structure, nodes can be non-consecutive */
 		double length = 0.0;
 		for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {
-			if (*lit == lmap[*it]) {
+			if (*is == lmap[*it]) {
 				length += bmap[*it];
 			}
 		}
 		totalLength += length;
-//		cout << "label: " << *lit << ", length: " << length << endl;
-		labelLengths.insert( make_pair(*lit,length ) );
+		labelLengths.insert( make_pair(*is,length ) );
 		
 	}
-//	cout << "total length: " << totalLength << endl;
 	
-	for ( lit=labelSet.begin(); lit != labelSet.end(); lit++ ) {
-		cout << labelLengths[*lit] / totalLength << " ";
+	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
+		cout << labelLengths[*is] / totalLength << " ";
 	}
 	cout << endl;
 	
 }
+
+/* get proportion of tree with each label, works with Skyline object */
+vector<double> CoalescentTree::getLabelPro() { 
+
+	/* calculation is to get the total length of each label */
+	
+	double totalLength = 0.0;
+	map <int,double> labelLengths;
+	set<int>::const_iterator is;
+
+	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
+   
+		/* sum branch lengths */
+		/* have to go through tree structure, nodes can be non-consecutive */
+		double length = 0.0;
+		for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {
+			if (*is == lmap[*it]) {
+				length += bmap[*it];
+			}
+		}
+		totalLength += length;
+		labelLengths.insert( make_pair(*is,length ) );
+		
+	}
+	
+	vector<double> proportions;	
+	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
+		proportions.push_back(labelLengths[*is] / totalLength);
+	}
+	
+	return proportions;
+	
+}
+
+
 
 /* print total rate of migration across tree, measured as events/year */
 void CoalescentTree::printMigTotal() { 
