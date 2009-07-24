@@ -20,12 +20,11 @@ Member function definitions for CoalescentTree class
 
 /* Constructor function to initialize private data */
 /* Takes NEWICK parentheses tree as string input */
+/* Depracting branch rates */
+/* One set of functions for migration events and branch lengths */
 CoalescentTree::CoalescentTree(string paren, string options) {
 
 	stepsize = 0.1;	
-//	mp = 1.0;			// 1.927 for mig within coal, 1.47 for mig outside coal
-
-	nlCheck = false;	
 	
 	string::iterator iterStr;
 
@@ -43,30 +42,9 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 			iterStr++;
 	}
 
-	// check paren string for :, indicates branch lengths present
-	blCheck = false;
-	for ( iterStr=paren.begin() ; iterStr < paren.end(); iterStr++ ) {
-		if (*iterStr == ':') {
-			blCheck = true;
-		}
-	}
-	
-	// check paren string for [, indicates rates lengths present
-	brCheck = false;
-	for ( iterStr=paren.begin() ; iterStr < paren.end(); iterStr++ ) {
-		if (*iterStr == '[') {
-			brCheck = true;
-		}
-	}	
-
-	if (options == "migrate") {
-		nlCheck = true;
-		brCheck = false;
-	}
-
 	// read in node names, filling tips
 	// tips maps a node string to an int
-	// names can only be 0-9 A-Z
+	// names can only be 0-9 A-Z a-z
 	// exported tree renames tips with consecutive numbering starting at 1
 	// ignore spaces
 	// in BEAST trees I can just directly use the node ids
@@ -74,23 +52,29 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	map<string,int> tips; 
 	leafCount = 0;
 	
+	vector<Node> tipsList;
+	
 	string tempNode = "";
 	bool nl = false;
 	for ( iterStr=paren.begin() ; iterStr < paren.end(); iterStr++ ) {
-		if (*iterStr >= '0' && *iterStr <= '9' || *iterStr >= 'A' && *iterStr <= 'Z') {
+		if ( (*iterStr >= '0' && *iterStr <= '9') || (*iterStr >= 'A' && *iterStr <= 'Z') || (*iterStr >= 'a' && *iterStr <= 'z') ) {
     		tempNode += *iterStr;
     	}
     	else {
-    	    if ( (brCheck && *iterStr == '[' && tempNode.length()>0) ||
-    	     (!brCheck && !nlCheck && blCheck && *iterStr == ':' && tempNode.length()>0) ||
-    	     (!brCheck && !blCheck && tempNode.length()>0) ||
-    	     (!brCheck && nlCheck && blCheck && *iterStr == ':' && tempNode.length()>0 && !nl) ) {
+    	    if (*iterStr == ':' && tempNode.length()>0 && !nl) {
     	    	leafCount++;
     	    	if (options == "migrate") {
+    	    	
+    	    		Node thisNode(leafCount);
+    	    		thisNode.setName(tempNode);
+    	    		thisNode.setLabel(atoi(tempNode.substr(0,1).c_str()) + 1);
+    	    		tipsList.push_back(thisNode);
+    	    	
     				tips.insert( make_pair(tempNode,leafCount ) );
     				leafSet.insert(leafCount);	
       				lmap[ leafCount ] = atoi(tempNode.substr(0,1).c_str()) + 1;	// label is the first character of node string
     				labelSet.insert(atoi(tempNode.substr(0,1).c_str()) + 1);  	// incremented by 1		
+    			
     			}
    				if (options == "beast") {
     				tips.insert( make_pair(tempNode,atoi(tempNode.c_str()) ) );
@@ -99,9 +83,9 @@ CoalescentTree::CoalescentTree(string paren, string options) {
     				labelSet.insert(1);   	    				
     			}	   			
     		}
-    		if (!brCheck && nlCheck && blCheck && *iterStr == '[')
+    		if (*iterStr == '[')
     			nl = true;
-    		if (!brCheck && nlCheck && blCheck && *iterStr == ']')
+    		if (*iterStr == ']')
     			nl = false;		
     		tempNode = "";
     	}	
@@ -113,23 +97,25 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	// construct starting point for tree (multifurcation from root)
 	ctree.set_head(0);
 	tmap[0] = 0.0;
-	Node root(0);
-	nodetree.set_head(root);
 	
 	map<string,int>::iterator iter;
 	for( iter = tips.begin(); iter != tips.end(); iter++ ) {
     	ctree.begin() = ctree.insert_after(ctree.begin(), iter->second);
 		tmap[iter->second] = 0.0;
    	}
+	tlist.insert( 0.0 );   	
+   	
+	// construct starting point for tree (multifurcation from root) 
+	Node root(0);
+	nodetree.set_head(root);
+	for(int i = 0; i < tipsList.size(); i++) {
+		nodetree.insert_after(nodetree.begin(), tipsList[i]);
+   	}
   	
-	tlist.insert( 0.0 );
-
-
-
 	// read parentheses string from left to right, stop when a close parenthesis is encountered
 	// push the left and right nodes onto their own branch
 	// replace parenthesis string with their parent node ((1,2),3)  --->  (4,3)
-	// fill bmap
+	// fill bmap / update lengths of nodes
 	
 	tree<int>::iterator it, jt, end, iterLeft, iterRight, iterN, iterTemp;
 	int leftNode, rightNode, openParen, closeParen, openMig, closeMig, stringPos;	
@@ -164,127 +150,99 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 				openParen = stringPos;
 				openMig = stringPos;
 			}
-			if ( (*iterStr >= '0' && *iterStr <= '9') || (*iterStr >= 'A' && *iterStr <= 'Z') || *iterStr == '.' || *iterStr == 'e' || *iterStr == '-' ) {
+			if ( (*iterStr >= '0' && *iterStr <= '9') || (*iterStr >= 'A' && *iterStr <= 'Z') || (*iterStr >= 'a' && *iterStr <= 'z') || *iterStr == '.' || *iterStr == '-' ) {
 				tempNode += *iterStr;
 				tempBl += *iterStr;
 				tempBr += *iterStr;
 			}	
 			else {
-				if (brCheck) {	
-					if (*iterStr == '[' && tempNode.length()>0) {
-						if (tips.end() == tips.find(tempNode))				// not found, direct insert
-							nodeList.push_back(atoi(tempNode.c_str()));
-						else
-							nodeList.push_back(tips[tempNode]);				// found, insert mapped int
-					}
-					if (*iterStr == ']' && tempNode.length()>0)
-						rmap[nodeList.back()] = atof(tempBr.c_str());
-					if (*iterStr != ':' && tempNode.length()>0)
-						bmap[nodeList.back()] = atof(tempBl.c_str());
-				}
-				if (!brCheck && nlCheck && blCheck) {
-					if (*iterStr == '[' && tempNode.length()>0 && !nl) {
-						bmap[nodeList.back()] = atof(tempBl.c_str());
-//						cout << "  bl = " << tempBl.c_str() << endl;
-						nl = true;
-					}
-					if (*iterStr == ':' && tempNode.length()>0 && !nl) {
-						if (tips.end() == tips.find(tempNode))				// not found, direct insert
-							nodeList.push_back(atoi(tempNode.c_str()));
-						else
-							nodeList.push_back(tips[tempNode]);				// found, insert mapped int
-//						cout << "node = " << tempNode.c_str() << endl;
-					}
-					if (*iterStr != ':' && tempNode.length()>0 && !nl) {
-						bmap[nodeList.back()] = atof(tempBl.c_str());
-//						cout << "  bl = " << tempBl.c_str() << endl;
-					}
-					if (*iterStr == ',') {
-						openMig = stringPos;
-					}	
-					if (*iterStr == '[' && tempNode.length()==0) {
-						nl = true;
-					}						
-					if (*iterStr == ']') {
-					
-						closeMig = stringPos; 
-					
-						migBranch = atof(tempNode.c_str());
-					//	cout << thisNode << " mig from " << from << " to " << to << ", at " << migBranch << endl;
-					
-						/* wrapping a new node */
-						tree<int>::iterator iterTo, iterFrom;
-						it = ctree.begin();
-						while(it!=end) {
-							if (*it == thisNode) { 
-								iterFrom = it; 
-								break;
-							}
-							it++;
-						}
-						iterTo = ctree.wrap(iterFrom,currentNode);
-						
-						lmap[currentNode] = to;
-						bmap[currentNode] = migBranch;
-			
-						/* this sometimes results in a negative branch length */
-						/* however, I'm fairly certain this is a problem with Migrate */
-						/* rather than a problem with my code */
-						bmap[thisNode] = bmap[thisNode] - migBranch;		// this places the migration event 
-																			// on the coalescent branch
 				
-					//	bmap[thisNode] = bmap[thisNode];					// this makes a new branch for the 
-																			// migration event 					
-						
-						/* replace parenthesis with new node label */	
-						/* code is set up to deal with the situation of two labels before a parenthesis */
-						stringstream out;
-						out << currentNode << ":" << bmap[currentNode];
-						paren = paren.substr(0,openMig+1) + out.str() + paren.substr(closeMig+1,paren.length());
-					//	cout << paren << endl;
-						
-						currentNode++;
-						nodeCount++;
-						iterStr=paren.begin();	// reset count
-						break;
-					
-						nl = false;
-					}
-					
-					/* this deals with what goes on between the brackets */
-					/* need to extend ctree here */
-					/* can only deal with migration events that effect a tip node */
-					/* this section is only called when brackets follow a tip node */
-					if (*iterStr == ':' && tempNode.length()>0 && nl) {
-					
-						/* grabbing migration event */
-						string labelString = tempNode;
-						thisNode = *--nodeList.end();
-						labelString.erase(0,1);
-						from = atoi(labelString.c_str()) + 1;
-						labelString = tempNode;
-						labelString.erase(1,1);		
-						to = atoi(labelString.c_str()) + 1;
-						lmaptemp[thisNode] = to;
-						
-					}
-				}				
-				if (!brCheck && !nlCheck && blCheck) {
-					if (*iterStr == ':' && tempNode.length()>0) {
-						if (tips.end() == tips.find(tempNode))				// not found, direct insert
-							nodeList.push_back(atoi(tempNode.c_str()));
-						else
-							nodeList.push_back(tips[tempNode]);				// found, insert mapped int
-					}
-					if (*iterStr != ':' && tempNode.length()>0)
-						bmap[nodeList.back()] = atof(tempBl.c_str());
+				if (*iterStr == '[' && tempNode.length()>0 && !nl) {
+					bmap[nodeList.back()] = atof(tempBl.c_str());
+//						cout << "  bl = " << tempBl.c_str() << endl;
+					nl = true;
 				}
-				if (!brCheck && !blCheck && tempNode.length()>0) {
+				if (*iterStr == ':' && tempNode.length()>0 && !nl) {
 					if (tips.end() == tips.find(tempNode))				// not found, direct insert
 						nodeList.push_back(atoi(tempNode.c_str()));
 					else
 						nodeList.push_back(tips[tempNode]);				// found, insert mapped int
+//						cout << "node = " << tempNode.c_str() << endl;
 				}
+				if (*iterStr != ':' && tempNode.length()>0 && !nl) {
+					bmap[nodeList.back()] = atof(tempBl.c_str());
+//						cout << "  bl = " << tempBl.c_str() << endl;
+				}
+				if (*iterStr == ',') {
+					openMig = stringPos;
+				}	
+				if (*iterStr == '[' && tempNode.length()==0) {
+					nl = true;
+				}						
+				if (*iterStr == ']') {
+				
+					closeMig = stringPos; 
+				
+					migBranch = atof(tempNode.c_str());
+				//	cout << thisNode << " mig from " << from << " to " << to << ", at " << migBranch << endl;
+				
+					/* wrapping a new node */
+					tree<int>::iterator iterTo, iterFrom;
+					it = ctree.begin();
+					while(it!=end) {
+						if (*it == thisNode) { 
+							iterFrom = it; 
+							break;
+						}
+						it++;
+					}
+					iterTo = ctree.wrap(iterFrom,currentNode);
+					
+					lmap[currentNode] = to;
+					bmap[currentNode] = migBranch;
+		
+					/* this sometimes results in a negative branch length */
+					/* however, I'm fairly certain this is a problem with Migrate */
+					/* rather than a problem with my code */
+					bmap[thisNode] = bmap[thisNode] - migBranch;		// this places the migration event 
+																		// on the coalescent branch
+			
+				//	bmap[thisNode] = bmap[thisNode];					// this makes a new branch for the 
+																		// migration event 					
+					
+					/* replace parenthesis with new node label */	
+					/* code is set up to deal with the situation of two labels before a parenthesis */
+					stringstream out;
+					out << currentNode << ":" << bmap[currentNode];
+					paren = paren.substr(0,openMig+1) + out.str() + paren.substr(closeMig+1,paren.length());
+				//	cout << paren << endl;
+					
+					currentNode++;
+					nodeCount++;
+					iterStr=paren.begin();	// reset count
+					break;
+				
+					nl = false;
+				}
+				
+				/* this deals with what goes on between the brackets */
+				/* need to extend ctree here */
+				/* can only deal with migration events that effect a tip node */
+				/* this section is only called when brackets follow a tip node */
+				if (*iterStr == ':' && tempNode.length()>0 && nl) {
+				
+					/* grabbing migration event */
+					string labelString = tempNode;
+					thisNode = *--nodeList.end();
+					labelString.erase(0,1);
+					from = atoi(labelString.c_str()) + 1;
+					labelString = tempNode;
+					labelString.erase(1,1);		
+					to = atoi(labelString.c_str()) + 1;
+					lmaptemp[thisNode] = to;
+					
+				}
+				
 				tempNode = "";
 				tempBl = "";
 				tempBr = "";
@@ -741,8 +699,11 @@ void CoalescentTree::printNodeTree() {
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
 		for(int i=0; i<nodetree.depth(it)-rootdepth; ++i) 
 			cout << "  ";
-		cout << (*it).getName();
-		cout << " (" << (*it).getTime()<< ")";
+		cout << (*it).getNumber();
+		if ((*it).getName() != "") { 
+			cout << " " << (*it).getName();
+		}
+		cout << " (" << (*it).getTime() << ")";
 		cout << " [" << (*it).getLabel() << "]";			
 		cout << " {" << (*it).getLength() << "}";		
 		cout << endl << flush;
@@ -816,31 +777,16 @@ void CoalescentTree::printPaddedRuleList() {
     }
 	cout << endl;
 	
-	/* print mapping of rates in Mathematica format */
-	if (brCheck) {
-		it = ctree.begin();
-		it++;
-		cout << *it << "->" << rmap[*it];
-		it++;
-		while(it!=end) {
-			cout << " " << *it << "->" << rmap[*it];
-			it++;
-		}
-		cout << endl;
-	}
-	
 	/* print mapping of labels in Mathematica format */
-	if (nlCheck) {
-		it = ctree.begin();
+	it = ctree.begin();
+	it++;
+	cout << *it << "->" << lmap[*it];
+	it++;
+	while(it!=end) {
+		cout << " " << *it << "->" << lmap[*it];
 		it++;
-		cout << *it << "->" << lmap[*it];
-		it++;
-		while(it!=end) {
-			cout << " " << *it << "->" << lmap[*it];
-			it++;
-		}
-		cout << endl;
-	}	
+	}
+	cout << endl;
 	  	
   	
 }

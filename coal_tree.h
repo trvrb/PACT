@@ -106,10 +106,6 @@ private:
 										// defaults to 1/100 of mostRecentTime
 	double stepsize;					// length of time between samples of parameter values										
 	
-	bool blCheck;						// whether branch lengths exist in input tree
-	bool brCheck;						// whether branch rates exist in input tree
-	bool nlCheck;						// whether node labels exist in input tree	
-
 	vector<double> skylineindex;
 	vector<double> skylinevalue;
 	
