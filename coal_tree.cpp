@@ -561,16 +561,10 @@ void CoalescentTree::padTree() {
 void CoalescentTree::pruneToTrunk() {
 	
 	/* erase other nodes from the tree */
-	/* as well as their maps */
 	tree<int>::iterator it;	
 	it = ctree.begin();
 	while(it!=ctree.end()) {
 		if (trunkSet.end() == trunkSet.find(*it)) {
-			tmap.erase(*it);
-			bmap.erase(*it);
-			rmap.erase(*it);	
-			lmap.erase(*it);			
-			ancmap.erase(*it);
 			it = ctree.erase(it);
 		}
 		else {
@@ -578,21 +572,8 @@ void CoalescentTree::pruneToTrunk() {
     	}
     }
             
-    /* update other private data */
-    nodeCount = ctree.size();
-    tlist.clear();
-    leafSet.clear();    
-    leafCount = 0;
-	for (it=ctree.begin(); it!=ctree.end(); it++) {
-		tlist.insert(tmap[*it]);
-		if (ctree.number_of_children(it)==0) {
-			leafCount++;
-			leafSet.insert(*it);			
-		}
-	}
-	
-	rootTime = *tlist.begin();
-	presentTime = *tlist.end();	
+	/* update maps and other data accordingly */
+	cleanup();
 			
 }
 
@@ -601,13 +582,11 @@ void CoalescentTree::pruneToLabel(int label) {
 
 	/* start by finding all tips with this label */
 	set<int> labelset; 
-	tree<int>::iterator it, jt, end;
+	tree<int>::iterator it, jt;
 	int newLeafs = 0;
-	
 	it = ctree.begin();
-	end = ctree.end();
-   
-	while(it!=end) {
+	
+	while(it!=ctree.end()) {
 		/* find leaf nodes at present */
 		if (lmap[*it] == label) {     
 			newLeafs++;
@@ -626,14 +605,8 @@ void CoalescentTree::pruneToLabel(int label) {
 	
 	/* erase other nodes from the tree */
 	it = ctree.begin();
-	end = ctree.end();
-	while(it!=end) {
+	while(it!=ctree.end()) {
 		if (labelset.end() == labelset.find(*it)) {
-			tmap.erase(*it);
-			bmap.erase(*it);
-			rmap.erase(*it);
-			lmap.erase(*it);
-			ancmap.erase(*it);
 			it = ctree.erase(it);
 		}
 		else {
@@ -641,21 +614,8 @@ void CoalescentTree::pruneToLabel(int label) {
     	}
     }
         
-    /* update other private data */
-    nodeCount = ctree.size();
-    tlist.clear();
-    leafSet.clear();    
-    leafCount = 0;
-	for (it=ctree.begin(); it!=ctree.end(); it++) {
-		tlist.insert(tmap[*it]);
-		if (ctree.number_of_children(it)==0) {
-			leafCount++;
-			leafSet.insert(*it);			
-		}
-	}
-	
-	rootTime = *tlist.begin();
-	presentTime = *tlist.end();	
+	/* update maps and other data accordingly */
+	cleanup();
 				
 }
 
@@ -669,11 +629,10 @@ from  ------			 	to	--
 void CoalescentTree::trimEnds(double start, double stop) {
 		
 	/* erase nodes from the tree where neither the node nor its parent are between start and stop */
-	tree<int>::iterator it, end, root, itertemp;	
+	tree<int>::iterator it, root, itertemp;	
 	it = ctree.begin();
-	end = ctree.end();
 	root = ctree.begin();
-	while(it!=end) {	
+	while(it!=ctree.end()) {	
 		/* if node > stop and anc[node] < stop, erase children and prune node back to stop */
 		if (tmap[*it] > stop && tmap[ancmap[*it]] <= stop) {
 			tmap[*it] = stop;
@@ -698,8 +657,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
     
     /* second pass for nodes < start */
     it = ctree.begin();
-	end = ctree.end();
-	while(it!=end) {	
+	while(it!=ctree.end()) {	
 		if (tmap[*it] < start && *it != 0) {
 			it = ctree.erase(it);
 		}
@@ -709,40 +667,8 @@ void CoalescentTree::trimEnds(double start, double stop) {
     }
     tmap[0] = start;
                
-	/* want to reduce maps to just the subset dealing with these nodes */
-	/* set of remaining nodes */
-	set<int> nodeSet;
-	for (it = ctree.begin(); it != ctree.end(); it++) {
-		nodeSet.insert(*it);
-	}
-	/* go through and erase nonfunctionaling map elements */
-	for (int i = 0; i < nodeCount; i++) {
-		if (nodeSet.count(i) == 0) {
-			leafSet.erase(i);
-			trunkSet.erase(i);
-			bmap.erase(i);
-			rmap.erase(i);
-			tmap.erase(i);
-			lmap.erase(i);
-			ancmap.erase(i);
-		}
-	}
-
-    /* update other private data */
-    nodeCount = ctree.size();
-    tlist.clear();
-    leafSet.clear();
-    leafCount = 0;
-	for (it=ctree.begin(); it!=ctree.end(); it++) {
-		tlist.insert(tmap[*it]);
-		if (ctree.number_of_children(it)==0) {
-			leafCount++;
-			leafSet.insert(*it);
-		}
-	}
-	
-	rootTime = *tlist.begin();
-	presentTime = *tlist.end();
+	/* update maps and other data accordingly */
+	cleanup();
 		
 }
 
@@ -754,9 +680,7 @@ void CoalescentTree::printParenTree() {
 
 	it = ctree.begin_post();
 	end = ctree.end_post();
-   
-	if(!ctree.is_valid(it)) return;
-	
+   	
 	int rootdepth = ctree.depth(it);
 	int currentdepth = ctree.depth(it);
 	for (int i = 0; i < currentdepth; i++) { cout << "("; } 
@@ -1990,6 +1914,47 @@ vector<double> CoalescentTree::getSkylineValue() {
 
 void CoalescentTree::setStepSize(double ss) {
 	stepsize = ss;
+}
+
+/* removes cruft from maps and other data, based on current nodes in tree */
+void CoalescentTree::cleanup() {
+
+	/* want to reduce maps to just the subset dealing with these nodes */
+	set<int> nodeSet;
+	tree<int>::iterator it;
+	for (it = ctree.begin(); it != ctree.end(); it++) {
+		nodeSet.insert(*it);
+	}
+	
+	/* go through and erase nonfunctionaling map elements */
+	for (int i = 0; i < nodeCount; i++) {
+		if (nodeSet.count(i) == 0) {
+			leafSet.erase(i);
+			trunkSet.erase(i);
+			bmap.erase(i);
+			rmap.erase(i);
+			tmap.erase(i);
+			lmap.erase(i);
+			ancmap.erase(i);
+		}
+	}
+
+    /* update other private data */
+    nodeCount = ctree.size();
+    tlist.clear();
+    leafSet.clear();
+    leafCount = 0;
+	for (it=ctree.begin(); it!=ctree.end(); it++) {
+		tlist.insert(tmap[*it]);
+		if (ctree.number_of_children(it)==0) {
+			leafCount++;
+			leafSet.insert(*it);
+		}
+	}
+	
+	rootTime = *tlist.begin();
+	presentTime = *tlist.end();
+
 }
 
 tree<int> CoalescentTree::extractSubtree(set<int> subset) {

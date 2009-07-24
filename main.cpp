@@ -70,10 +70,10 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				Statistic stat;
 				CoalescentTree ct(parenString, "migrate");
 				ct.pushTimesBack(2007);
-				
+		/*		
 				ct.pruneToTrunk();
 				
-				double step = 0.1;
+				double step = 1;
 				for (double t = 2002; t <= 2007 - step; t += step ) {
 				
 					CoalescentTree temptree = ct;
@@ -82,12 +82,11 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 					stat.increment(temptree.getLabelPro());
 					
 					cout << t << " " << t + step << " ";
-				//	temptree.printLabelPro();
 					stat.print();
 					stat.clear();
 				
 				}
-				
+		*/		
 
 		//		stat.increment(ct.getLabelPro());
 		//		stat.print();
@@ -97,9 +96,9 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(5);
-		//		ct.trimEnds(2005.9,2006.1);
+				ct.trimEnds(2005,2006);
 		
-		//		ct.printRuleList();
+				ct.printRuleList();
 		
 		//		ct.printMigTotal();
 		//		ct.printMigRates();

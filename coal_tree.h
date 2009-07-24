@@ -110,6 +110,8 @@ private:
 
 	vector<double> skylineindex;
 	vector<double> skylinevalue;
+	
+	void cleanup();						// goes through tree and removes cruft from maps and other data
 
 	void padTree();						// pads CoalescentTre with additional nodes at each coalescent event
 										// included mainly for compatibility with TreePlot
