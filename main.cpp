@@ -46,6 +46,10 @@ using namespace std;
 // Template class for standard library style tree
 #include "tree.hh"
 
+// Class for coalescent nodes within a tree object
+#include "node.h"
+#include "node.cpp"
+
 // Extension of the tree class to deal specifically with coalescent trees
 #include "coal_tree.h"
 #include "coal_tree.cpp"
