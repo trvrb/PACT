@@ -29,96 +29,102 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	string::iterator iterStr;
 
 	// strip spaces from paren string
-	// also & and next character
+	// strip & and following character, replace following : with =
+	// assumes migration events follow the format [&M 5 3:8.49916e-05]
 	iterStr=paren.begin() ;
+	bool mig = false;
 	while (iterStr < paren.end()) {
 		if (*iterStr == ' ')
 			iterStr = paren.erase(iterStr);
 		else if (*iterStr == '&') {
 			iterStr = paren.erase(iterStr);
 			iterStr = paren.erase(iterStr);
+			mig = true;
+		}
+		else if (*iterStr == ':' && mig) {
+			*iterStr = '=';
+			mig = false;
 		}
 		else
 			iterStr++;
 	}
 
-	// read in node names, filling tips
-	// tips maps a node string to an int
+	// GATHER TIPS ////////////////
+	// read in node names, filling tips vector
 	// names can only be 0-9 A-Z a-z
 	// exported tree renames tips with consecutive numbering starting at 1
-	// ignore spaces
-	// in BEAST trees I can just directly use the node ids
-	
-	map<string,int> tips; 
-	leafCount = 0;
-	
-	vector<Node> tipsList;
-	
-	// GATHER TIPS ////////////////
-	/* go through paren string and collect tips, at the same time replace names with matching numbers in paren string */
-	string thisString = "";
-	bool nl = false;
-	bool puredigits = true;
-	int stringPos = 0;
-	iterStr = paren.begin();
+	// go through paren string and collect tips, at the same time replace names with matching numbers in paren string
+	// if name contains letters, assume first character is node label
 
-	if (options == "migrate") {	
+	map<string,int> tips; 
+	vector<Node> tipsList;
+	leafCount = 0;	
+	int stringPos = 0;
+	string thisString = "";
 	
-		while (iterStr < paren.end()) {
-				
-			if ( (*iterStr >= 'A' && *iterStr <= 'Z') || (*iterStr >= 'a' && *iterStr <= 'z') || (*iterStr >= '0' && *iterStr <= '9') ) {
-				thisString += *iterStr;
-			} 	  	
-			
-			else {
-			
-				bool letters = false;
-				for (int i = 0; i < thisString.length(); i++) {
-					if ( (thisString[i] >= 'A' && thisString[i] <= 'Z') || (thisString[i] >= 'a' && thisString[i] <= 'z') ) {
-						letters = true;
-					}
-				}
-			
-				if (*iterStr == ':' && letters) {
-					
-					leafCount++;
-						
-					/* nodetree update */	
-					Node thisNode(leafCount);
-					thisNode.setName(thisString);
-					// label is the first character of node string, incremented by 1
-					// if the first character is not a digit, this will go to 1 automatically
-					thisNode.setLabel(atoi(thisString.substr(0,1).c_str()) + 1);
-					tipsList.push_back(thisNode);
+	while (stringPos < paren.length()) {
 		
-					/* ctree update */
-					tips.insert( make_pair(thisString,leafCount ) );
-					leafSet.insert(leafCount);	
-					lmap[ leafCount ] = atoi(thisString.substr(0,1).c_str()) + 1;	// label is the first character of node string
-					labelSet.insert(atoi(thisString.substr(0,1).c_str()) + 1);  	// incremented by 1		
+		char thisChar = paren[stringPos];
+		
+		if ( (thisChar >= 'A' && thisChar <= 'Z') || (thisChar >= 'a' && thisChar <= 'z') || (thisChar >= '0' && thisChar <= '9') ) {
+			thisString += thisChar;
+		} 	  	
 				
-					/* replace name with number */	
-					stringstream out;
-					out << leafCount;
-					paren = paren.substr(0,stringPos - thisString.size()) + out.str() + paren.substr(stringPos,paren.length());
-					
-					// reset counts
-					stringPos = 0;
-					iterStr = paren.begin();	
-					puredigits = true;
-					continue;
-						
+		else if (thisChar == ':' && thisString.length() > 0) {
+			
+	//		cout << paren << endl;
+	//		cout << thisString << endl;
+			
+			leafCount++;
+				
+			/* nodetree update */	
+			Node thisNode(leafCount);
+			thisNode.setName(thisString);
+			
+			// label is the first character of node string, incremented by 1
+			// if the first character is not a digit, this will go to 1 automatically
+			// only attempt this if there are letters in the node
+			// will only fail if a name begins with a number unintentionally
+			bool letters = false;
+			for (int i = 0; i < thisString.length(); i++) {
+				if ( (thisString[i] >= 'A' && thisString[i] <= 'Z') || (thisString[i] >= 'a' && thisString[i] <= 'z') ) {
+					letters = true;
 				}
+			}
+			if (letters) {
+				thisNode.setLabel(atoi(thisString.substr(0,1).c_str()) + 1);
+			}
+			tipsList.push_back(thisNode);
+
+			/* ctree update */
+			tips.insert( make_pair(thisString,leafCount ) );
+			leafSet.insert(leafCount);	
+			lmap[ leafCount ] = atoi(thisString.substr(0,1).c_str()) + 1;	// label is the first character of node string
+			labelSet.insert(atoi(thisString.substr(0,1).c_str()) + 1);  	// incremented by 1		
+		
+			/* replace name with number */	
+			stringstream out;
+			out << leafCount;
+			paren = paren.substr(0,stringPos - thisString.size()) + out.str() + paren.substr(stringPos,paren.length());
 			
-				thisString = "";
+			/* move counter back */
+			/* need to take into acount the length of the digits */
+			stringPos -= thisString.size() - (out.str()).length() + 1;		
 			
-			}	
-			stringPos++;
-			iterStr++;
+			thisString = "";
+		
 		}
 		
-	}
+		else {
+			thisString = "";
+		}
 		
+		stringPos++;
+		
+	}
+	
+//	cout << paren << endl;
+	
 	nodeCount = leafCount;
 	int currentNode = nodeCount + 1;
 
@@ -170,7 +176,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 		thisString = "";
 		tempBl = "";
 		tempBr = "";
-		nl = false; 
+		bool nl = false; 
 		
 		// temporarily holds left and right nodes
 		Node leftNodeN(-1), rightNodeN(-1);
@@ -260,7 +266,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 				/* need to extend ctree here */
 				/* can only deal with migration events that effect a tip node */
 				/* this section is only called when brackets follow a tip node */
-				if (*iterStr == ':' && thisString.length()>0 && nl) {
+				if (*iterStr == '=' && thisString.length()>0 && nl) {
 				
 					/* grabbing migration event */
 					string labelString = thisString;
