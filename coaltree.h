@@ -1,4 +1,4 @@
-/* coal_tree.h
+/* coaltree.h
 CoalescentTree class definition
 This object stores and manipulates coalescent trees, rooted bifurcating trees with nodes mapped to time points
 */

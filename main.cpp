@@ -51,8 +51,8 @@ using namespace std;
 #include "node.cpp"
 
 // Extension of the tree class to deal specifically with coalescent trees
-#include "coal_tree.h"
-#include "coal_tree.cpp"
+#include "coaltree.h"
+#include "coaltree.cpp"
 
 // Measurements done on a CoalescentTree
 #include "measurement.h"

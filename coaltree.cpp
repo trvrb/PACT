@@ -1,8 +1,8 @@
-/* coal_tree.cpp
+/* coaltree.cpp
 Member function definitions for CoalescentTree class
 */
 
-#include "coal_tree.h"
+#include "coaltree.h"
 #include "tree.hh"
 
 #include <iostream>
@@ -28,6 +28,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	
 	string::iterator iterStr;
 
+	// STRIP PAREN STRING ///////////
 	// strip spaces from paren string
 	// strip & and following character, replace following : with =
 	// assumes migration events follow the format [&M 5 3:8.49916e-05]
@@ -54,7 +55,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	// names can only be 0-9 A-Z a-z
 	// exported tree renames tips with consecutive numbering starting at 1
 	// go through paren string and collect tips, at the same time replace names with matching numbers in paren string
-	// if name contains letters, assume first character is node label
+	// if first character of name is a number and the second character is a letter, assume first character is label
 
 	map<string,int> tips; 
 	vector<Node> tipsList;
@@ -82,25 +83,33 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 			thisNode.setName(thisString);
 			
 			// label is the first character of node string, incremented by 1
-			// if the first character is not a digit, this will go to 1 automatically
-			// only attempt this if there are letters in the node
-			// will only fail if a name begins with a number unintentionally
-			bool letters = false;
-			for (int i = 0; i < thisString.length(); i++) {
-				if ( (thisString[i] >= 'A' && thisString[i] <= 'Z') || (thisString[i] >= 'a' && thisString[i] <= 'z') ) {
-					letters = true;
-				}
+			// only attempt this if first character is number and second character is letter
+			// otherwise set to 1
+			bool labelExists;
+			if ( (thisString[0] >= '0' && thisString[0] <= '9') &&
+					( (thisString[1] >= 'A' && thisString[1] <= 'Z') || (thisString[1] >= 'a' && thisString[1] <= '1') ) ) {
+				labelExists = true;
 			}
-			if (letters) {
+			else {
+				labelExists = false;
+			}
+			if (labelExists) {
 				thisNode.setLabel(atoi(thisString.substr(0,1).c_str()) + 1);
 			}
+			
 			tipsList.push_back(thisNode);
 
 			/* ctree update */
 			tips.insert( make_pair(thisString,leafCount ) );
 			leafSet.insert(leafCount);	
-			lmap[ leafCount ] = atoi(thisString.substr(0,1).c_str()) + 1;	// label is the first character of node string
-			labelSet.insert(atoi(thisString.substr(0,1).c_str()) + 1);  	// incremented by 1		
+			if (labelExists) {
+				lmap[ leafCount ] = atoi(thisString.substr(0,1).c_str()) + 1;	// label is the first character of node string
+				labelSet.insert(atoi(thisString.substr(0,1).c_str()) + 1);  	// incremented by 1		
+			}
+			else {
+				lmap[ leafCount ] = 1;
+				labelSet.insert(1); 			
+			}
 		
 			/* replace name with number */	
 			stringstream out;
@@ -122,13 +131,13 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 		stringPos++;
 		
 	}
+		
+	// STARTING TREE /////////////////
+	// construct starting point for tree (multifurcation from root)
 	
-//	cout << paren << endl;
-	
+	// ctree update
 	nodeCount = leafCount;
 	int currentNode = nodeCount + 1;
-
-	// construct starting point for tree (multifurcation from root)
 	ctree.set_head(0);
 	tmap[0] = 0.0;
 	
@@ -139,17 +148,20 @@ CoalescentTree::CoalescentTree(string paren, string options) {
    	}
 	tlist.insert( 0.0 );   	
    	
-	// construct starting point for tree (multifurcation from root) 
+	// nodetree update
 	Node root(0);
 	nodetree.set_head(root);
 	for(int i = 0; i < tipsList.size(); i++) {
 		nodetree.insert_after(nodetree.begin(), tipsList[i]);
    	}
   	
+  	// CONSTRUCT TREE /////////////////////
 	// read parentheses string from left to right, stop when a close parenthesis is encountered
 	// push the left and right nodes onto their own branch
 	// replace parenthesis string with their parent node ((1,2),3)  --->  (4,3)
 	// fill bmap / update lengths of nodes
+	
+	cout << paren << endl;
 	
 	tree<int>::iterator it, jt, end, iterLeft, iterRight, iterN, iterTemp;
 	int leftNode, rightNode, openParen, closeParen, openMig, closeMig;	
