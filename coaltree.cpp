@@ -287,26 +287,6 @@ CoalescentTree::CoalescentTree(string paren) {
 
 }
 
-/* most recent node in tree, will always be a leaf */
-double CoalescentTree::getPresentTime() {
-	
-	double t = 0;
-	for (tree<Node>::leaf_iterator it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
-		if ((*it).getTime() > t) { 
-			t = (*it).getTime(); 
-		}
-	}
-	return t;
-
-}
-
-/* most ancient node in tree */
-double CoalescentTree::getRootTime() {
-	
-	return (*nodetree.begin()).getTime();
-
-}
-
 /* push dates to agree with a most recent sample date at endTime */
 void CoalescentTree::pushTimesBack(double endTime) {
 		
@@ -517,26 +497,34 @@ from  ------			 	to	--
 void CoalescentTree::trimEnds(double start, double stop) {
 		
 	/* erase nodes from the tree where neither the node nor its parent are between start and stop */
-	tree<int>::iterator it, root, jt;	
-	it = ctree.begin();
-	root = ctree.begin();
-	while(it!=ctree.end()) {	
-		/* if node > stop and anc[node] < stop, erase children and prune node back to stop */
-		if (tmap[*it] > stop && tmap[ancmap[*it]] <= stop) {
-			tmap[*it] = stop;
-			bmap[*it] = tmap[*it] - tmap[ancmap[*it]];
-			ctree.erase_children(it);
-			it = ctree.begin();
+	tree<Node>::iterator it, root, jt;
+	it = nodetree.begin();
+	root = nodetree.begin();
+	while(it != nodetree.end()) {	
+	
+		jt = nodetree.parent(it);
+	
+		/* if node > stop and parent < stop, erase children and prune node back to stop */
+		/* this pruning causes a leaf node to become an internal node */
+		if ((*it).getTime() > stop && (*jt).getTime() <= stop) {
+		
+			(*it).setTime( stop );
+			(*it).setLength( (*it).getTime() - (*jt).getTime() );
+			(*it).setLeaf(false);
+			nodetree.erase_children(it);
+			it = nodetree.begin();
+		
 		}
-		/* if node > start and anc[node] < start, push anc[node] up to start */
+		
+		/* if node > start and parent < start, push parent up to start */
 		/* and reparent anc[node] to be a child of root */
 		/* neither node nore anc[node] can be root */
-		else if (tmap[*it] > start && tmap[ancmap[*it]] < start && *it != 0 && ancmap[*it] != 0) {	
-			tmap[ancmap[*it]] = start;
-			bmap[ancmap[*it]] = 0;
-			jt = ctree.append_child(root);
-			ctree.move_ontop(jt, ctree.parent(it));
-			it = ctree.begin();
+		else if ((*it).getTime() > start && (*jt).getTime() < start && nodetree.depth(it) > 1) {	
+			(*jt).setTime( start );
+			(*jt).setLength( 0.0 );
+			Node tempNode(-1);
+			nodetree.move_ontop(nodetree.append_child(root,tempNode),jt);
+			it = nodetree.begin();
 		}
 		else {
     		it++;
@@ -544,20 +532,94 @@ void CoalescentTree::trimEnds(double start, double stop) {
     }
     
     /* second pass for nodes < start */
-    it = ctree.begin();
-	while(it!=ctree.end()) {	
-		if (tmap[*it] < start && *it != 0) {
-			it = ctree.erase(it);
+    it = nodetree.begin();
+    (*it).setTime(start);
+    (*it).setLength(0.0);
+	while(it != nodetree.end()) {	
+		if ((*it).getTime() < start && nodetree.depth(it) > 0) {
+			it = nodetree.erase(it);
 		}
 		else {
     		it++;
     	}
     }
-    tmap[0] = start;
                
 	/* update maps and other data accordingly */
 	reduce();
 		
+}
+
+/* Reduces tree to just the ancestors of a single slice in time */
+/* Used to calcuate diversity, TMRCA and Tajima's D at a particular time */
+void CoalescentTree::timeSlice(double slice) {
+
+	/* desire only nodes spanning the time slice */
+	/* find these nodes and add them and their ancestors to a set */
+	set<int> sliceset; 
+	tree<Node>::iterator it, jt;
+	it = nodetree.begin();
+	while(it != nodetree.end()) {	
+	
+		jt = nodetree.parent(it);
+	
+		/* if node > slice and parent < slice, erase children and prune node back to stop */
+		/* this pruning causes a leaf node to become an internal node */
+		if ((*it).getTime() > slice && (*jt).getTime() <= slice) {
+		
+			// adjusting node
+			(*it).setTime( slice );
+			(*it).setLength( (*it).getTime() - (*jt).getTime() );
+			(*it).setLeaf(true);
+			nodetree.erase_children(it);
+			
+			// move up tree adding nodes to sliceset
+			jt = it;
+			while (nodetree.is_valid(jt)) {
+				sliceset.insert( (*jt).getNumber() );
+				jt = ctree.parent(jt);
+			}
+			
+			it = nodetree.begin();
+		
+		}
+		
+		else {
+    		it++;
+    	}
+    	
+    }
+    
+	/* erase other nodes from the tree */
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		if (sliceset.end() == sliceset.find( (*it).getNumber() )) {
+			it = nodetree.erase(it);
+		}
+		else {
+    		it++;
+    	}
+    }    
+    
+    /* peel back trunk */
+	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+		if (nodetree.number_of_children(it) == 1) {	
+			jt = nodetree.child(it,0);
+			(*jt).setLength( (*jt).getLength() + (*it).getLength() );	
+			nodetree.reparent(nodetree.parent(it),it);				// push child node up to be sibling of node
+			nodetree.erase(it);										// erase node									
+			it = nodetree.begin();
+		}
+		else {
+			break;
+		}
+	}
+    
+	nodetree.move_after(nodetree.begin(),++nodetree.begin());
+	nodetree.erase(nodetree.begin());
+
+	reduce();
+
+
 }
 
 /* Print parentheses tree */
@@ -728,8 +790,9 @@ void CoalescentTree::printRuleList() {
 		}
 		it++;
 	}
-
+	
 	/* print leaf nodes */
+	/* a node may be a leaf on the current tree, but not a leaf on the original tree */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		if ((*it).getLeaf()) {
 			cout << (*it).getNumber() << " ";
@@ -763,115 +826,257 @@ void CoalescentTree::printRuleList() {
 	/* print mapping of nodes to coordinates */
   	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-		cout << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";
-		// count should only increase when a coalescent event occurs
-		if (nodetree.number_of_children(it) == 2) {	
-			count++;
-		}
+		cout << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
+		count++;
 	}
 	cout << endl;	
 	  	  	
 }
 
-/* print proportion of tree that can trace its history forward to present day samples */
-/* trunk traced back from the last 1/100 of the time width */
-void CoalescentTree::printTrunkRatio() { 
-
-	double totalLength = 0.0;
-	double trunkLength = 0.0;
+/* most recent node in tree, will always be a leaf */
+double CoalescentTree::getPresentTime() {
 	
-	set<int> trunk; 
-	tree<int>::iterator it, jt, end;
-
-	/* sum branch lengths */
-	for (int i=0; i<nodeCount; i++) {
-		totalLength += bmap[i];
+	double t = 0;
+	for (tree<Node>::leaf_iterator it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
+		if ((*it).getTime() > t) { 
+			t = (*it).getTime(); 
+		}
 	}
-	cout << "total tree length: " << totalLength << endl;
-		
-	/* move through trunk nodes and total branch lengths */
-	for ( set<int>::const_iterator is = trunkSet.begin(); is != trunkSet.end(); is++ ) {
-		trunkLength += bmap[*is];
-    }
-    
-    cout << "trunk length: " << trunkLength << endl;
-    cout << "ratio: " << trunkLength / totalLength << endl;
+	return t;
+
+}
+
+/* most ancient node in tree */
+double CoalescentTree::getRootTime() {
+	return (*nodetree.begin()).getTime();
+}
+
+/* amount of time it takes for all samples to coalesce */
+double CoalescentTree::getTMRCA() {
+	return getPresentTime() - getRootTime();
+}
+
+/* number of labels 1 to n */
+int CoalescentTree::getMaxLabel() {
+
+	double n = 0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
+		if ( (*it).getLabel() > n ) {
+			n = (*it).getLabel();
+		}
+	}	
+	return n;
+
+}
+
+/* total length of the tree */
+double CoalescentTree::getLength() {
+
+	double length = 0.0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
+		length += (*it).getLength();
+	}	
+	return length;
+
+}
+
+/* length of the tree with label l */
+double CoalescentTree::getLength(int l) {
+
+	double length = 0.0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
+		if ( (*it).getLabel() == l ) {
+			length += (*it).getLength();
+		}
+	}	
+	return length;
+
+}
+
+/* get proportion of tree with each label */
+vector<double> CoalescentTree::getLabelPro() { 
+
+	vector<double> labelPro;
+	
+	double totalLength = getLength();
+
+	for (int i = 1; i <= getMaxLabel(); i++) {
+		labelPro.push_back( getLength(i) / totalLength );
+	}
+	
+	return labelPro;
+	
+}
+
+/* proportion of tree that can trace its history forward to present day samples */
+/* trunk traced back from the last 1/100 of the time width */
+double CoalescentTree::getTrunkPro() { 
+
+	double totalLength = getLength();
+
+	double trunkLength = 0.0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
+		if ( (*it).getTrunk()) {
+			trunkLength += (*it).getLength();
+		}
+	}	
+	
+	return trunkLength / totalLength;
     	
 }
 
-/* print proportion of tree with each label */
-void CoalescentTree::printLabelPro() { 
+/* returns the count of coalescent events */
+int CoalescentTree::getCoalCount() {
 
-	/* calculation is to get the total length of each label */
+	/* count coalescent events, these are nodes with two children */
+	int count = 0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
+		if (nodetree.number_of_children(it) == 2) {		
+			count++;
+		}
+	}
+	return count;
+
+}
+
+/* returns the count of coalescent events with label */
+int CoalescentTree::getCoalCount(int l) {
+
+	/* count coalescent events, these are nodes with two children */
+	int count = 0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
+		if (nodetree.number_of_children(it) == 2 && (*it).getLabel() == l ) {		
+			count++;
+		}
+	}
+	return count;
+
+}
+
+/* returns the opportunity for coalescence over the whole tree */
+double CoalescentTree::getCoalOpp() {
+
+	// setting step to be 1/1000 of the total length of the tree
+	double start = getRootTime();
+	double stop = getPresentTime();
+	double step = (stop - start) / (double) 1000;
 	
-	double totalLength = 0.0;
-	map <int,double> labelLengths;
-	set<int>::const_iterator is;
-
-	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
-   
-		/* sum branch lengths */
-		/* have to go through tree structure, nodes can be non-consecutive */
-		double length = 0.0;
-		for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {
-			if (*is == lmap[*it]) {
-				length += bmap[*it];
+	// step through tree counting concurrent lineages
+	double opportunity = 0.0;
+	for (double t = start; t <= stop; t += step) {
+	
+		int lineages = 0;
+		tree<Node>::iterator it, jt;
+		for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+			jt = nodetree.parent(it);
+			if ( (*it).getTime() >= t && (*jt).getTime() < t) {		
+				lineages++;
 			}
 		}
-		totalLength += length;
-		labelLengths.insert( make_pair(*is,length ) );
 		
-	}
+		if (lineages > 0) {
+			opportunity += ( ( lineages * (lineages - 1) ) / 2 ) * step;
+		}
+		
+	}	
 	
-	for ( is=labelSet.begin(); is != labelSet.end(); is++ ) {
-		cout << labelLengths[*is] / totalLength << " ";
+	return opportunity;
+
+}
+
+/* returns the opportunity for coalescence for label */
+double CoalescentTree::getCoalOpp(int l) {
+
+	// setting step to be 1/1000 of the total length of the tree
+	double start = getRootTime();
+	double stop = getPresentTime();
+	double step = (stop - start) / (double) 1000;
+	
+	// step through tree counting concurrent lineages
+	double opportunity = 0.0;
+	for (double t = start; t <= stop; t += step) {
+	
+		int lineages = 0;
+		tree<Node>::iterator it, jt;
+		for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+			jt = nodetree.parent(it);
+			if ( (*it).getTime() >= t && (*jt).getTime() < t && (*it).getLabel() == l ) {		
+				lineages++;
+			}
+		}
+		
+		if (lineages > 0) {
+			opportunity += ( ( lineages * (lineages - 1) ) / 2 ) * step;
+		}
+		
+	}	
+	
+	return opportunity;
+
+}
+
+double CoalescentTree::getCoalRate() {
+	return getCoalCount() / getCoalOpp();
+}
+
+double CoalescentTree::getCoalRate(int l) {
+	return getCoalCount(l) / getCoalOpp(l);
+}
+
+/* get count of coalescent involving each label */
+vector<double> CoalescentTree::getLabelCoalCounts() { 
+
+	vector<double> counts;
+	for (int i = 1; i <= getMaxLabel(); i++) {
+		counts.push_back( getCoalCount(i) );
 	}
-	cout << endl;
+	return counts;
 	
 }
 
-/* get length of tree with each label */
-vector<double> CoalescentTree::getLabelLengths() { 
-	
-	vector<double> labelLengths;	
-	
-	for ( set<int>::const_iterator is = labelSet.begin(); is != labelSet.end(); is++ ) {
-   
-		/* sum branch lengths */
-		/* have to go through tree structure, nodes can be non-consecutive */
-		double length = 0.0;
-		for (tree<int>::iterator it = ctree.begin(); it != ctree.end(); it++ ) {
-			if (*is == lmap[*it]) {
-				length += bmap[*it];
-			}
-		}
-	
-		labelLengths.push_back(length);
-		
+/* get coalescent opportunity involving each label */
+vector<double> CoalescentTree::getLabelCoalOpp() { 
+
+	vector<double> opp;
+	for (int i = 1; i <= getMaxLabel(); i++) {
+		opp.push_back( getCoalOpp(i) );
 	}
-	
-	return labelLengths;
+	return opp;
 	
 }
 
-/* get proportion of tree with each label, works with Skyline object */
-vector<double> CoalescentTree::getLabelPro() { 
 
-	vector<double> labelLengths = getLabelLengths();
+/* return map of coalescent counts for each label */
+/* making it a double to talk better with LabelSummary */
+map<int,int> CoalescentTree::getCoalCounts() {
+
+	tree<int>::iterator it;
+	map<int,int> labelCounts;
 	
-	/* calculate total length */
-	double totalLength = 0.0;
-	for (int i = 0; i < labelLengths.size(); i++) {
-		totalLength += labelLengths[i];
+	/* go through tree and find end points */
+	double start, stop;
+	start = tmap[*ctree.begin()];
+	stop = tmap[*ctree.begin()];
+	for (it = ctree.begin(); it != ctree.end(); it++) {
+		if (start > tmap[*it]) {
+			start = tmap[*it];
+		}
+	}
+		
+	for ( set<int>::const_iterator lit = labelSet.begin(); lit != labelSet.end(); lit++ ) {
+		
+		labelCounts.insert(make_pair(*lit,0));
+				
+		/* count coalescent events, these are nodes with two children */
+		for (it = ctree.begin(); it != ctree.end(); it++) {
+			if (ctree.number_of_children(it) == 2 && lmap[*it] == *lit) {		
+				labelCounts[*lit]++;
+			}
+		}
+			
 	}
 	
-	/* divide by this length to get frequencies */
-	for (int i = 0; i < labelLengths.size(); i++) {
-		labelLengths[i] /= totalLength;
-	}
-	
-	return labelLengths;
-	
+	return labelCounts;
 }
 
 /* print total rate of migration across tree, measured as events/year */
@@ -916,7 +1121,6 @@ void CoalescentTree::printMigTotal() {
 	cout << count / totalLength << endl;
 	
 }
-
 
 /* print matrix of migration rates */
 void CoalescentTree::printMigRates() { 
@@ -976,7 +1180,6 @@ void CoalescentTree::printMigRates() {
 	cout << endl;
 	
 }
-
 
 map<int,double> CoalescentTree::getMigWeights() { 
 
@@ -1324,40 +1527,6 @@ map<int,double> CoalescentTree::getCoalWeights() {
 	
 	return labelWeights;
 }
-
-/* return map of coalescent counts for each label */
-/* making it a double to talk better with LabelSummary */
-map<int,int> CoalescentTree::getCoalCounts() {
-
-	tree<int>::iterator it;
-	map<int,int> labelCounts;
-	
-	/* go through tree and find end points */
-	double start, stop;
-	start = tmap[*ctree.begin()];
-	stop = tmap[*ctree.begin()];
-	for (it = ctree.begin(); it != ctree.end(); it++) {
-		if (start > tmap[*it]) {
-			start = tmap[*it];
-		}
-	}
-		
-	for ( set<int>::const_iterator lit = labelSet.begin(); lit != labelSet.end(); lit++ ) {
-		
-		labelCounts.insert(make_pair(*lit,0));
-				
-		/* count coalescent events, these are nodes with two children */
-		for (it = ctree.begin(); it != ctree.end(); it++) {
-			if (ctree.number_of_children(it) == 2 && lmap[*it] == *lit) {		
-				labelCounts[*lit]++;
-			}
-		}
-			
-	}
-	
-	return labelCounts;
-}
-
 
 
 set<int> CoalescentTree::getLabelSet() {

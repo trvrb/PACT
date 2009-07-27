@@ -20,38 +20,46 @@ public:
 	CoalescentTree(string);				// constructor, takes a parentheses string as input as well as an options string
 										// can only be "migrate" or "beast"
 
-	// SIMPLE STATISTICS
-	double getPresentTime();
-	double getRootTime();
-
 	// TREE MANIPULATION
+	void pushTimesBack(double);			// push dates to agree with a most recent sample date at t
+	void pushTimesBack(double,double);	// oldest sample and most recent sample	
 	void pruneToTrunk();				// reduces CoalescentTree object to trunk
 	void pruneToLabel(int);				// reduces CoalescentTree object to only include a particular set of tips
 	void trimEnds(double,double);		// reduces CoalescentTree object to only those nodes between
-										// time start and time stop
-//	TODO:	
-//	void timeSlice(double);				// reduces CoalescentTree to all the ancestors of time slice
+										// time start and time stop	
+	void timeSlice(double);				// reduces CoalescentTree to all the ancestors of time slice
 
 	
 	// TREE STRUCTURE
 	void printTree();					// print indented tree with coalescent times
-	void printParenTree();				// print parentheses tree
-										// only prints structure at the moment, no branch lengths or migration events
-	void printPaddedRuleList();			// ****** completely broken ******
-										// print tree in Mathematica suitable format
-										// padded with extra nodes at coalescent time points
-										// used with TreePlot
 	void printRuleList();				// print tree in Mathematica rule list format with times included
 										// used with Graphics primitives
-					
-					
-	// SUMMARY STATISTICS			
-	void printTrunkRatio();				// proportion of tree that can trace its history from present day samples
+
+	// BASIC STATISTICS
+	double getPresentTime();			// returns most recent time in tree
+	double getRootTime();				// returns most ancient time in tree
+	double getTMRCA();					// span of time in tree
+	int getMaxLabel();					// returns the highest label present
+	double getLength();					// return total tree length
+	double getLength(int);				// return length with this label
+
+	// LABEL STATISTICS		
+	vector<double> getLabelPro();		// proportion of tree with each label
+	double getTrunkPro();				// proportion of tree that can trace its history from present day samples
 	
-	void printLabelPro();				// print proportion of tree with each label
-	vector<double> getLabelPro();
-	vector<double> getLabelLengths();	
-	
+	// COALESCENT STATISTICS
+	int getCoalCount();					// total count of coalescent events on tree
+	int getCoalCount(int);				// count of coalescent events involving label on tree	
+	double getCoalOpp();				// total opportunity for coalescence on tree
+	double getCoalOpp(int);				// total opportunity for coalescence on tree
+	double getCoalRate();
+	double getCoalRate(int);
+	vector<double> getLabelCoalCounts();
+	vector<double> getLabelCoalOpp();	
+
+
+//	REVISE BELOW:
+		
 	void printMigTotal();				// print overall migration rate across tree 
 	void printMigRates();				// print list of posterior migration rates 
 	void printCoalRates();				// print list of coalescent rates for each label
@@ -81,8 +89,13 @@ public:
 	vector<double> getSkylineValue();	// go through skyline object and print medians
 																	
 	void setStepSize(double);			// sets the window at which to take parameter values
-	void pushTimesBack(double);			// push dates to agree with a most recent sample date at t
-	void pushTimesBack(double,double);
+
+	void printParenTree();				// print parentheses tree
+										// only prints structure at the moment, no branch lengths or migration events
+	void printPaddedRuleList();			// ****** completely broken ******
+										// print tree in Mathematica suitable format
+										// padded with extra nodes at coalescent time points
+										// used with TreePlot
 		
 private:
 	tree<int> ctree;					// coalescent tree, has n leaf nodes (labelled 1..n) and n-1 internal nodes
@@ -124,6 +137,8 @@ private:
 	// HELPER FUNCTIONS
 	tree<Node>::iterator findNode(int);			// return iterator to a Node in nodetree based upon matching number
 												// if not found, returns iterator to end of tree
+//	TODO:
+//	tree<Node>::iterator commonAncestor(tree<Node>::iterator,tree<Node>::iterator);
 	
 };
 
