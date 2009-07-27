@@ -150,7 +150,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 	// end when all parentheses have been eliminated
 	while (paren.at(0) == '(') {
 	
-//		cout << paren << endl;
+		cout << paren << endl;
 		
 		stringPos = 0;
 		leftNode = -1;
@@ -222,32 +222,18 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 					closeMig = stringPos; 
 				
 					migBranch = atof(thisString.c_str());
-				//	cout << tempN << " mig from " << from << " to " << to << ", at " << migBranch << endl;
-				
-					/* wrapping a new node */
-				//	tree<int>::iterator iterTo, iterFrom;
-				//	it = ctree.begin();
-				//	while(it!=end) {
-				//		if (*it == rightNode) { 
-				//			iterFrom = it; 
-				//			break;
-				//		}
-				//		it++;
-				//	}
-				//	iterTo = ctree.wrap(iterFrom,currentNode);
-					
-				//	lmap[currentNode] = to;
-				//	bmap[currentNode] = migBranch;
+					cout << tempN << " mig from " << from << " to " << to << ", at " << migBranch << endl;
+									
+					tree<Node>:: iterator iRight, iNew, iTemp; 
+					iRight = findNode(rightNode);	
+					(*iRight).setLength( rightLength - migBranch );
 		
-					/* this sometimes results in a negative branch length */
-					/* however, I'm fairly certain this is a problem with Migrate */
-					/* rather than a problem with my code */
-				//	bmap[rightNode] = bmap[rightNode] - migBranch;		// this places the migration event 
-																		// on the coalescent branch
-			
-				//	bmap[tempN] = bmap[tempN];					// this makes a new branch for the 
-																		// migration event 					
+					Node migNode(currentNode);
+					migNode.setLabel(to);
+					migNode.setLength(migBranch);
 					
+					iNew = nodetree.wrap(iRight,migNode);		
+							
 					/* replace parenthesis with new node label */	
 					/* code is set up to deal with the situation of two labels before a parenthesis */
 					stringstream out;
@@ -258,6 +244,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 					currentNode++;
 					nodeCount++;
 					iterStr=paren.begin();	// reset count
+							
 					break;
 				
 				}
@@ -270,16 +257,23 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 			
 			if (*iterStr == ')') { 
 				
+				cout << "close paren" << endl;
+				
 				closeParen = stringPos; 
 				
 				// iterate over the tree
 				// once right node is reached, append a new node
 				// append this new node with two branches (left node and right node)
-									
+				
+				cout << "leftNode: " << leftNode << endl;	
+				cout << "rightNode: " << rightNode << endl;					
+					
 				tree<Node>:: iterator iLeft, iRight, iNew, iTemp; 
 				iLeft = findNode(leftNode);
 				iRight = findNode(rightNode);	
-				
+
+				cout << "coal" << endl;
+
 				(*iLeft).setLength(leftLength);
 				(*iRight).setLength(rightLength);				
 				
@@ -288,7 +282,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 			
 				iNew = nodetree.wrap(iLeft,newNode);		
 				nodetree.move_after(iLeft,iRight);
-								
+				
 				/* replace parenthesis with new node label */		
 				stringstream out;
 				out << currentNode;
@@ -298,6 +292,7 @@ CoalescentTree::CoalescentTree(string paren, string options) {
 				currentNode++;
 				nodeCount++;
 				iterStr=paren.begin();	// reset count
+							
 				break;
 					
 				
