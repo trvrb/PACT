@@ -34,8 +34,8 @@ public:
 	void setTime(double);
 	void setLabel(int);
 	void setLeaf(bool);
-	void setTrunk(bool);	
-																		
+	void setTrunk(bool);
+																			
 private:
 	int number;						// number of node, must be unique
 	string name;					// name of node, doesn't have to exist

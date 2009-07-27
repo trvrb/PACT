@@ -74,10 +74,8 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
 //	double a = atof(argv[1]);
 //	double b = atof(argv[2]);
-//	cout << "a = " << a << endl;
-//	cout << "b = " << b << endl;	
-	
-	Skyline skl;
+		
+//	Skyline skl;
 	
 	string parenString;
 	ifstream inputFile ("trees.txt");
@@ -87,50 +85,17 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 			
 			if (parenString.size() > 1) {
 	
-				Measurement ms;
-				CoalescentTree ct(parenString, "migrate");
-		//		ct.pushTimesBack(2002,2007);
-				
-		//		ct.pruneToTrunk();
-			/*	
-				double step = 1;
-				for (double t = 2002; t <= 2007 - step; t += step ) {
-				
-					CoalescentTree temptree = ct;
-					temptree.trimEnds(t,t+step);
-					
-					ms.increment(temptree.getLabelPro());
-					
-					cout << t << " " << t + step << " ";
-					ms.print();
-					ms.clear();
-				
-				}
-			*/	
-
-		//		lsum.incrWeights(ct.getRevMigWeights());
-		//		lsum.incrCounts(ct.getRevMigCounts());
+		//		Measurement ms;
+				CoalescentTree ct(parenString);
+				ct.pushTimesBack(2002,2007);
 
 		//		ct.pruneToTrunk();					
-		//		ct.pruneToLabel(2);
+				ct.pruneToLabel(2);
 		//		ct.trimEnds(2003,2004);
 		
-				ct.printNodeTree();
-		//		ct.printRuleList();
-			
-		//		ct.printMigTotal();
-		//		ct.printMigRates();
-		//		ct.printCoalRates();
-		//		ct.printTrunkRates();
-
-		//		ct.printLabelProportions();
+				ct.printRuleList();
+		//		ct.printTree();
 		
-		//		lsum.printRates();
-		
-		//		ct.setStepSize(0.001);
-		//		ct.NeSkyline();
-		//		ct.labelSkyline(a);													
-		//		skl.appendIteration(ct.getSkylineIndex(),ct.getSkylineValue());
 			}
 			
 		}
@@ -138,9 +103,6 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 	}
 	else
 		cout << "Unable to open tree file, expecting trees.txt";
-
-
-//	skl.printMeans();
 	
 	return 0;
 }

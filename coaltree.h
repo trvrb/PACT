@@ -17,8 +17,12 @@ using std::vector;
 class CoalescentTree {
 
 public:
-	CoalescentTree(string,string);		// constructor, takes a parentheses string as input as well as an options string
+	CoalescentTree(string);				// constructor, takes a parentheses string as input as well as an options string
 										// can only be "migrate" or "beast"
+
+	// SIMPLE STATISTICS
+	double getPresentTime();
+	double getRootTime();
 
 	// TREE MANIPULATION
 	void pruneToTrunk();				// reduces CoalescentTree object to trunk
@@ -31,7 +35,6 @@ public:
 	
 	// TREE STRUCTURE
 	void printTree();					// print indented tree with coalescent times
-	void printNodeTree();
 	void printParenTree();				// print parentheses tree
 										// only prints structure at the moment, no branch lengths or migration events
 	void printPaddedRuleList();			// ****** completely broken ******
@@ -102,14 +105,13 @@ private:
 	
 	double presentTime;					// most recent time in the tree
 	double rootTime;					// most ancient time in the tree
-	double trunkTime;					// time back from mostRecentTime to consider nodes as part of the trunk
-										// defaults to 1/100 of mostRecentTime
+
 	double stepsize;					// length of time between samples of parameter values										
 	
 	vector<double> skylineindex;
 	vector<double> skylinevalue;
 	
-	void cleanup();						// goes through tree and removes cruft from maps and other data
+	void reduce();						// goes through tree and removes inconsequential nodes
 
 	void padTree();						// pads CoalescentTre with additional nodes at each coalescent event
 										// included mainly for compatibility with TreePlot
