@@ -118,6 +118,11 @@ private:
 										// returning a tree object, tmap still works with this object											
 	double getTreeLength(tree<int> &);	// takes a tree object and returns the total tree length, works with tmap
 	
+
+	// HELPER FUNCTIONS
+	tree<Node>::iterator findNode(int);			// return iterator to a Node in nodetree based upon matching number
+												// if not found, returns iterator to end of tree
+	
 };
 
 #endif

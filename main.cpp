@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 	
 				Measurement ms;
 				CoalescentTree ct(parenString, "migrate");
-				ct.pushTimesBack(2007);
+		//		ct.pushTimesBack(2002,2007);
 				
 		//		ct.pruneToTrunk();
 			/*	
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
-		//		ct.trimEnds(2002,2003);
+		//		ct.trimEnds(2003,2004);
 		
 				ct.printNodeTree();
 		//		ct.printRuleList();
