@@ -28,20 +28,27 @@ public:
 	void trimEnds(double,double);		// reduces CoalescentTree object to only those nodes between
 										// time start and time stop	
 	void timeSlice(double);				// reduces CoalescentTree to all the ancestors of time slice
+	void padTree();						// BROKEN
+										// pads CoalescentTre with additional nodes at each coalescent event
+										// included mainly for compatibility with TreePlot	
 
-	
 	// TREE STRUCTURE
 	void printTree();					// print indented tree with coalescent times
 	void printRuleList();				// print tree in Mathematica rule list format with times included
 										// used with Graphics primitives
+	void printParen();					// TODO: migration events
+										// print parentheses tree										
 
 	// BASIC STATISTICS
 	double getPresentTime();			// returns most recent time in tree
 	double getRootTime();				// returns most ancient time in tree
 	double getTMRCA();					// span of time in tree
+	
 	int getMaxLabel();					// returns the highest label present
+	
 	double getLength();					// return total tree length
 	double getLength(int);				// return length with this label
+	vector<double> getLengths();
 
 	// LABEL STATISTICS		
 	vector<double> getLabelPro();		// proportion of tree with each label
@@ -61,22 +68,12 @@ public:
 	// MIGRATION STATISTICS
 	int getMigCount();
 	int getMigCount(int,int);	
-	double getMigRate();
+	double getMigRate();				// normalized by 'from' length
 	double getMigRate(int,int);
+	vector<double> getMigRates();
 
 //	REVISE BELOW:
-		
-	void printMigTotal();				// print overall migration rate across tree 
-	void printMigRates();				// print list of posterior migration rates 
-	void printTrunkRates();				// print list of coalescent rates for each label 
-										// only considering coalescent events that include the trunk
-	map<int,double> getMigWeights();	// return map of forward migration weights for each label
-	map<int,int> getMigCounts();		// return map of forward migration counts for each label
-	map<int,double> getRevMigWeights();	// return map of backward migration weights for each label
-	map<int,int> getRevMigCounts();		// return map of backward migration counts for each label	
-
-	set<int> getLabelSet();				// returns labelSet
-																	
+																			
 	void NeSkyline();					// updates skyline with effective coalesent timescale Ne*tau
 	void subRateSkyline();				// updates skyline with substitution rate on phylogeny	
 										// takes mean rate across all concurrent lineages
@@ -91,13 +88,6 @@ public:
 	vector<double> getSkylineValue();	// go through skyline object and print medians
 																	
 	void setStepSize(double);			// sets the window at which to take parameter values
-
-	void printParenTree();				// print parentheses tree
-										// only prints structure at the moment, no branch lengths or migration events
-	void printPaddedRuleList();			// * completely broken *
-										// print tree in Mathematica suitable format
-										// padded with extra nodes at coalescent time points
-										// used with TreePlot
 		
 private:
 	tree<int> ctree;					// coalescent tree, has n leaf nodes (labelled 1..n) and n-1 internal nodes
@@ -127,16 +117,14 @@ private:
 	vector<double> skylinevalue;
 	
 	void reduce();						// goes through tree and removes inconsequential nodes
-
-	void padTree();						// pads CoalescentTre with additional nodes at each coalescent event
-										// included mainly for compatibility with TreePlot
-		
+	
 	tree<int> extractSubtree(set<int>);	// takes a set of node labels and walks up the coalescent tree
 										// returning a tree object, tmap still works with this object											
 	double getTreeLength(tree<int> &);	// takes a tree object and returns the total tree length, works with tmap
 	
 
 	// HELPER FUNCTIONS
+	int getMaxNumber();							// return larger number in tree
 	tree<Node>::iterator findNode(int);			// return iterator to a Node in nodetree based upon matching number
 												// if not found, returns iterator to end of tree
 //	TODO:

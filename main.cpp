@@ -91,16 +91,18 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2003,2004);
-		//		ct.timeSlice(5);
+		//		ct.timeSlice(5);		
+	
+				ct.printRuleList();
 		
-		//		ct.printRuleList();
-		//		ct.printTree();
+				Measurement mcoal;
+				mcoal.increment(ct.getCoalRates());
+				mcoal.print();
 		
-		//		Measurement ms;
-		//		ms.increment(ct.getCoalRates());
-		//		ms.print();
+				Measurement mmig;
+				mmig.increment(ct.getMigRates());
+				mmig.print();
 		
-				cout << ct.getMigRate(1,6) << endl;
 		
 			}
 			

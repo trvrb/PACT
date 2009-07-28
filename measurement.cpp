@@ -23,10 +23,18 @@ Measurement::Measurement() {
 
 void Measurement::print() {
 
-	for (int i = 0; i < n - 1; i++) {
-		cout << values[i] << " ";
+	if (n > 0) {
+
+		for (int i = 0; i < n - 1; i++) {
+			cout << values[i] << " ";
+		}
+		cout << values[n-1] << endl;
+	
 	}
-	cout << values[n-1] << endl;
+	
+	else {
+		cout << endl;
+	}
 
 }
 
