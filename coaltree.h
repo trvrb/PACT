@@ -43,7 +43,8 @@ public:
 	double getPresentTime();			// returns most recent time in tree
 	double getRootTime();				// returns most ancient time in tree
 	double getTMRCA();					// span of time in tree
-	int getMaxLabel();					// returns the highest label present	
+	int getMaxLabel();					// returns the highest label present
+	int getLeafCount();					// returns the count of leaf nodes in tree
 
 
 	// LABEL STATISTICS		
@@ -72,23 +73,14 @@ public:
 	vector<double> getMigRates();
 	
 	// DIVERSITY STATISTICS
+	double getDiversity();				// return mean of (2 * time to common ancestor) for every pair of leaf nodes
+	double getTajimaD();				// return D = pi - S/a1, where pi is diversity, S is the total tree length, 
+										// and a1 is a normalization factor
 
 //	REVISE BELOW:
 																			
-	void NeSkyline();					// updates skyline with effective coalesent timescale Ne*tau
-	void subRateSkyline();				// updates skyline with substitution rate on phylogeny	
-										// takes mean rate across all concurrent lineages
-	void divSkyline();					// updates skyline with diversity (pi) estimates
-	void tmrcaSkyline();				// updates skyline with TMRCA estimates	
 	void tajimaSkyline();				// updates skyline with estimates of Tajima's D
-	void tcSkyline();					// updates skyline with time for each sampled lineage to coalesce with phylogeny trunk
-	void labelSkyline(int);				// updates skyline with proportion of branches with label	
-										// takes mean proportion across all concurrent lineages									
-											
-	vector<double> getSkylineIndex();	// go through skyline object and print medians
-	vector<double> getSkylineValue();	// go through skyline object and print medians
-																	
-	void setStepSize(double);			// sets the window at which to take parameter values
+									
 		
 private:
 	tree<int> ctree;					// coalescent tree, has n leaf nodes (labelled 1..n) and n-1 internal nodes
@@ -117,7 +109,7 @@ private:
 	vector<double> skylineindex;
 	vector<double> skylinevalue;
 	
-	void reduce();						// goes through tree and removes inconsequential nodes
+
 	
 	tree<int> extractSubtree(set<int>);	// takes a set of node labels and walks up the coalescent tree
 										// returning a tree object, tmap still works with this object											
@@ -125,11 +117,12 @@ private:
 	
 
 	// HELPER FUNCTIONS
+	void reduce();								// goes through tree and removes inconsequential nodes	
 	int getMaxNumber();							// return larger number in tree
 	tree<Node>::iterator findNode(int);			// return iterator to a Node in nodetree based upon matching number
 												// if not found, returns iterator to end of tree
-//	TODO:
-//	tree<Node>::iterator commonAncestor(tree<Node>::iterator,tree<Node>::iterator);
+												
+	tree<Node>::iterator commonAncestor(tree<Node>::iterator,tree<Node>::iterator);
 	
 };
 

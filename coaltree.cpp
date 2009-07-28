@@ -22,8 +22,6 @@ Member function definitions for CoalescentTree class
 /* Takes NEWICK parentheses tree as string input */
 CoalescentTree::CoalescentTree(string paren) {
 
-	stepsize = 0.1;	
-	
 	string::iterator is;
 	tree<Node>:: iterator it, jt;
 
@@ -528,9 +526,11 @@ void CoalescentTree::timeSlice(double slice) {
 			break;
 		}
 	}
-    
+
+	// adjust root    
 	nodetree.move_after(nodetree.begin(),++nodetree.begin());
 	nodetree.erase(nodetree.begin());
+	(*nodetree.begin()).setLength(0.0);
 
 	reduce();
 
@@ -760,6 +760,19 @@ int CoalescentTree::getMaxLabel() {
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
 		if ( (*it).getLabel() > n ) {
 			n = (*it).getLabel();
+		}
+	}	
+	return n;
+
+}
+
+/* number of leaf nodes 1 to n */
+int CoalescentTree::getLeafCount() {
+
+	double n = 0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
+		if ( (*it).getLeaf() ) {
+			n++;
 		}
 	}	
 	return n;
@@ -1025,234 +1038,54 @@ vector<double> CoalescentTree::getMigRates() {
 	
 }
 
-/* Bayesian skyline for effective coalesent timescale Ne*tau */
-void CoalescentTree::NeSkyline() { 
+/* return mean of (2 * time to common ancestor) for every pair of leaf nodes */
+double CoalescentTree::getDiversity() {
 
-	vector<int> lineages (tlist.size());
-	tree<int>::iterator it, end;
-	it = ctree.begin();
-	end = ctree.end(); 		
-	int rootdepth=ctree.depth(it);
+	double div = 0.0;
+	int count = 0;
+
+	/* iterating over every pair of leaf nodes */
+	tree<Node>::leaf_iterator it, jt, kt;
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
+		for (jt = it; jt != nodetree.end_leaf(); jt++) {
+			if (it != jt) {
 	
-	while(it!=end) {
-		lineages.at(ctree.depth(it)-rootdepth)++;
-		it++;
+				/* find common ancestor and calculate time from it to jt via common ancestor */
+				kt = commonAncestor(it,jt);
+				div += ( (*it).getTime() - (*kt).getTime() ) + ( (*jt).getTime() - (*kt).getTime() );
+				count++;
+			
+			}
+		}
 	}
 	
-	int loc = ctree.max_depth();
-	double ne;
-	int count;
-	double step = stepsize;
-  	for( set<double>::const_iterator iter = tlist.begin(); iter != --tlist.end(); iter++ ) {
-  		double a = *iter;
-  		iter++;
-  		double b = *iter;
-  		iter--;
-  		if (a < b - 0.00000001) {
-  			if (lineages.at(loc-1) < lineages.at(loc))
-				ne = (b - a) * 0.5 * lineages.at(loc) * (lineages.at(loc) - 1);
-	//		cout << "{" << a << "," << b << "} " << lineages.at(loc) << " " << ne << endl;
-			while (step > a && step < b) {
-	//			cout << step << "\t" << ne << endl;
-				skylineindex.push_back(step);
-				skylinevalue.push_back(ne);
-				step += stepsize;
-			}
-	//		cout << step << "\t" << ne << endl;
-			skylineindex.push_back(step);
-			skylinevalue.push_back(ne);
-			step += stepsize;
-		}
-		loc--;
-    }
-    
+	div /= (double) count;
+	return div;
+	
 }
 
-/* Skyline for rate of substitution, take mean rate for concurrent lineages */
-void CoalescentTree::subRateSkyline() { 
+/* return D = pi - S/a1, where pi is diversity, S is the total tree length, and a1 is a normalization factor */
+/* expect D = 0 under neutrality */
+double CoalescentTree::getTajimaD() {
 
-	tree<int>::iterator it, jt, end;
-	vector<int> lineages (tlist.size());
-	vector<double> rates (tlist.size());	
-	it = ctree.end();
-	end = ctree.end(); 		
-	int rootdepth=ctree.depth(it);
-	
-	/* lineages contains a running tally of mean rate at this depth */
-	while(it!=ctree.begin()) {
-		lineages.at(ctree.depth(it)-rootdepth)++;
-		rates.at(ctree.depth(it)-rootdepth) += rmap[*it];
-//		cout << *it << " " << rmap[*it] << endl;
-		it--;
+	double div = getDiversity();
+	double S = getLength();
+
+	double a1 = 0.0;
+	double a2 = 0.0;	
+	int n = getLeafCount();
+	for (int i = 1; i < n; i++) {
+		a1 += 1 / (double) i;
+		a2 += 1 / (double) (i*i);		
 	}
-	
-	int loc = ctree.max_depth();
-	double rate;
-	int count;
-	double step = stepsize;
-  	for( set<double>::const_iterator iter = tlist.begin(); iter != --tlist.end(); iter++ ) {
-  		double a = *iter;
-  		iter++;
-  		double b = *iter;
-  		iter--;
-  		if (a < b - 0.00000001) {
-			rate = rates.at(loc) / lineages.at(loc);
-//			cout << "{" << a << "," << b << "} " << lineages.at(loc) << " " << rate << endl;
-			while (step > a && step < b) {
-//				cout << step << "\t" << rate << endl;
-				skylineindex.push_back(step);
-				skylinevalue.push_back(rate);
-				step += stepsize;
-			}
-//			cout << step << "\t" << rate << endl;
-			skylineindex.push_back(step);
-			skylinevalue.push_back(rate);
-			step += stepsize;
-		}
-		loc--;
-    }
-    
-}
+		
+	double e1 = (1.0/a1) * ((double)(n+1) / (3*(n-1)) - (1.0/a1));
+	double e2 = (1.0 / (a1*a1 + a2) ) * ( (double)(2*(n*n+n+3)) / (9*n*(n-1)) - (double)(n+2) / (n*a1) + a2/(a1*a1) );
+	double denom = sqrt(e1*S + e2*S*(S-1));
 
+	double tajima = (div - S/a1) / denom;	
+	return tajima;
 
-/* Skyline for diversity (pi) */
-/* At every event, take concurrent lineages and make all pairwise comparisons */
-/* calculating total distance separating samples, E[div] = 2 Ne*tau */
-void CoalescentTree::divSkyline() { 
-
-	/* have a vector[time points] of sets[node labels] */
-	tree<int>::iterator it, jt, end;
-	vector< set<int> > lineages (tlist.size());
-	it = ctree.end();
-	end = ctree.end(); 		
-	int rootdepth=ctree.depth(it);
-	
-	/* go through tree and add to set */
-	while(it!=ctree.begin()) {
-		(lineages.at(ctree.depth(it)-rootdepth)).insert(*it);
-		it--;
-	}
-	
-	int loc = ctree.max_depth();
-	double rate;
-	int count;
-	double step = stepsize;
-  	for( set<double>::const_iterator iter = tlist.begin(); iter != --tlist.end(); iter++ ) {
-  		set<int> nodes = lineages.at(loc);
-  		double a = *iter;
-  		iter++;
-  		double b = *iter;
-  		iter--;
-  		if (a < b - 0.00000001) {
-//			cout << "{" << a << "," << b << "} ";
-			int divn = 0;
-			double div = 0.0;
-			for( set<int>::const_iterator jter = nodes.begin(); jter != --nodes.end(); jter++ ) {
-				for( set<int>::const_iterator kter = jter; kter != nodes.end(); kter++ ) {
-					if (*jter < *kter) { 
-						set<int> s;
-						s.insert(*jter);
-						s.insert(*kter);
-						tree<int> st = extractSubtree(s);
-						divn++;
-						div += getTreeLength(st);
-					}
-				}
-			}
-			div /= divn;
-//			cout << div << endl;
-			while (step > a && step < b) {
-				skylineindex.push_back(step);
-				skylinevalue.push_back(div);
-				step += stepsize;
-			}
-			skylineindex.push_back(step);
-			skylinevalue.push_back(div);
-			step += stepsize;
-		}
-		loc--;
-    }
-   
-}
-
-/* Skyline for TMRCA */
-/* At every event, take concurrent lineages and roll back until they share a common ancestor */
-/* compare tmap of this common ancestor to the current time in phylogeny */
-void CoalescentTree::tmrcaSkyline() { 
-
-	/* have a vector[time points] of sets[node labels] */
-	tree<int>::iterator it, jt, end;
-	vector< set<int> > lineages (tlist.size());
-	it = ctree.end();
-	end = ctree.end(); 		
-	int rootdepth=ctree.depth(it);
-	
-	/* go through tree and add to set */
-	while(it!=ctree.begin()) {
-		(lineages.at(ctree.depth(it)-rootdepth)).insert(*it);
-		it--;
-	}
-	
-	int loc = ctree.max_depth();
-	double rate;
-	int count;
-	double step = stepsize;
-  	for( set<double>::const_iterator iter = tlist.begin(); iter != --tlist.end(); iter++ ) {
-  		set<int> nodes = lineages.at(loc);
-  		double a = *iter;
-  		iter++;
-  		double b = *iter;
-  		iter--;
-  		if (a < b - 0.00000001) {
-//			cout << "{" << a << "," << b << "} ";
-
-			// take each node and add all its ancestors to the sharedSet;
-			map<int,int> sharedMap;		// maps a node to its number of occurences
-			for( set<int>::iterator jter = nodes.begin(); jter != nodes.end(); jter++ ) {
-	
-				int n = *jter;
-				while (n != 0) {
-					sharedMap[n]++;
-					n = ancmap[n];
-				}
-			
-			}
-						
-			// go through sharedMap and find highest count	
-			int count = 0;	
-			for( map<int,int>::iterator jter = sharedMap.begin(); jter != sharedMap.end(); jter++ ) {
-				if ((*jter).second > count){
-					count = (*jter).second;
-				}
-			}
-				
-			// go through sharedMap and find most recent node with count matching highest count
-			double tmrca = tmap[0];			
-			for( map<int,int>::iterator jter = sharedMap.begin(); jter != sharedMap.end(); jter++ ) {
-				
-			//	cout << "node = " <<  (*jter).first << ", count = " << (*jter).second << endl;
-				
-				if (tmap[(*jter).first] < tmrca && (*jter).second == count) {
-					tmrca = tmap[(*jter).first];
-				}
-			
-			}
-			
-			// difference in time now and back to TMRCA
-			tmrca -= step;		
-			
-			while (step > a && step < b) {
-				skylineindex.push_back(step);
-				skylinevalue.push_back(tmrca);
-				step += stepsize;
-			}
-			skylineindex.push_back(step);
-			skylinevalue.push_back(tmrca);
-			step += stepsize;
-		}
-		loc--;
-    }
-   
 }
 
 
@@ -1337,129 +1170,6 @@ void CoalescentTree::tajimaSkyline() {
    
 }
 
-/* Skyline with time for each sampled lineage to coalesce with phylogeny trunk */
-/* only looks at samples, not full tree */
-void CoalescentTree::tcSkyline() { 
-
-	tree<int>::iterator it, jt, end;
-	it = ctree.begin();
-	end = ctree.end(); 
-
-	int steps = ceil(tmap[0] / stepsize);
-	vector<int> counts (steps);
-	vector<double> tc (steps);
-	
-	for (double i = 0.0; i <= tmap[0]; i+=stepsize) {
-		skylineindex.push_back(i);
-	}
-	
-	while(it!=ctree.end()) {
-		if (leafSet.end() != leafSet.find(*it)) {
-			
-			jt = it;
-			while (trunkSet.end() == trunkSet.find(*jt)) {
-				jt = ctree.parent(jt);
-			}
-	//		cout << tmap[*it] << " " << tmap[*jt] - tmap[*it] << endl;
-			counts.at( floor(tmap[*it] / stepsize + 0.5) )++;
-			tc.at( floor(tmap[*it] / stepsize + 0.5) ) += tmap[*jt] - tmap[*it];
-			
-		}
-		it++;
-	}
-    
-    for (int i = 0; i < steps; i++) {
-    	skylinevalue.push_back( tc[i] / counts[i] );
-	}
-		
-	
-}
-
-/* Skyline for proportion with a particular label, take mean proportion for concurrent lineages */
-void CoalescentTree::labelSkyline(int label) { 
-
-	tree<int>::iterator it, jt, end;
-	vector<int> lineages (tlist.size());
-	vector<double> proportions (tlist.size());	
-	it = ctree.end();
-	end = ctree.end(); 		
-	int rootdepth=ctree.depth(it);
-	
-	/* lineages contains a running tally of mean rate at this depth */
-	while(it!=ctree.begin()) {
-		lineages.at(ctree.depth(it)-rootdepth)++;
-		if (lmap[*it] == label)
-			proportions.at(ctree.depth(it)-rootdepth) += 1;
-//		cout << *it << " " << rmap[*it] << endl;
-		it--;
-	}
-	
-	int loc = ctree.max_depth();
-	double proportion;
-	int count;
-	double step = stepsize;
-	
-  	for( set<double>::const_iterator iter = tlist.begin(); iter != --tlist.end(); iter++ ) {
-  		double a = *iter;
-  		iter++;
-  		double b = *iter;
-  		iter--;
-  		if (a < b - 0.00000001) {
-			proportion = proportions.at(loc) / lineages.at(loc);
-//			cout << "loc = " << loc << endl;
-//			cout << "{" << a << "," << b << "} " << lineages.at(loc) << " " << proportion << endl;
-			while (step > a && step < b) {
-//				cout << step << "\t" << proportion << endl;
-				skylineindex.push_back(step);
-				skylinevalue.push_back(proportion);
-				step += stepsize;
-			}
-//			cout << step << "\t" << proportion << endl;
-			skylineindex.push_back(step);
-			skylinevalue.push_back(proportion);
-			step += stepsize;
-		}
-		if (loc == 0)
-			break;
-		else
-			loc--;
-    }
-    
-}
-
-vector<double> CoalescentTree::getSkylineIndex() {   
-    return skylineindex;
-}
-
-vector<double> CoalescentTree::getSkylineValue() {   
-    return skylinevalue;
-}
-
-void CoalescentTree::setStepSize(double ss) {
-	stepsize = ss;
-}
-
-/* removes cruft from maps and other data, based on current nodes in tree */
-void CoalescentTree::reduce() {
-
-	tree<Node>::iterator it, jt;
-
-	/* removing pointless nodes, ie nodes that have no coalecent
-	events or migration events associated with them */
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
-		if (nodetree.number_of_children(it) == 1) {						// no coalescence
-			jt = nodetree.child(it,0);
-			if ( (*it).getLabel() == (*jt).getLabel() ) {				// no migration
-//				cout << "it = " << *it << ", jt = " << *jt << endl;
-				(*jt).setLength( (*jt).getLength() + (*it).getLength() );	
- 				nodetree.reparent(nodetree.parent(it),it);				// push child node up to be sibling of node
- 				nodetree.erase(it);										// erase node									
-				it = nodetree.begin();
-			}
-		}
-	}
-
-}
 
 tree<int> CoalescentTree::extractSubtree(set<int> subset) {
 
@@ -1538,6 +1248,28 @@ double CoalescentTree::getTreeLength(tree<int> &tr) {
 
 }
 
+/* removes cruft from maps and other data, based on current nodes in tree */
+void CoalescentTree::reduce() {
+
+	tree<Node>::iterator it, jt;
+
+	/* removing pointless nodes, ie nodes that have no coalecent
+	events or migration events associated with them */
+	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+		if (nodetree.number_of_children(it) == 1) {						// no coalescence
+			jt = nodetree.child(it,0);
+			if ( (*it).getLabel() == (*jt).getLabel() ) {				// no migration
+//				cout << "it = " << *it << ", jt = " << *jt << endl;
+				(*jt).setLength( (*jt).getLength() + (*it).getLength() );	
+ 				nodetree.reparent(nodetree.parent(it),it);				// push child node up to be sibling of node
+ 				nodetree.erase(it);										// erase node									
+				it = nodetree.begin();
+			}
+		}
+	}
+
+}
+
 /* returns maximium node associated with a node in the tree */
 int CoalescentTree::getMaxNumber() {
 
@@ -1565,3 +1297,33 @@ tree<Node>::iterator CoalescentTree::findNode(int n) {
 	
 }
 
+/* given two iterators, returns an iterator to their most recent common ancestor */
+tree<Node>::iterator CoalescentTree::commonAncestor(tree<Node>::iterator ia, tree<Node>::iterator ib) {
+
+	/* make a set */
+	set<int> nodeSet;
+	
+	/* walk down from first node to root, appending to nodeSet */
+	tree<Node>::iterator it;
+	it = ia;
+	while (nodetree.is_valid(it)) {
+		nodeSet.insert( (*it).getNumber() );
+		it = ctree.parent(it);
+	}
+	
+	/* walk down from second node, stopping when a member of nodeSet is encountered */
+	it = ib;	
+	while (nodetree.is_valid(it)) {
+		if (nodeSet.end() == nodeSet.find( (*it).getNumber() )) {
+			it = ctree.parent(it);
+		}
+		else {
+			break;
+		}
+	}
+
+//	cout << "a = " << (*ia).getNumber() << ", b = " << (*ib).getNumber() << ", anc = " << (*it).getNumber() << endl;
+	
+	return it;
+	
+}

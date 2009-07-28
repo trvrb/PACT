@@ -91,8 +91,11 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2003,2004);
-		//		ct.timeSlice(5);		
+				ct.timeSlice(2004);
 	
+				cout << ct.getTajimaD() << endl;
+	
+		/*	
 				ct.printRuleList();
 		
 				Measurement mcoal;
@@ -102,7 +105,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				Measurement mmig;
 				mmig.increment(ct.getMigRates());
 				mmig.print();
-		
+		*/
 		
 			}
 			
