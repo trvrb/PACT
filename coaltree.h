@@ -43,14 +43,13 @@ public:
 	double getPresentTime();			// returns most recent time in tree
 	double getRootTime();				// returns most ancient time in tree
 	double getTMRCA();					// span of time in tree
-	
-	int getMaxLabel();					// returns the highest label present
-	
-	double getLength();					// return total tree length
-	double getLength(int);				// return length with this label
-	vector<double> getLengths();
+	int getMaxLabel();					// returns the highest label present	
+
 
 	// LABEL STATISTICS		
+	double getLength();					// return total tree length
+	double getLength(int);				// return length with this label
+	vector<double> getLengths();	
 	vector<double> getLabelPro();		// proportion of tree with each label
 	double getTrunkPro();				// proportion of tree that can trace its history from present day samples
 	
@@ -71,6 +70,8 @@ public:
 	double getMigRate();				// normalized by 'from' length
 	double getMigRate(int,int);
 	vector<double> getMigRates();
+	
+	// DIVERSITY STATISTICS
 
 //	REVISE BELOW:
 																			
