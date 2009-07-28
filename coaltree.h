@@ -29,7 +29,7 @@ public:
 											// time start and time stop	
 	void section(double,double,double);		// break tree up into section
 	void timeSlice(double);					// reduces CoalescentTree to all the ancestors of time slice
-	void padTree();							// BROKEN
+	void padTree();							// TODO: fix this
 											// pads CoalescentTre with additional nodes at each coalescent event
 											// included mainly for compatibility with TreePlot	
 
@@ -83,13 +83,13 @@ public:
 	double getTajimaD();					// return D = pi - S/a1, where pi is diversity, S is the total tree length, 
 											// and a1 is a normalization factor
 									
-		
 private:
 	tree<Node> nodetree;					// linked tree containing Node objects		
 										
 	// HELPER FUNCTIONS
 	void reduce();							// goes through tree and removes inconsequential nodes	
 	int getMaxNumber();						// return larger number in tree
+//	void renumber(int);						// renumbers tree in preorder traversal starting from int	
 	tree<Node>::iterator findNode(int);		// return iterator to a Node in nodetree based upon matching number
 											// if not found, returns iterator to end of tree
 												

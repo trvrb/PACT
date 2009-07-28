@@ -16,8 +16,6 @@ Member function definitions for CoalescentTree class
 #include <cmath>
 #include <sstream>
 
-#define INF pow(double(10),double(100)) // 10^100 (~infinity)
-
 /* Constructor function to initialize private data */
 /* Takes NEWICK parentheses tree as string input */
 CoalescentTree::CoalescentTree(string paren) {
@@ -109,10 +107,9 @@ CoalescentTree::CoalescentTree(string paren) {
 		
 	// STARTING TREE /////////////////
 	// construct starting point for tree (multifurcation from root)
-	Node root(0);
-	nodetree.set_head(root);
-	for(int i = 0; i < tipsList.size(); i++) {
-		nodetree.insert_after(nodetree.begin(), tipsList[i]);
+	it = nodetree.set_head(tipsList[0]);
+	for(int i = 1; i < tipsList.size(); i++) {
+		it = nodetree.insert_after(it, tipsList[i]);
    	}
   	
   	// CONSTRUCT TREE /////////////////////
@@ -253,11 +250,7 @@ CoalescentTree::CoalescentTree(string paren) {
 		}
 	
 	}
-	
-	
-	// removing null root and replacing node label of root with 0						
-	nodetree.erase(findNode(0));
-	(*nodetree.begin()).setNumber(0);
+		
 	
 	// adding branch length to the parent node's time to get the node's time
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
@@ -279,14 +272,14 @@ CoalescentTree::CoalescentTree(string paren) {
 		if ((*it).getTime() > presentTime - trunkTime) {
 			jt = it;
 			/* move up tree adding nodes to trunk set */
-			while ((*jt).getNumber() != 0) {
+			while (nodetree.is_valid(jt)) {
 				(*jt).setTrunk(true);
 				jt = nodetree.parent(jt);
 			}
 		}
 		it++;
 	}
-
+	
 }
 
 /* push dates to agree with a most recent sample date at endTime */
@@ -414,35 +407,43 @@ from  ------			 	to	--
 void CoalescentTree::trimEnds(double start, double stop) {
 		
 	/* erase nodes from the tree where neither the node nor its parent are between start and stop */
-	tree<Node>::iterator it, root, jt;
+	tree<Node>::iterator it, jt;
 	it = nodetree.begin();
-	root = nodetree.begin();
 	while(it != nodetree.end()) {	
 	
 		jt = nodetree.parent(it);
 	
-		/* if node > stop and parent < stop, erase children and prune node back to stop */
-		/* this pruning causes a leaf node to become an internal node */
-		if ((*it).getTime() > stop && (*jt).getTime() <= stop) {
-		
-			(*it).setTime( stop );
-			(*it).setLength( (*it).getTime() - (*jt).getTime() );
-			(*it).setLeaf(false);
-			nodetree.erase_children(it);
-			it = nodetree.begin();
+		if (nodetree.is_valid(jt)) {
+	
+			/* if node > stop and parent < stop, erase children and prune node back to stop */
+			/* this pruning causes a leaf node to become an internal node */
+			if ((*it).getTime() > stop && (*jt).getTime() <= stop) {
+			
+				(*it).setTime( stop );
+				(*it).setLength( (*it).getTime() - (*jt).getTime() );
+				(*it).setLeaf(false);
+				nodetree.erase_children(it);
+				it = nodetree.begin();
+			
+			}
+			
+			/* if node > start and parent < start, push parent up to start */
+			/* and reparent anc[node] to be a child of root */
+			/* neither node nore anc[node] can be root */
+			else if ((*it).getTime() > start && (*jt).getTime() < start && nodetree.depth(it) > 1) {	
+				(*jt).setTime( start );
+				(*jt).setLength( 0.0 );
+				Node tempNode(-1);
+				nodetree.move_ontop(nodetree.append_child(nodetree.begin(),tempNode),jt);
+				it = nodetree.begin();
+			}
+			
+			else {
+				it++;
+			}
 		
 		}
 		
-		/* if node > start and parent < start, push parent up to start */
-		/* and reparent anc[node] to be a child of root */
-		/* neither node nore anc[node] can be root */
-		else if ((*it).getTime() > start && (*jt).getTime() < start && nodetree.depth(it) > 1) {	
-			(*jt).setTime( start );
-			(*jt).setLength( 0.0 );
-			Node tempNode(-1);
-			nodetree.move_ontop(nodetree.append_child(root,tempNode),jt);
-			it = nodetree.begin();
-		}
 		else {
     		it++;
     	}
@@ -475,19 +476,19 @@ void CoalescentTree::section(double start, double window, double step) {
 	tree<Node> newtree;
 	Node tempNode(-1);
 	
-	trimEnds(2002,2002.1);
+	trimEnds(2002,2002.05);
 	newtree.set_head(tempNode);
 	it = newtree.begin();
 	jt = nodetree.begin();
-	(*jt).setNumber(-1);
+//	(*jt).setNumber(-1);
 	newtree.replace(it,jt);
 	
 	nodetree = holdtree;
-	trimEnds(2005,2005.1);	
+	trimEnds(2005,2005.05);	
 	newtree.insert(newtree.begin(),tempNode);
 	it = newtree.begin();	
 	jt = nodetree.begin();
-	(*jt).setNumber(-2);	
+//	(*jt).setNumber(-2);	
 	newtree.replace(it,jt);	
 	
 	nodetree = newtree;

@@ -66,9 +66,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
 //	double a = atof(argv[1]);
 //	double b = atof(argv[2]);
-		
-//	Skyline skl;
-	
+			
 	string parenString;
 	ifstream inputFile ("trees.txt");
 	if (inputFile.is_open()) {
@@ -82,16 +80,16 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
-		//		ct.trimEnds(2003,2004);
-		//		ct.timeSlice(2004);
-				ct.section(2002,0.25,1);
+		//		ct.trimEnds(2003,2003.25);
+				ct.timeSlice(2004);
+		//		ct.section(2002,0.25,1);
 	
 		//		ct.printTree();
 	
 			
 				ct.printRuleList();
 		
-		/*
+		
 				Measurement mcoal;
 				mcoal.increment(ct.getCoalRates());
 				mcoal.print();
@@ -99,7 +97,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				Measurement mmig;
 				mmig.increment(ct.getMigRates());
 				mmig.print();
-		*/
+		
 		
 			}
 			
