@@ -471,28 +471,38 @@ void CoalescentTree::trimEnds(double start, double stop) {
 void CoalescentTree::section(double start, double window, double step) {
 
 	tree<Node>::iterator it, jt;
-
 	tree<Node> holdtree = nodetree;
-	tree<Node> newtree;
-	Node tempNode(-1);
-	
-	trimEnds(2002,2002.05);
-	newtree.set_head(tempNode);
-	it = newtree.begin();
-	jt = nodetree.begin();
-//	(*jt).setNumber(-1);
-	newtree.replace(it,jt);
-	
-	nodetree = holdtree;
-	trimEnds(2005,2005.05);	
-	newtree.insert(newtree.begin(),tempNode);
-	it = newtree.begin();	
-	jt = nodetree.begin();
-//	(*jt).setNumber(-2);	
-	newtree.replace(it,jt);	
-	
-	nodetree = newtree;
+	int current = 1;
 
+	double rootTime = getRootTime();
+	double presentTime = getPresentTime();
+
+	/* newtree holds the growing tree structure */
+	tree<Node> newtree;
+	Node tempNode(-1);	
+	newtree.set_head(tempNode);
+
+	/* move window forward in time, make sure there are nodes in this window */
+	for (double t = start; t < presentTime; t += step) {
+		if (t > rootTime) {
+		
+			// operations all affect nodetree
+			nodetree = holdtree;
+			trimEnds(t,t + window);	
+			current = renumber(current);			// need unique node numbers
+			
+			it = newtree.begin();
+			jt = nodetree.begin();	
+			newtree.replace(it,jt);			
+		
+			newtree.insert(newtree.begin(),tempNode);
+			
+		}
+	}
+
+	newtree.erase(newtree.begin());
+	nodetree = newtree;
+	
 }
 
 /* Reduces tree to just the ancestors of a single slice in time */
@@ -547,7 +557,7 @@ void CoalescentTree::timeSlice(double slice) {
     }    
     
     /* peel back trunk */
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
 		if ( nodetree.is_valid(jt) && nodetree.number_of_children(it) == 1) {	
 			kt = nodetree.child(it,0);
@@ -708,6 +718,9 @@ void CoalescentTree::printRuleList() {
 	/* print mapping of nodes to coordinates */
   	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+		if (nodetree.depth(it) == 0) {
+			count = 0;
+		}
 		cout << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
 		count++;
 	}
@@ -1249,6 +1262,17 @@ int CoalescentTree::getMaxNumber() {
 		if ((*it).getNumber() > n) {
 			n = (*it).getNumber();
 		}
+	}
+	return n;
+
+}
+
+/* renumber tree via preorder traversal starting from n */
+int CoalescentTree::renumber(int n) {
+
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
+		(*it).setNumber(n);
+		n++;
 	}
 	return n;
 

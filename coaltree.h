@@ -89,7 +89,8 @@ private:
 	// HELPER FUNCTIONS
 	void reduce();							// goes through tree and removes inconsequential nodes	
 	int getMaxNumber();						// return larger number in tree
-//	void renumber(int);						// renumbers tree in preorder traversal starting from int	
+	int renumber(int);						// renumbers tree in preorder traversal starting from int 
+											// returning 1 greater than the max in the tree
 	tree<Node>::iterator findNode(int);		// return iterator to a Node in nodetree based upon matching number
 											// if not found, returns iterator to end of tree
 												

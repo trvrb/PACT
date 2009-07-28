@@ -80,15 +80,14 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
-		//		ct.trimEnds(2003,2003.25);
-				ct.timeSlice(2004);
-		//		ct.section(2002,0.25,1);
+				ct.trimEnds(2003,2007);
+		//		ct.timeSlice(2004);
+		//		ct.section(2002,1,1);
 	
 		//		ct.printTree();
 	
 			
 				ct.printRuleList();
-		
 		
 				Measurement mcoal;
 				mcoal.increment(ct.getCoalRates());
