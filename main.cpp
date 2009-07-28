@@ -62,14 +62,6 @@ using namespace std;
 #include "series.h"
 #include "series.cpp"
 
-// Soon to be deprecated
-#include "lsum.h"
-#include "lsum.cpp"
-#include "skyline.h"
-#include "skyline.cpp"
-
-#define INF pow(double(10),double(100)) // 10^100 (~infinity)
-
 int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
 //	double a = atof(argv[1]);
@@ -90,12 +82,12 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
-		//		ct.trimEnds(2003,2004);
-				ct.timeSlice(2004);
+				ct.trimEnds(2003,2004);
+		//		ct.timeSlice(2004);
 	
-				cout << ct.getTajimaD() << endl;
+		//		cout << ct.getFst() << endl;
 	
-		/*	
+			
 				ct.printRuleList();
 		
 				Measurement mcoal;
@@ -105,7 +97,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				Measurement mmig;
 				mmig.increment(ct.getMigRates());
 				mmig.print();
-		*/
+		
 		
 			}
 			

@@ -268,7 +268,7 @@ CoalescentTree::CoalescentTree(string paren) {
 	  			
 	/* go through tree and append to trunk set */
 	/* only the last 1/100 of the time span is considered */
-	presentTime = getPresentTime();
+	double presentTime = getPresentTime();
 	double trunkTime = presentTime / (double) 100;
 	it = nodetree.begin();
 	(*it).setTrunk(true);
@@ -304,7 +304,7 @@ void CoalescentTree::pushTimesBack(double endTime) {
 void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 	
 	tree<Node>::iterator it, jt;
-	presentTime = getPresentTime();
+	double presentTime = getPresentTime();
 	
 	// STRETCH OR SHRINK //////////////	 
 		 
@@ -377,7 +377,7 @@ void CoalescentTree::pruneToLabel(int label) {
 			jt = it;
 			while (nodetree.is_valid(jt)) {
 				labelset.insert( (*jt).getNumber() );
-				jt = ctree.parent(jt);
+				jt = nodetree.parent(jt);
 			}
 		
 		}
@@ -489,7 +489,7 @@ void CoalescentTree::timeSlice(double slice) {
 			jt = it;
 			while (nodetree.is_valid(jt)) {
 				sliceset.insert( (*jt).getNumber() );
-				jt = ctree.parent(jt);
+				jt = nodetree.parent(jt);
 			}
 			
 			it = nodetree.begin();
@@ -766,7 +766,7 @@ int CoalescentTree::getMaxLabel() {
 
 }
 
-/* number of leaf nodes 1 to n */
+/* number of leaf nodes */
 int CoalescentTree::getLeafCount() {
 
 	double n = 0;
@@ -777,6 +777,11 @@ int CoalescentTree::getLeafCount() {
 	}	
 	return n;
 
+}
+
+/* total number of nodes */
+int CoalescentTree::getNodeCount() {
+	return nodetree.size();
 }
 
 /* total length of the tree */
@@ -1064,6 +1069,94 @@ double CoalescentTree::getDiversity() {
 	
 }
 
+/* return mean of (2 * time to common ancestor) for pairs of leaf nodes with labels a and b */
+double CoalescentTree::getDiversity(int l) {
+
+	double div = 0.0;
+	int count = 0;
+
+	/* iterating over every pair of leaf nodes */
+	tree<Node>::leaf_iterator it, jt, kt;
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
+		for (jt = it; jt != nodetree.end_leaf(); jt++) {
+			if (it != jt && (*it).getLabel() == l && (*jt).getLabel() == l ) {
+	
+				/* find common ancestor and calculate time from it to jt via common ancestor */
+				kt = commonAncestor(it,jt);
+				div += ( (*it).getTime() - (*kt).getTime() ) + ( (*jt).getTime() - (*kt).getTime() );
+				count++;
+			
+			}
+		}
+	}
+	
+	div /= (double) count;
+	return div;
+	
+}
+
+/* return mean of (2 * time to common ancestor) for pairs of leaf nodes with identical labels */
+double CoalescentTree::getDiversityWithin() {
+
+	double div = 0.0;
+	int count = 0;
+
+	/* iterating over every pair of leaf nodes */
+	tree<Node>::leaf_iterator it, jt, kt;
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
+		for (jt = it; jt != nodetree.end_leaf(); jt++) {
+			if (it != jt && (*it).getLabel() == (*jt).getLabel() ) {
+	
+				/* find common ancestor and calculate time from it to jt via common ancestor */
+				kt = commonAncestor(it,jt);
+				div += ( (*it).getTime() - (*kt).getTime() ) + ( (*jt).getTime() - (*kt).getTime() );
+				count++;
+			
+			}
+		}
+	}
+	
+	div /= (double) count;
+	return div;
+	
+}
+
+/* return mean of (2 * time to common ancestor) for pairs of leaf nodes with different labels */
+double CoalescentTree::getDiversityBetween() {
+
+	double div = 0.0;
+	int count = 0;
+
+	/* iterating over every pair of leaf nodes */
+	tree<Node>::leaf_iterator it, jt, kt;
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
+		for (jt = it; jt != nodetree.end_leaf(); jt++) {
+			if (it != jt && (*it).getLabel() != (*jt).getLabel() ) {
+	
+				/* find common ancestor and calculate time from it to jt via common ancestor */
+				kt = commonAncestor(it,jt);
+				div += ( (*it).getTime() - (*kt).getTime() ) + ( (*jt).getTime() - (*kt).getTime() );
+				count++;
+			
+			}
+		}
+	}
+	
+	div /= (double) count;
+	return div;
+	
+}
+
+/* returns population subdivision Fst = (divBetween - divWithin) / divBetween */
+double CoalescentTree::getFst() {
+
+	double divWithin = getDiversityWithin();
+	double divBetween = getDiversityBetween();
+	double fst = (divBetween - divWithin) / divBetween;
+	return fst;
+
+}
+
 /* return D = pi - S/a1, where pi is diversity, S is the total tree length, and a1 is a normalization factor */
 /* expect D = 0 under neutrality */
 double CoalescentTree::getTajimaD() {
@@ -1088,165 +1181,6 @@ double CoalescentTree::getTajimaD() {
 
 }
 
-
-/* Skyline for segregating site (S/a1) */
-/* At every event, take concurrent lineages and calculate total tree length */
-/* a1 = sum 1 through n-1 of 1/i */
-void CoalescentTree::tajimaSkyline() { 
-
-	/* have a vector[time points] of sets[node labels] */
-	tree<int>::iterator it, jt, end;
-	vector< set<int> > lineages (tlist.size());
-	it = ctree.end();
-	end = ctree.end(); 		
-	int rootdepth=ctree.depth(it);
-	
-	/* go through tree and add to set */
-	while(it!=ctree.begin()) {
-		(lineages.at(ctree.depth(it)-rootdepth)).insert(*it);
-		it--;
-	}
-	
-	int loc = ctree.max_depth();
-	double rate;
-	int count;
-	double step = stepsize;
-  	for( set<double>::const_iterator iter = tlist.begin(); iter != --tlist.end(); iter++ ) {
-  		set<int> nodes = lineages.at(loc);
-  		double a = *iter;
-  		iter++;
-  		double b = *iter;
-  		iter--;
-  		if (a < b - 0.00000001) {
-	//		cout << "{" << a << "," << b << "} ";
-			int divn = 0;
-			double div = 0.0;
-			for( set<int>::const_iterator jter = nodes.begin(); jter != --nodes.end(); jter++ ) {
-				for( set<int>::const_iterator kter = jter; kter != nodes.end(); kter++ ) {
-					if (*jter < *kter) { 
-						set<int> s;
-						s.insert(*jter);
-						s.insert(*kter);
-						tree<int> st = extractSubtree(s);
-						divn++;
-						div += getTreeLength(st);
-					}
-				}
-			}
-			div /= divn;
-			
-			double treeS;
-			double a1 = 0.0;
-			double a2 = 0.0;
-			int n = nodes.size();
-			tree<int> st = extractSubtree(nodes);
-			treeS = getTreeLength(st);
-			for (int i = 1; i < n; i++) {
-				a1 += 1.0/i;
-				a2 += 1.0/(i*i);
-			}
-	//		cout << " " << treeS << " " << a1 << " " << treeS/a1 << endl;
-			
-			double e1 = (1.0/a1) * ((double)(n+1) / (3*(n-1)) - (1.0/a1));
-			double e2 = (1.0 / (a1*a1 + a2) ) * ( (double)(2*(n*n+n+3)) / (9*n*(n-1)) - (double)(n+2) / (n*a1) + a2/(a1*a1) );
-			double denom = sqrt(e1*treeS + e2*treeS*(treeS-1));
-			double tajima = (div - treeS / a1) / denom;
-			
-	//		double tajima = div - treeS / a1;
-			
-	//		cout << "a1: " << a1 << " a2: " << a2 << " e1: " << e1 << " e2: " << e2 << " denom: " << denom << " D: " << tajima << endl;
-			
-			while (step > a && step < b) {
-				skylineindex.push_back(step);
-				skylinevalue.push_back(tajima);
-				step += stepsize;
-			}
-			skylineindex.push_back(step);
-			skylinevalue.push_back(tajima);
-			step += stepsize;
-		}
-		loc--;
-    }
-   
-}
-
-
-tree<int> CoalescentTree::extractSubtree(set<int> subset) {
-
-	tree<int> stree;
-	tree<int>::pre_order_iterator it, jt, end;
-
-	/* fill top of tree with subset */
-//	it = stree.set_head(*subset.begin());
-	it = stree.set_head(0);
-	for( set<int>::const_iterator jter = subset.begin(); jter != subset.end(); jter++ ) {
-//		it = stree.insert_after(it, *jter);
-		stree.append_child(it,*jter);
-	}
-	
-	map<int,int> anc;
-	
-	while (stree.number_of_children(stree.begin()) > 1) {
-			
-		/* update stree based upon this mapping */
-		for (tree<int>::sibling_iterator st = stree.begin(stree.begin()); st != stree.end(stree.begin()); st++) {
-			st = stree.wrap(st,ancmap[*st]);
-		}	
-		
-		/* compare all pairs of nodes at top level of stree, if match, merge children of these nodes */	
-		tree<int>::sibling_iterator st, tt;
-		st = stree.begin(stree.begin());
-		while (st != --stree.end(stree.begin())) {
-			tt = st;
-			tt++;
-			while (tt != stree.end(stree.begin())) {
-				if (*st == *tt) {
-					stree.reparent(st,tt);		// moves children of tt to be children of st
-				}
-				tt++;
-			}
-			st++;
-		}
-		
-		/* remove nodes in stree without any children */
-		for (tree<int>::sibling_iterator st = stree.begin(stree.begin()); st != stree.end(stree.begin()); st++) {
-			if (stree.number_of_children(st) == 0) {
-				st = stree.erase(st);
-			}
-		}	
-		
-		/* new subset is the top level of tree */
-		subset.clear();
-		for (tree<int>::sibling_iterator st = stree.begin(stree.begin()); st != stree.end(stree.begin()); st++) {
-			subset.insert(*st);
-		}	
-	
-	}
-	
-	/* remove 0 from head of tree */
-	stree.move_after(stree.begin(),++stree.begin());
-	stree.erase(stree.begin());
-			  
-	return stree;	
-
-}
-
-double CoalescentTree::getTreeLength(tree<int> &tr) {
-
-	double length = 0.0;
-
-	tree<int>::pre_order_iterator it, end;	
-	it = tr.begin();
-	end = tr.end();
-	while(it!=end) {
-		if (tr.depth(it) > 0 )
-			length += tmap[*tr.parent(it)] - tmap[*it];
-		it++;
-	}
-	
-	return length;
-
-}
 
 /* removes cruft from maps and other data, based on current nodes in tree */
 void CoalescentTree::reduce() {
@@ -1308,14 +1242,14 @@ tree<Node>::iterator CoalescentTree::commonAncestor(tree<Node>::iterator ia, tre
 	it = ia;
 	while (nodetree.is_valid(it)) {
 		nodeSet.insert( (*it).getNumber() );
-		it = ctree.parent(it);
+		it = nodetree.parent(it);
 	}
 	
 	/* walk down from second node, stopping when a member of nodeSet is encountered */
 	it = ib;	
 	while (nodetree.is_valid(it)) {
 		if (nodeSet.end() == nodeSet.find( (*it).getNumber() )) {
-			it = ctree.parent(it);
+			it = nodetree.parent(it);
 		}
 		else {
 			break;
