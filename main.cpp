@@ -51,8 +51,8 @@ using namespace std;
 #include "node.cpp"
 
 // Extension of the tree class to deal specifically with coalescent trees
-#include "ctree.h"
-#include "ctree.cpp"
+#include "coaltree.h"
+#include "coaltree.cpp"
 
 // Measurements done on a CoalescentTree
 #include "measurement.h"
@@ -86,19 +86,21 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 			if (parenString.size() > 1) {
 	
 				CoalescentTree ct(parenString);
-				ct.pushTimesBack(0.2,9.98356);
+				ct.pushTimesBack(2002,2007);
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2003,2004);
 		//		ct.timeSlice(5);
 		
-				ct.printRuleList();
+		//		ct.printRuleList();
 		//		ct.printTree();
 		
-				Measurement ms;
-				ms.increment(ct.getCoalRates());
-				ms.print();
+		//		Measurement ms;
+		//		ms.increment(ct.getCoalRates());
+		//		ms.print();
+		
+				cout << ct.getMigRate(1,6) << endl;
 		
 			}
 			

@@ -1,8 +1,8 @@
-/* ctree.cpp
+/* coaltree.cpp
 Member function definitions for CoalescentTree class
 */
 
-#include "ctree.h"
+#include "coaltree.h"
 #include "tree.hh"
 
 #include <iostream>
@@ -1060,15 +1060,43 @@ vector<double> CoalescentTree::getCoalRates() {
 /* returns the count of migration events over entire tree */
 int CoalescentTree::getMigCount() {
 
-	/* count coalescent events, these are nodes with two children */
+	/* count migration events, these are nodes in which the parent label differs from child label */
+	tree<Node>::iterator it, jt;
 	int count = 0;
-	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
-		if (nodetree.number_of_children(it) == 2) {		
+	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+		jt = nodetree.parent(it);
+		if ( (*it).getLabel() != (*jt).getLabel() ) {		
 			count++;
 		}
 	}
 	return count;
 
+}
+
+/* returns the count of migration events from label to label */
+int CoalescentTree::getMigCount(int from, int to) {
+
+	/* count migration events, these are nodes in which the parent label differs from child label */
+	tree<Node>::iterator it, jt;
+	int count = 0;
+	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+		jt = nodetree.parent(it);
+		if ( (*it).getLabel() == to && (*jt).getLabel() == from ) {		
+			count++;
+		}
+	}
+	return count;
+
+}
+
+/* returns the overall rate of migration */
+double CoalescentTree::getMigRate() {
+	return getMigCount() / getLength();
+}
+
+/* returns the rate of migration from label to label */
+double CoalescentTree::getMigRate(int from, int to) {
+	return getMigCount(from,to) / getLength(from);
 }
 
 /* print total rate of migration across tree, measured as events/year */

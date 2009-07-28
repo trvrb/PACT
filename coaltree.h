@@ -1,4 +1,4 @@
-/* ctree.h
+/* coaltree.h
 CoalescentTree class definition
 This object stores and manipulates coalescent trees, rooted bifurcating trees with nodes mapped to time points
 */
@@ -60,6 +60,9 @@ public:
 
 	// MIGRATION STATISTICS
 	int getMigCount();
+	int getMigCount(int,int);	
+	double getMigRate();
+	double getMigRate(int,int);
 
 //	REVISE BELOW:
 		
