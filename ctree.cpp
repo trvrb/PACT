@@ -1,8 +1,8 @@
-/* coaltree.cpp
+/* ctree.cpp
 Member function definitions for CoalescentTree class
 */
 
-#include "coaltree.h"
+#include "ctree.h"
 #include "tree.hh"
 
 #include <iostream>
@@ -954,7 +954,8 @@ int CoalescentTree::getCoalCount(int l) {
 }
 
 /* returns the opportunity for coalescence over the whole tree */
-double CoalescentTree::getCoalOpp() {
+/* running this will padTree() may be faster and more accurate */
+double CoalescentTree::getCoalWeight() {
 
 	// setting step to be 1/1000 of the total length of the tree
 	double start = getRootTime();
@@ -962,7 +963,7 @@ double CoalescentTree::getCoalOpp() {
 	double step = (stop - start) / (double) 1000;
 	
 	// step through tree counting concurrent lineages
-	double opportunity = 0.0;
+	double weight = 0.0;
 	for (double t = start; t <= stop; t += step) {
 	
 		int lineages = 0;
@@ -975,17 +976,17 @@ double CoalescentTree::getCoalOpp() {
 		}
 		
 		if (lineages > 0) {
-			opportunity += ( ( lineages * (lineages - 1) ) / 2 ) * step;
+			weight += ( ( lineages * (lineages - 1) ) / 2 ) * step;
 		}
 		
 	}	
 	
-	return opportunity;
+	return weight;
 
 }
 
 /* returns the opportunity for coalescence for label */
-double CoalescentTree::getCoalOpp(int l) {
+double CoalescentTree::getCoalWeight(int l) {
 
 	// setting step to be 1/1000 of the total length of the tree
 	double start = getRootTime();
@@ -993,7 +994,7 @@ double CoalescentTree::getCoalOpp(int l) {
 	double step = (stop - start) / (double) 1000;
 	
 	// step through tree counting concurrent lineages
-	double opportunity = 0.0;
+	double weight = 0.0;
 	for (double t = start; t <= stop; t += step) {
 	
 		int lineages = 0;
@@ -1006,25 +1007,25 @@ double CoalescentTree::getCoalOpp(int l) {
 		}
 		
 		if (lineages > 0) {
-			opportunity += ( ( lineages * (lineages - 1) ) / 2 ) * step;
+			weight += ( ( lineages * (lineages - 1) ) / 2 ) * step;
 		}
 		
 	}	
 	
-	return opportunity;
+	return weight;
 
 }
 
 double CoalescentTree::getCoalRate() {
-	return getCoalCount() / getCoalOpp();
+	return getCoalCount() / getCoalWeight();
 }
 
 double CoalescentTree::getCoalRate(int l) {
-	return getCoalCount(l) / getCoalOpp(l);
+	return getCoalCount(l) / getCoalWeight(l);
 }
 
 /* get count of coalescent involving each label */
-vector<double> CoalescentTree::getLabelCoalCounts() { 
+vector<double> CoalescentTree::getCoalCounts() { 
 
 	vector<double> counts;
 	for (int i = 1; i <= getMaxLabel(); i++) {
@@ -1035,48 +1036,39 @@ vector<double> CoalescentTree::getLabelCoalCounts() {
 }
 
 /* get coalescent opportunity involving each label */
-vector<double> CoalescentTree::getLabelCoalOpp() { 
+vector<double> CoalescentTree::getCoalWeights() { 
 
-	vector<double> opp;
+	vector<double> weights;
 	for (int i = 1; i <= getMaxLabel(); i++) {
-		opp.push_back( getCoalOpp(i) );
+		weights.push_back( getCoalWeight(i) );
 	}
-	return opp;
+	return weights;
 	
 }
 
+/* get coalescent rate involving each label */
+vector<double> CoalescentTree::getCoalRates() { 
 
-/* return map of coalescent counts for each label */
-/* making it a double to talk better with LabelSummary */
-map<int,int> CoalescentTree::getCoalCounts() {
-
-	tree<int>::iterator it;
-	map<int,int> labelCounts;
+	vector<double> rates;
+	for (int i = 1; i <= getMaxLabel(); i++) {
+		rates.push_back( getCoalCount(i) / getCoalWeight(i) );
+	}
+	return rates;
 	
-	/* go through tree and find end points */
-	double start, stop;
-	start = tmap[*ctree.begin()];
-	stop = tmap[*ctree.begin()];
-	for (it = ctree.begin(); it != ctree.end(); it++) {
-		if (start > tmap[*it]) {
-			start = tmap[*it];
+}
+
+/* returns the count of migration events over entire tree */
+int CoalescentTree::getMigCount() {
+
+	/* count coalescent events, these are nodes with two children */
+	int count = 0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
+		if (nodetree.number_of_children(it) == 2) {		
+			count++;
 		}
 	}
-		
-	for ( set<int>::const_iterator lit = labelSet.begin(); lit != labelSet.end(); lit++ ) {
-		
-		labelCounts.insert(make_pair(*lit,0));
-				
-		/* count coalescent events, these are nodes with two children */
-		for (it = ctree.begin(); it != ctree.end(); it++) {
-			if (ctree.number_of_children(it) == 2 && lmap[*it] == *lit) {		
-				labelCounts[*lit]++;
-			}
-		}
-			
-	}
-	
-	return labelCounts;
+	return count;
+
 }
 
 /* print total rate of migration across tree, measured as events/year */
@@ -1341,70 +1333,6 @@ map<int,int> CoalescentTree::getRevMigCounts() {
 
 
 /* go through tree and print the coalescent rate for each label */
-void CoalescentTree::printCoalRates() {
-
-	tree<int>::iterator it;
-	
-	/* go through tree and find end points */
-	double start, stop;
-	start = tmap[*ctree.begin()];
-	stop = tmap[*ctree.begin()];
-	for (it = ctree.begin(); it != ctree.end(); it++) {
-		if (start > tmap[*it]) {
-			start = tmap[*it];
-		}
-	}
-
-	// setting step to be 1/1000 of the total length of the tree
-	double step = (stop - start) / (double) 1000;
-
-//	cout << "start = " << start << ", stop = " << stop << ", step = " << step << endl;
-	
-	set<int>::const_iterator lit;
-	for ( lit=labelSet.begin(); lit != labelSet.end(); lit++ ) {
-	
-//		cout << "label = " << *lit << endl;
-	
-		/* go through tree and count concurrent lineages */
-		/* weight number by n(n-1)/2 to get coalescent opportunity */
-		double labelWeight = 0.0;
-		for (double t = start; t <= stop; t += step) {
-		
-//			cout << t << endl;
-			int count = 0;
-			for (it = ctree.begin(); it != ctree.end(); it++) {
-				if (tmap[*it] < t && tmap[ancmap[*it]] >= t && lmap[*it] == *lit) {		
-//					cout << *it << " ";
-					count++;
-				}
-			}
-			double weight;
-			if (count > 0)
-				weight = ( ( count * (count - 1) ) / 2 ) * step;
-			else
-				weight = 0;
-//			cout << "count = " << count << ", weight = " << weight << endl;
-			labelWeight += weight;
-		
-		}
-		
-		
-		/* count coalescent events, these are nodes with two children */
-		int count = 0;
-		for (it = ctree.begin(); it != ctree.end(); it++) {
-			if (ctree.number_of_children(it) == 2 && lmap[*it] == *lit) {		
-				count++;
-			}
-		}
-//		cout << "label = " << *lit << ", weight = " << labelWeight << ", count = " << count << ", rate = " << count / labelWeight << ", timescale = " << labelWeight / count << endl;
-		cout << count / labelWeight << " ";
-
-	}
-	cout << endl;
-	
-}
-
-/* go through tree and print the coalescent rate for each label */
 /* only concerned with coalescent events that include the trunk */
 void CoalescentTree::printTrunkRates() {
 
@@ -1479,55 +1407,6 @@ void CoalescentTree::printTrunkRates() {
 	cout << endl;
 	
 }
-
-/* return map of coalescent weights for each label */
-map<int,double> CoalescentTree::getCoalWeights() {
-
-	double step = 0.0001;
-	tree<int>::iterator it;
-	map<int,double> labelWeights;
-	
-	/* go through tree and find end points */
-	double start, stop;
-	start = tmap[*ctree.begin()];
-	stop = tmap[*ctree.begin()];
-	for (it = ctree.begin(); it != ctree.end(); it++) {
-		if (start > tmap[*it]) {
-			start = tmap[*it];
-		}
-	}
-		
-	for ( set<int>::const_iterator lit = labelSet.begin(); lit != labelSet.end(); lit++ ) {
-		
-		labelWeights.insert(make_pair(*lit,0.0));
-		
-		/* go through tree and count concurrent lineages */
-		/* weight number by n(n-1)/2 to get coalescent opportunity */
-		for (double t = start; t <= stop; t += step) {
-		
-//			cout << t << endl;
-			int count = 0;
-			for (it = ctree.begin(); it != ctree.end(); it++) {
-				if (tmap[*it] < t && tmap[ancmap[*it]] >= t && lmap[*it] == *lit) {		
-//					cout << *it << " ";
-					count++;
-				}
-			}
-			double weight;
-			if (count > 0)
-				weight = ( ( count * (count - 1) ) / 2 ) * step;
-			else
-				weight = 0;
-//			cout << "count = " << count << ", weight = " << weight << endl;
-			labelWeights[*lit] += weight;
-		
-		}
-			
-	}
-	
-	return labelWeights;
-}
-
 
 set<int> CoalescentTree::getLabelSet() {
 	return labelSet;

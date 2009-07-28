@@ -1,10 +1,10 @@
-/* coaltree.h
+/* ctree.h
 CoalescentTree class definition
 This object stores and manipulates coalescent trees, rooted bifurcating trees with nodes mapped to time points
 */
 
-#ifndef COALTREE_H
-#define COALTREE_H
+#ifndef CTREE_H
+#define CTREE_H
 
 #include <map>
 using std::map;
@@ -50,24 +50,23 @@ public:
 	// COALESCENT STATISTICS
 	int getCoalCount();					// total count of coalescent events on tree
 	int getCoalCount(int);				// count of coalescent events involving label on tree	
-	double getCoalOpp();				// total opportunity for coalescence on tree
-	double getCoalOpp(int);				// total opportunity for coalescence on tree
+	double getCoalWeight();				// total opportunity for coalescence on tree
+	double getCoalWeight(int);			// total opportunity for coalescence on tree
 	double getCoalRate();
 	double getCoalRate(int);
-	vector<double> getLabelCoalCounts();
-	vector<double> getLabelCoalOpp();	
+	vector<double> getCoalCounts();
+	vector<double> getCoalWeights();	
+	vector<double> getCoalRates();		
 
+	// MIGRATION STATISTICS
+	int getMigCount();
 
 //	REVISE BELOW:
 		
 	void printMigTotal();				// print overall migration rate across tree 
 	void printMigRates();				// print list of posterior migration rates 
-	void printCoalRates();				// print list of coalescent rates for each label
 	void printTrunkRates();				// print list of coalescent rates for each label 
 										// only considering coalescent events that include the trunk
-	
-	map<int,double> getCoalWeights();	// return map of coalescent weights for each label	
-	map<int,int> getCoalCounts();		// return map of coalescent counts for each label
 	map<int,double> getMigWeights();	// return map of forward migration weights for each label
 	map<int,int> getMigCounts();		// return map of forward migration counts for each label
 	map<int,double> getRevMigWeights();	// return map of backward migration weights for each label
@@ -92,7 +91,7 @@ public:
 
 	void printParenTree();				// print parentheses tree
 										// only prints structure at the moment, no branch lengths or migration events
-	void printPaddedRuleList();			// ****** completely broken ******
+	void printPaddedRuleList();			// * completely broken *
 										// print tree in Mathematica suitable format
 										// padded with extra nodes at coalescent time points
 										// used with TreePlot
