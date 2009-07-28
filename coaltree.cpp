@@ -260,10 +260,12 @@ CoalescentTree::CoalescentTree(string paren) {
 	(*nodetree.begin()).setNumber(0);
 	
 	// adding branch length to the parent node's time to get the node's time
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
-		double t = (*jt).getTime() + (*it).getLength();
-		(*it).setTime(t);
+		if (nodetree.is_valid(jt)) {
+			double t = (*jt).getTime() + (*it).getLength();
+			(*it).setTime(t);
+		}
 	}	
 	  			
 	/* go through tree and append to trunk set */
@@ -325,10 +327,12 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 	}	
 	
 	// update times in tree
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
-		double t = (*jt).getTime() + (*it).getLength();
-		(*it).setTime(t);
+		if (nodetree.is_valid(jt)) {
+			double t = (*jt).getTime() + (*it).getLength();
+			(*it).setTime(t);
+		}
 	}	
 
 	// PUSH BACK /////////////////////
@@ -462,6 +466,34 @@ void CoalescentTree::trimEnds(double start, double stop) {
 		
 }
 
+/* cuts up tree into multiple sections */
+void CoalescentTree::section(double start, double window, double step) {
+
+	tree<Node>::iterator it, jt;
+
+	tree<Node> holdtree = nodetree;
+	tree<Node> newtree;
+	Node tempNode(-1);
+	
+	trimEnds(2002,2002.1);
+	newtree.set_head(tempNode);
+	it = newtree.begin();
+	jt = nodetree.begin();
+	(*jt).setNumber(-1);
+	newtree.replace(it,jt);
+	
+	nodetree = holdtree;
+	trimEnds(2005,2005.1);	
+	newtree.insert(newtree.begin(),tempNode);
+	it = newtree.begin();	
+	jt = nodetree.begin();
+	(*jt).setNumber(-2);	
+	newtree.replace(it,jt);	
+	
+	nodetree = newtree;
+
+}
+
 /* Reduces tree to just the ancestors of a single slice in time */
 /* Used to calcuate diversity, TMRCA and Tajima's D at a particular time */
 void CoalescentTree::timeSlice(double slice) {
@@ -469,7 +501,7 @@ void CoalescentTree::timeSlice(double slice) {
 	/* desire only nodes spanning the time slice */
 	/* find these nodes and add them and their ancestors to a set */
 	set<int> sliceset; 
-	tree<Node>::iterator it, jt;
+	tree<Node>::iterator it, jt, kt;
 	it = nodetree.begin();
 	while(it != nodetree.end()) {	
 	
@@ -515,14 +547,15 @@ void CoalescentTree::timeSlice(double slice) {
     
     /* peel back trunk */
 	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
-		if (nodetree.number_of_children(it) == 1) {	
-			jt = nodetree.child(it,0);
-			(*jt).setLength( (*jt).getLength() + (*it).getLength() );	
-			nodetree.reparent(nodetree.parent(it),it);				// push child node up to be sibling of node
+		jt = nodetree.parent(it);
+		if ( nodetree.is_valid(jt) && nodetree.number_of_children(it) == 1) {	
+			kt = nodetree.child(it,0);
+			(*kt).setLength( (*kt).getLength() + (*it).getLength() );	
+			nodetree.reparent(jt,it);								// push child node up to be sibling of node
 			nodetree.erase(it);										// erase node									
 			it = nodetree.begin();
 		}
-		else {
+		if (nodetree.number_of_children(it) == 2) {
 			break;
 		}
 	}
@@ -656,9 +689,11 @@ void CoalescentTree::printRuleList() {
 			
 	/* print the tree in rule list (Mathematica-ready) format */
 	/* print only upward links */
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {		// increment past root
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {		// increment past root
 		jt = nodetree.parent(it);
-		cout << (*it).getNumber() << "->" << (*jt).getNumber() << " ";
+		if (nodetree.is_valid(jt)) {
+			cout << (*it).getNumber() << "->" << (*jt).getNumber() << " ";
+		}
 	}
 	cout << endl;
 	
@@ -894,9 +929,9 @@ double CoalescentTree::getCoalWeight() {
 	
 		int lineages = 0;
 		tree<Node>::iterator it, jt;
-		for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+		for (it = nodetree.begin(); it != nodetree.end(); it++) {
 			jt = nodetree.parent(it);
-			if ( (*it).getTime() >= t && (*jt).getTime() < t) {		
+			if ( nodetree.is_valid(jt) && (*it).getTime() >= t && (*jt).getTime() < t) {		
 				lineages++;
 			}
 		}
@@ -925,9 +960,9 @@ double CoalescentTree::getCoalWeight(int l) {
 	
 		int lineages = 0;
 		tree<Node>::iterator it, jt;
-		for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+		for (it = nodetree.begin(); it != nodetree.end(); it++) {
 			jt = nodetree.parent(it);
-			if ( (*it).getTime() >= t && (*jt).getTime() < t && (*it).getLabel() == l ) {		
+			if ( nodetree.is_valid(jt) && (*it).getTime() >= t && (*jt).getTime() < t && (*it).getLabel() == l ) {		
 				lineages++;
 			}
 		}
@@ -989,9 +1024,9 @@ int CoalescentTree::getMigCount() {
 	/* count migration events, these are nodes in which the parent label differs from child label */
 	tree<Node>::iterator it, jt;
 	int count = 0;
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
-		if ( (*it).getLabel() != (*jt).getLabel() ) {		
+		if ( nodetree.is_valid(jt) && (*it).getLabel() != (*jt).getLabel() ) {		
 			count++;
 		}
 	}
@@ -1005,9 +1040,9 @@ int CoalescentTree::getMigCount(int from, int to) {
 	/* count migration events, these are nodes in which the parent label differs from child label */
 	tree<Node>::iterator it, jt;
 	int count = 0;
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
-		if ( (*it).getLabel() == to && (*jt).getLabel() == from ) {		
+		if ( nodetree.is_valid(jt) && (*it).getLabel() == to && (*jt).getLabel() == from ) {		
 			count++;
 		}
 	}
@@ -1185,18 +1220,19 @@ double CoalescentTree::getTajimaD() {
 /* removes cruft from maps and other data, based on current nodes in tree */
 void CoalescentTree::reduce() {
 
-	tree<Node>::iterator it, jt;
+	tree<Node>::iterator it, jt, kt;
 
 	/* removing pointless nodes, ie nodes that have no coalecent
 	events or migration events associated with them */
-	for (it = ++nodetree.begin(); it != nodetree.end(); it++) {
-		if (nodetree.number_of_children(it) == 1) {						// no coalescence
-			jt = nodetree.child(it,0);
-			if ( (*it).getLabel() == (*jt).getLabel() ) {				// no migration
-//				cout << "it = " << *it << ", jt = " << *jt << endl;
-				(*jt).setLength( (*jt).getLength() + (*it).getLength() );	
- 				nodetree.reparent(nodetree.parent(it),it);				// push child node up to be sibling of node
- 				nodetree.erase(it);										// erase node									
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt) && nodetree.number_of_children(it) == 1) {	// no coalescence
+			kt = nodetree.child(it,0);
+			if ( (*it).getLabel() == (*kt).getLabel() ) {						// no migration
+//				cout << "it = " << *it << ", kt = " << *kt << endl;
+				(*kt).setLength( (*kt).getLength() + (*it).getLength() );	
+ 				nodetree.reparent(jt,it);										// push child node up to be sibling of node
+ 				nodetree.erase(it);												// erase node									
 				it = nodetree.begin();
 			}
 		}
