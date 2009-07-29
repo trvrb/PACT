@@ -2,22 +2,27 @@
 Member function definitions for CoalescentTree class
 */
 
-using namespace std;
+#include <iostream>
+#include <sstream>
+using std::stringstream;
+using std::cout;
+using std::endl;
+using std::flush;
+
+#include <string>
+using std::string;
+
+#include <set>
+using std::set;
+
+#include <vector>
+using std::vector;
+
+#include <cmath>
 
 #include "coaltree.h"
 #include "node.h"
 #include "tree.hh"
-
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <string>
-#include <cstdlib>
-#include <map>
-#include <set>
-#include <vector>
-#include <cmath>
-#include <sstream>
 
 /* Constructor function to initialize private data */
 /* Takes NEWICK parentheses tree as string input */
@@ -119,7 +124,6 @@ CoalescentTree::CoalescentTree(string paren) {
 	// read parentheses string from left to right, stop when a close parenthesis is encountered
 	// push the left and right nodes onto their own branch
 	// replace parenthesis string with their parent node ((1,2),3)  --->  (4,3)
-	// fill bmap / update lengths of nodes
 		
 	// end when all parentheses have been eliminated
 	while (paren.at(0) == '(') {
@@ -394,7 +398,6 @@ void CoalescentTree::pruneToLabel(int label) {
     	}
     }
         
-	/* update maps and other data accordingly */
 	reduce();
 				
 }
@@ -1237,7 +1240,7 @@ double CoalescentTree::getTajimaD() {
 }
 
 
-/* removes cruft from maps and other data, based on current nodes in tree */
+/* removes extraneous nodes from tree */
 void CoalescentTree::reduce() {
 
 	tree<Node>::iterator it, jt, kt;

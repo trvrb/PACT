@@ -6,12 +6,6 @@ This object stores a collection of measurements, outputs things like mean and 95
 #ifndef SERIES_H
 #define SERIES_H
 
-#include <map>
-using std::map;
-#include <set>
-using std::set;
-#include <vector>
-using std::vector;
 
 class Series {
 

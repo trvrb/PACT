@@ -7,6 +7,8 @@ This object stores and manipulates coalescent trees, rooted bifurcating trees wi
 #define CTREE_H
 
 #include <vector>
+using std::vector;
+
 #include "node.h"
 #include "tree.hh"
 

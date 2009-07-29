@@ -6,6 +6,8 @@ node.o: node.cpp node.h
 	g++ -c node.cpp 
 coaltree.o: coaltree.cpp coaltree.h 
 	g++ -c coaltree.cpp 
+series.o: series.cpp series.h 
+	g++ -c series.cpp 	
 tree.hh.gch: tree.hh
 	g++ -c tree.hh
 clean: 

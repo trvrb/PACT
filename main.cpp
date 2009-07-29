@@ -32,16 +32,16 @@
 	to work with a set of nodes.  Or, might be easier to cleanup tree and maps to be consecutive.
 */
 
-using namespace std;
-
 #include <iostream>
 #include <fstream>
-#include <iomanip>
+using std::ifstream;
+using std::cout;
+
 #include <string>
-#include <cstdlib>
-#include <map>
+using std::string;
+
 #include <vector>
-#include <set>
+using std::vector;
 
 // Template class for standard library style tree
 #include "tree.hh"
@@ -53,8 +53,7 @@ using namespace std;
 #include "coaltree.h"
 
 // Collects a series of measurement objects, usually from multiple trees
-//#include "series.h"
-//#include "series.cpp"
+#include "series.h"
 
 int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
@@ -76,15 +75,15 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2002,2007);
 		//		ct.timeSlice(2004);
-				ct.section(2002,1,1);
+				ct.section(2002,0.25,1);
 	
-		//		ct.printTree();
+				ct.printTree();
 	
 		//		ct.printRuleList();
 		
-				for (int i = 1; i <= 6; i++) {
-					cout << ct.getCoalWeight(i) << endl;
-				}
+		//		for (int i = 1; i <= 6; i++) {
+		//			cout << ct.getCoalWeight(i) << endl;
+		//		}
 	
 			}
 			
