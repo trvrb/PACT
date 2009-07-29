@@ -80,13 +80,12 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
-		//		ct.trimEnds(2002,2002.25);
+		//		ct.trimEnds(2002,2007);
 		//		ct.timeSlice(2004);
-				ct.section(2002,0.25,1);
+				ct.section(2001.75,0.5,1);
 	
-				ct.printTree();
+		//		ct.printTree();
 	
-		/*	
 				ct.printRuleList();
 		
 				Measurement mcoal;
@@ -96,8 +95,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				Measurement mmig;
 				mmig.increment(ct.getMigRates());
 				mmig.print();
-		*/
-		
+	
 			}
 			
 		}

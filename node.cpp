@@ -24,7 +24,7 @@ Node::Node(int n) {
 	label = 1;
 	leaf = false;
 	trunk = false;
-	ignore = false;
+	include = true;
 		
 }
 
@@ -36,7 +36,7 @@ double Node::getTime() { return time; }
 int Node::getLabel() { return label; }
 bool Node::getLeaf() { return leaf; }
 bool Node::getTrunk() { return trunk; }
-bool Node::getIgnore() { return ignore; }
+bool Node::getInclude() { return include; }
 
 /* Set functions */
 void Node::setNumber(int n) { number = n; }
@@ -46,4 +46,4 @@ void Node::setTime(double n) { time = n; }
 void Node::setLabel(int n) { label = n; }
 void Node::setLeaf(bool n) { leaf = n; }
 void Node::setTrunk(bool n) { trunk = n; }
-void Node::setIgnore(bool n) { ignore = n; }
+void Node::setInclude(bool n) { include = n; }

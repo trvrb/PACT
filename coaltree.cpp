@@ -433,7 +433,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 			else if ((*it).getTime() > start && (*jt).getTime() < start && nodetree.depth(it) > 1) {	
 				(*jt).setTime(start);
 				(*jt).setLength(0.0);
-				(*jt).setIgnore(true);
+				(*jt).setInclude(false);
 				Node tempNode(-1);
 				nodetree.move_ontop(nodetree.append_child(nodetree.begin(),tempNode),jt);
 				it = nodetree.begin();
@@ -454,7 +454,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
     it = nodetree.begin();
     (*it).setTime(start);
     (*it).setLength(0.0);
-	(*it).setIgnore(true);    
+	(*it).setInclude(false);    
 	while(it != nodetree.end()) {	
 		if ((*it).getTime() < start && nodetree.depth(it) > 0) {
 			it = nodetree.erase(it);
@@ -657,7 +657,7 @@ void CoalescentTree::printTree() {
 		cout << " (" << (*it).getTime() << ")";
 		cout << " [" << (*it).getLabel() << "]";			
 		cout << " {" << (*it).getLength() << "}";		
-		if ((*it).getIgnore()) { 
+		if ( !(*it).getInclude()) { 
 			cout << " *";
 		}		
 		cout << endl << flush;
@@ -794,7 +794,7 @@ void CoalescentTree::printParen() {
 /* most recent node in tree, will always be a leaf */
 double CoalescentTree::getPresentTime() {
 	
-	double t = 0;
+	double t = (*nodetree.begin()).getTime();
 	for (tree<Node>::leaf_iterator it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
 		if ((*it).getTime() > t) { 
 			t = (*it).getTime(); 
@@ -806,7 +806,14 @@ double CoalescentTree::getPresentTime() {
 
 /* most ancient node in tree */
 double CoalescentTree::getRootTime() {
-	return (*nodetree.begin()).getTime();
+
+	double t = (*nodetree.begin()).getTime();
+	for (tree<Node>::leaf_iterator it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
+		if ((*it).getTime() < t) { 
+			t = (*it).getTime(); 
+		}
+	}
+	return t;
 }
 
 /* amount of time it takes for all samples to coalesce */
@@ -850,7 +857,9 @@ double CoalescentTree::getLength() {
 
 	double length = 0.0;
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
-		length += (*it).getLength();
+		if ( (*it).getInclude() ) {
+			length += (*it).getLength();
+		}
 	}	
 	return length;
 
@@ -861,7 +870,7 @@ double CoalescentTree::getLength(int l) {
 
 	double length = 0.0;
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
-		if ( (*it).getLabel() == l ) {
+		if ( (*it).getInclude() && (*it).getLabel() == l ) {
 			length += (*it).getLength();
 		}
 	}	
@@ -903,7 +912,7 @@ double CoalescentTree::getTrunkPro() {
 
 	double trunkLength = 0.0;
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++ ) {
-		if ( (*it).getTrunk()) {
+		if ( (*it).getInclude() && (*it).getTrunk()) {
 			trunkLength += (*it).getLength();
 		}
 	}	
@@ -918,7 +927,7 @@ int CoalescentTree::getCoalCount() {
 	/* count coalescent events, these are nodes with two children */
 	int count = 0;
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
-		if (nodetree.number_of_children(it) == 2) {		
+		if ((*it).getInclude() && nodetree.number_of_children(it) == 2) {		
 			count++;
 		}
 	}
@@ -932,7 +941,7 @@ int CoalescentTree::getCoalCount(int l) {
 	/* count coalescent events, these are nodes with two children */
 	int count = 0;
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); it++) {
-		if (nodetree.number_of_children(it) == 2 && (*it).getLabel() == l ) {		
+		if ((*it).getInclude() && nodetree.number_of_children(it) == 2 && (*it).getLabel() == l ) {		
 			count++;
 		}
 	}
@@ -957,7 +966,7 @@ double CoalescentTree::getCoalWeight() {
 		tree<Node>::iterator it, jt;
 		for (it = nodetree.begin(); it != nodetree.end(); it++) {
 			jt = nodetree.parent(it);
-			if ( nodetree.is_valid(jt) && (*it).getTime() >= t && (*jt).getTime() < t) {		
+			if ( (*it).getInclude() && nodetree.is_valid(jt) && (*it).getTime() >= t && (*jt).getTime() < t) {		
 				lineages++;
 			}
 		}
@@ -979,7 +988,7 @@ double CoalescentTree::getCoalWeight(int l) {
 	double start = getRootTime();
 	double stop = getPresentTime();
 	double step = (stop - start) / (double) 1000;
-	
+		
 	// step through tree counting concurrent lineages
 	double weight = 0.0;
 	for (double t = start; t <= stop; t += step) {
@@ -988,11 +997,11 @@ double CoalescentTree::getCoalWeight(int l) {
 		tree<Node>::iterator it, jt;
 		for (it = nodetree.begin(); it != nodetree.end(); it++) {
 			jt = nodetree.parent(it);
-			if ( nodetree.is_valid(jt) && (*it).getTime() >= t && (*jt).getTime() < t && (*it).getLabel() == l ) {		
+			if ( (*it).getInclude() && nodetree.is_valid(jt) && (*it).getTime() >= t && (*jt).getTime() < t && (*it).getLabel() == l ) {		
 				lineages++;
 			}
 		}
-		
+				
 		if (lineages > 0) {
 			weight += ( ( lineages * (lineages - 1) ) / 2 ) * step;
 		}
@@ -1009,28 +1018,6 @@ double CoalescentTree::getCoalRate() {
 
 double CoalescentTree::getCoalRate(int l) {
 	return getCoalCount(l) / getCoalWeight(l);
-}
-
-/* get count of coalescent involving each label */
-vector<double> CoalescentTree::getCoalCounts() { 
-
-	vector<double> counts;
-	for (int i = 1; i <= getMaxLabel(); i++) {
-		counts.push_back( getCoalCount(i) );
-	}
-	return counts;
-	
-}
-
-/* get coalescent opportunity involving each label */
-vector<double> CoalescentTree::getCoalWeights() { 
-
-	vector<double> weights;
-	for (int i = 1; i <= getMaxLabel(); i++) {
-		weights.push_back( getCoalWeight(i) );
-	}
-	return weights;
-	
 }
 
 /* get coalescent rate involving each label */
@@ -1052,8 +1039,10 @@ int CoalescentTree::getMigCount() {
 	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
-		if ( nodetree.is_valid(jt) && (*it).getLabel() != (*jt).getLabel() ) {		
-			count++;
+		if (nodetree.is_valid(jt)) {		
+			if ( (*it).getInclude() && (*jt).getInclude() && (*it).getLabel() != (*jt).getLabel() ) {		
+				count++;
+			}
 		}
 	}
 	return count;
@@ -1068,8 +1057,10 @@ int CoalescentTree::getMigCount(int from, int to) {
 	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
-		if ( nodetree.is_valid(jt) && (*it).getLabel() == to && (*jt).getLabel() == from ) {		
-			count++;
+		if (nodetree.is_valid(jt)) {
+			if ( (*it).getInclude() && (*jt).getInclude() && (*it).getLabel() == to && (*jt).getLabel() == from ) {		
+				count++;
+			}
 		}
 	}
 	return count;
@@ -1114,7 +1105,7 @@ double CoalescentTree::getDiversity() {
 	tree<Node>::leaf_iterator it, jt, kt;
 	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
 		for (jt = it; jt != nodetree.end_leaf(); jt++) {
-			if (it != jt) {
+			if ((*it).getInclude() && (*jt).getInclude() && it != jt) {
 	
 				/* find common ancestor and calculate time from it to jt via common ancestor */
 				kt = commonAncestor(it,jt);
@@ -1140,7 +1131,7 @@ double CoalescentTree::getDiversity(int l) {
 	tree<Node>::leaf_iterator it, jt, kt;
 	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
 		for (jt = it; jt != nodetree.end_leaf(); jt++) {
-			if (it != jt && (*it).getLabel() == l && (*jt).getLabel() == l ) {
+			if ((*it).getInclude() && (*jt).getInclude() && it != jt && (*it).getLabel() == l && (*jt).getLabel() == l ) {
 	
 				/* find common ancestor and calculate time from it to jt via common ancestor */
 				kt = commonAncestor(it,jt);
@@ -1166,7 +1157,7 @@ double CoalescentTree::getDiversityWithin() {
 	tree<Node>::leaf_iterator it, jt, kt;
 	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
 		for (jt = it; jt != nodetree.end_leaf(); jt++) {
-			if (it != jt && (*it).getLabel() == (*jt).getLabel() ) {
+			if ((*it).getInclude() && (*jt).getInclude() && it != jt && (*it).getLabel() == (*jt).getLabel() ) {
 	
 				/* find common ancestor and calculate time from it to jt via common ancestor */
 				kt = commonAncestor(it,jt);
@@ -1192,7 +1183,7 @@ double CoalescentTree::getDiversityBetween() {
 	tree<Node>::leaf_iterator it, jt, kt;
 	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
 		for (jt = it; jt != nodetree.end_leaf(); jt++) {
-			if (it != jt && (*it).getLabel() != (*jt).getLabel() ) {
+			if ((*it).getInclude() && (*jt).getInclude() && it != jt && (*it).getLabel() != (*jt).getLabel() ) {
 	
 				/* find common ancestor and calculate time from it to jt via common ancestor */
 				kt = commonAncestor(it,jt);

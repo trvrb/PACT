@@ -57,14 +57,13 @@ public:
 	double getTrunkPro();					// proportion of tree that can trace its history from present day samples
 	
 	// COALESCENT STATISTICS
+	// problem with weight calculation for sectioned data
 	int getCoalCount();						// total count of coalescent events on tree
 	int getCoalCount(int);					// count of coalescent events involving label on tree	
 	double getCoalWeight();					// total opportunity for coalescence on tree
 	double getCoalWeight(int);				// total opportunity for coalescence on tree
 	double getCoalRate();
 	double getCoalRate(int);
-	vector<double> getCoalCounts();
-	vector<double> getCoalWeights();	
 	vector<double> getCoalRates();		
 
 	// MIGRATION STATISTICS
