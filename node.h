@@ -26,6 +26,7 @@ public:
 	int getLabel();
 	bool getLeaf();
 	bool getTrunk();
+	bool getIgnore();
 
 	// SET FUNCTIONS
 	void setNumber(int);
@@ -35,6 +36,7 @@ public:
 	void setLabel(int);
 	void setLeaf(bool);
 	void setTrunk(bool);
+	void setIgnore(bool);
 																			
 private:
 	int number;						// number of node, must be unique
@@ -44,6 +46,7 @@ private:
 	int label;						// numeric label associated with node
 	bool leaf;						// is this node a leaf?
 	bool trunk;						// is this node part of the trunk?
+	bool ignore;					// ignore this node when performing calculations?
 
 
 };

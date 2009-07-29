@@ -431,8 +431,9 @@ void CoalescentTree::trimEnds(double start, double stop) {
 			/* and reparent anc[node] to be a child of root */
 			/* neither node nore anc[node] can be root */
 			else if ((*it).getTime() > start && (*jt).getTime() < start && nodetree.depth(it) > 1) {	
-				(*jt).setTime( start );
-				(*jt).setLength( 0.0 );
+				(*jt).setTime(start);
+				(*jt).setLength(0.0);
+				(*jt).setIgnore(true);
 				Node tempNode(-1);
 				nodetree.move_ontop(nodetree.append_child(nodetree.begin(),tempNode),jt);
 				it = nodetree.begin();
@@ -453,6 +454,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
     it = nodetree.begin();
     (*it).setTime(start);
     (*it).setLength(0.0);
+	(*it).setIgnore(true);    
 	while(it != nodetree.end()) {	
 		if ((*it).getTime() < start && nodetree.depth(it) > 0) {
 			it = nodetree.erase(it);
@@ -462,7 +464,14 @@ void CoalescentTree::trimEnds(double start, double stop) {
     	}
     }
                
-	/* update maps and other data accordingly */
+	// go through tree and update lengths based on times
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {
+			(*it).setLength( (*it).getTime() - (*jt).getTime() );
+		}
+	}	               
+               
 	reduce();
 		
 }
@@ -648,6 +657,9 @@ void CoalescentTree::printTree() {
 		cout << " (" << (*it).getTime() << ")";
 		cout << " [" << (*it).getLabel() << "]";			
 		cout << " {" << (*it).getLength() << "}";		
+		if ((*it).getIgnore()) { 
+			cout << " *";
+		}		
 		cout << endl << flush;
 	}
 		
