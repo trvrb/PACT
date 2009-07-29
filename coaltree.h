@@ -6,12 +6,8 @@ This object stores and manipulates coalescent trees, rooted bifurcating trees wi
 #ifndef CTREE_H
 #define CTREE_H
 
-#include <map>
-using std::map;
-#include <set>
-using std::set;
 #include <vector>
-using std::vector;
+#include "node.h"
 #include "tree.hh"
 
 class CoalescentTree {

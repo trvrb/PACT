@@ -2,7 +2,10 @@
 Member function definitions for CoalescentTree class
 */
 
+using namespace std;
+
 #include "coaltree.h"
+#include "node.h"
 #include "tree.hh"
 
 #include <iostream>

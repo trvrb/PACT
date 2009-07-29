@@ -12,6 +12,8 @@ using std::map;
 using std::set;
 #include <vector>
 using std::vector;
+#include <string>
+using std::string;
 
 class Node {
 

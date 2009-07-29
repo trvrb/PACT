@@ -48,19 +48,13 @@ using namespace std;
 
 // Class for coalescent nodes within a tree object
 #include "node.h"
-#include "node.cpp"
 
 // Extension of the tree class to deal specifically with coalescent trees
 #include "coaltree.h"
-#include "coaltree.cpp"
-
-// Measurements done on a CoalescentTree
-#include "measurement.h"
-#include "measurement.cpp"
 
 // Collects a series of measurement objects, usually from multiple trees
-#include "series.h"
-#include "series.cpp"
+//#include "series.h"
+//#include "series.cpp"
 
 int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
@@ -82,19 +76,15 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2002,2007);
 		//		ct.timeSlice(2004);
-				ct.section(2001.75,0.5,1);
+				ct.section(2002,1,1);
 	
 		//		ct.printTree();
 	
-				ct.printRuleList();
+		//		ct.printRuleList();
 		
-				Measurement mcoal;
-				mcoal.increment(ct.getCoalRates());
-				mcoal.print();
-		
-				Measurement mmig;
-				mmig.increment(ct.getMigRates());
-				mmig.print();
+				for (int i = 1; i <= 6; i++) {
+					cout << ct.getCoalWeight(i) << endl;
+				}
 	
 			}
 			

@@ -16,8 +16,9 @@ using std::vector;
 class Series {
 
 public:
-	Series();							// constructor
-																		
+	Series();								// constructor
+	
+	
 private:
 
 
