@@ -8,6 +8,8 @@ coaltree.o: coaltree.cpp coaltree.h
 	g++ -c coaltree.cpp 
 series.o: series.cpp series.h 
 	g++ -c series.cpp 	
+io.o: io.cpp io.h 
+	g++ -c io.cpp 		
 tree.hh.gch: tree.hh
 	g++ -c tree.hh
 clean: 

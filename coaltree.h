@@ -33,8 +33,9 @@ public:
 
 	// TREE STRUCTURE
 	void printTree();						// print indented tree with coalescent times
-	void printRuleList();					// print tree in Mathematica rule list format with times included
+//	void printRuleList();					// print tree in Mathematica rule list format with times included
 											// used with Graphics primitives
+	void printRuleList(string);				// print to file name
 	void printParen();						// TODO: migration events
 											// print parentheses tree										
 

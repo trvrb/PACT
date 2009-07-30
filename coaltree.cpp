@@ -4,10 +4,13 @@ Member function definitions for CoalescentTree class
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
+using std::ofstream;
 using std::stringstream;
 using std::cout;
 using std::endl;
 using std::flush;
+using std::ios;
 
 #include <string>
 using std::string;
@@ -679,7 +682,11 @@ Output is:
 	label rules
 	coordinate rules 
 */	
-void CoalescentTree::printRuleList() { 
+void CoalescentTree::printRuleList(string outputFile) {
+
+	/* initializing output stream */
+	ofstream outStream;
+	outStream.open( outputFile.c_str(),ios::out);
 
 	tree<Node>::iterator it, jt;
 
@@ -703,35 +710,35 @@ void CoalescentTree::printRuleList() {
 	/* a node may be a leaf on the current tree, but not a leaf on the original tree */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		if ((*it).getLeaf()) {
-			cout << (*it).getNumber() << " ";
+			outStream << (*it).getNumber() << " ";
 		}
 	}
-	cout << endl;	
+	outStream << endl;	
 	
 	/* print trunk nodes */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		if ((*it).getTrunk()) {
-			cout << (*it).getNumber() << " ";
+			outStream << (*it).getNumber() << " ";
 		}
 	}
-	cout << endl;	
+	outStream << endl;	
 			
 	/* print the tree in rule list (Mathematica-ready) format */
 	/* print only upward links */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {		// increment past root
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {
-			cout << (*it).getNumber() << "->" << (*jt).getNumber() << " ";
+			outStream << (*it).getNumber() << "->" << (*jt).getNumber() << " ";
 		}
 	}
-	cout << endl;
+	outStream << endl;
 	
 	
 	/* print mapping of labels in Mathematica format */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {	
-		cout << (*it).getNumber() << "->" << (*it).getLabel() << " ";
+		outStream << (*it).getNumber() << "->" << (*it).getLabel() << " ";
 	}
-	cout << endl;
+	outStream << endl;
 	
 	/* print mapping of nodes to coordinates */
   	int count = 0;
@@ -739,10 +746,12 @@ void CoalescentTree::printRuleList() {
 		if (nodetree.depth(it) == 0) {
 			count = 0;
 		}
-		cout << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
+		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
 		count++;
 	}
-	cout << endl;	
+	outStream << endl;	
+	  	  	
+	outStream.close();
 	  	  	
 }
 

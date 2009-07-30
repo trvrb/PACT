@@ -109,8 +109,6 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 				problist.push_back(ll);				
 			}
 			
-			
-			
 			// find first occurance of '(' in line
 			pos = line.find('(');
 			if (pos >= 0) {
@@ -133,6 +131,8 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		//		ct.printRuleList();
 		
 		//		s.insert( ct.getCoalRate() );
+		
+				cout << "tree " << treelist.size() << " read" << endl;
 					
 			}
 			
@@ -163,23 +163,10 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 	else {
 		index = treelist.size() - 1;
 	}
-
-	cout << index << endl;
-	cout << problist[index] << endl;
 	
-	string rulesFile( "out.rules" );
-	ofstream rulesStream;
-	rulesStream.open( rulesFile.c_str(),ios::out);
-
-	for (int i = 0; i< treelist.size(); i++) {
-		rulesStream << "prob: " << problist[i] << endl;
-	}
-
-	rulesStream.close();
+	treelist[index].printRuleList("out.rules");
 
 
-
-//	cout << "median: " << s.quantile(0.5) << endl;
 
 	return 0;
 }
