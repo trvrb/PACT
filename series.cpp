@@ -6,12 +6,12 @@ Member function definitions for Series class
 using std::cout;
 using std::endl;
 
-#include <set>
-using std::multiset;
-
 #include <stdexcept>
 using std::runtime_error;
 using std::out_of_range;
+
+#include <set>
+using std::multiset;
 
 #include <cmath>
 

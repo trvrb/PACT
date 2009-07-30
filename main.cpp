@@ -39,8 +39,14 @@
 #include <iostream>
 #include <fstream>
 using std::ifstream;
+using std::ofstream;
 using std::cout;
 using std::endl;
+using std::ios;
+
+#include <stdexcept>
+using std::runtime_error;
+using std::out_of_range;
 
 #include <string>
 using std::string;
@@ -64,55 +70,117 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 		
 //	double a = atof(argv[1]);
 //	double b = atof(argv[2]);
-			
+
+	Series s;
+	vector<CoalescentTree> treelist;
+	vector<double> problist;
+	
 	string line;
+	int pos;
 	ifstream inputFile ("trees.txt");
 	if (inputFile.is_open()) {
 		while (! inputFile.eof() ) {
 			getline (inputFile,line);
 			
-			// find first occurance of '(' in line
-			int start = line.find('(');
+			// Catching log probabilities of trees
+			string annoString;
 			
-			// does line contain '('
-			if (start != string::npos) {
-			
-				string paren = line.substr(start);
-			
-				CoalescentTree ct(paren);
-				ct.pushTimesBack(1968,2003);
+			// migrate annotation
+			annoString = "log likelihood = ";
+			pos = line.find(annoString);
 
+			if (pos >= 0) {
+				string thisString;
+				thisString = line.substr(pos+annoString.size());
+				thisString.erase(thisString.find(']'));
+				double ll = atof(thisString.c_str());
+				problist.push_back(ll);
+			}
+			
+			// beast annotation
+			annoString = "[&lnP=";
+			pos = line.find(annoString);
+
+			if (pos >= 0) {
+				string thisString;
+				thisString = line.substr(pos+annoString.size());
+				thisString.erase(thisString.find(']'));
+				double ll = atof(thisString.c_str());
+				problist.push_back(ll);				
+			}
+			
+			
+			
+			// find first occurance of '(' in line
+			pos = line.find('(');
+			if (pos >= 0) {
+			
+				string paren = line.substr(pos);
+				
+				CoalescentTree ct(paren);
+				
+				ct.pushTimesBack(1968,2003);
 		//		ct.pruneToTrunk();					
 		//		ct.pruneToLabel(2);
 		//		ct.trimEnds(2002.75,2003.23);
 		//		ct.timeSlice(2004);
 		//		ct.section(2001.75,0.5,1);
+				
+				treelist.push_back(ct);
 	
 		//		ct.printTree();
-	
+
 		//		ct.printRuleList();
 		
-				for (int i = 1; i <= ct.getMaxLabel(); i++) {
-					cout << ct.getCoalRate(i) << " ";
-				}
-				cout << endl;
-	
-		//		Series s;
-		//		s.insert(1);
-		//		s.insert(2);
-		//		s.insert(3);
-		//		s.insert(4);
-		//		s.insert(5);		
-		//		cout << s.quantile(0.5) << endl;
+		//		s.insert( ct.getCoalRate() );
 					
 			}
 			
 		}
 		inputFile.close();
 	}
-	else
-		cout << "Unable to open tree file, expecting trees.txt";
+	else {
+		throw runtime_error("input file not understood");
+	}
+
+	// TREE OUTPUT /////////////////
+	// output tree with highest likelihood
+	// if likelihoods don't exist, output final tree
 	
+	int index;
+	if (problist.size() == treelist.size()) {
+		
+		double ll = problist[0];
+		index = 0;
+		for (int i = 1; i < problist.size(); i++) {
+			if (problist[i] > ll) {
+				ll = problist[i];
+				index = i;
+			}
+		}
+		
+	}
+	else {
+		index = treelist.size() - 1;
+	}
+
+	cout << index << endl;
+	cout << problist[index] << endl;
+	
+	string rulesFile( "out.rules" );
+	ofstream rulesStream;
+	rulesStream.open( rulesFile.c_str(),ios::out);
+
+	for (int i = 0; i< treelist.size(); i++) {
+		rulesStream << "prob: " << problist[i] << endl;
+	}
+
+	rulesStream.close();
+
+
+
+//	cout << "median: " << s.quantile(0.5) << endl;
+
 	return 0;
 }
 
