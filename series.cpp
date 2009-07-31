@@ -72,11 +72,11 @@ double Series::quantile(double p) {
 
 	double q;						// quantile value
 	
-	int N = values.size();			// sample size
-	int j = floor(N*p);				// integer part
-	double g = N*p - floor(N*p);	// fractional part
+	int n = values.size();			// sample size
+	int j = floor(n*p);				// integer part
+	double g = n*p - floor(n*p);	// fractional part
 	
-	if (g > 0)						// samples are ordered 0 to N-1
+	if (g > 0 || n == 1)			// samples are ordered 0 to N-1
 		q = at(j);				
 	else
 		q = 0.5 * ( at(j-1) + at(j));

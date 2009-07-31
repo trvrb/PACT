@@ -11,4 +11,4 @@ series.o: series.cpp series.h
 io.o: io.cpp io.h 
 	g++ -c io.cpp 		
 clean: 
-	rm *.o pact *.gch
+	rm *.o pact
