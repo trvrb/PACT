@@ -1,6 +1,6 @@
-pact: main.o node.o coaltree.o series.o tree.hh.gch
-	g++ -o pact main.o node.o coaltree.o series.o
-main.o: main.cpp node.h coaltree.h 
+pact: main.o node.o coaltree.o series.o io.o
+	g++ -o pact main.o node.o coaltree.o series.o io.o
+main.o: main.cpp node.h coaltree.h series.h io.h
 	g++ -c main.cpp 
 node.o: node.cpp node.h 
 	g++ -c node.cpp 
@@ -10,7 +10,5 @@ series.o: series.cpp series.h
 	g++ -c series.cpp 	
 io.o: io.cpp io.h 
 	g++ -c io.cpp 		
-tree.hh.gch: tree.hh
-	g++ -c tree.hh
 clean: 
 	rm *.o pact *.gch
