@@ -7,6 +7,9 @@ This contains all the global variables used by pact, can be modified later if ne
 
 #include <cmath>
 
+#include <vector>
+using std::vector;
+
 #define INF pow(double(10),double(100)) // 10^100 (~infinity)
 
 class Parameters {
@@ -18,25 +21,21 @@ public:
 
 	// PARAMETERS
 	bool push_times_back;
-	double push_times_back_start;
-	double push_times_back_stop;
+	vector<double> push_times_back_values;	// start, stop
 	
 	bool prune_to_trunk;
 	
 	bool prune_to_label;
-	int prune_to_label_label;
+	vector<double> prune_to_label_values;	// label
 	
 	bool trim_ends;
-	double trim_ends_start;
-	double trim_ends_stop;
+	vector<double> trim_ends_values;		// start, stop
 	
 	bool section_tree;
-	double section_tree_start;
-	double section_tree_window;
-	double section_tree_step;
+	vector<double> section_tree_values;		// start, window, step
 	
 	bool time_slice;
-	double time_slice_time;
+	vector<double> time_slice_values;		// time
 	
 	bool print_hp_tree;
 	
@@ -48,10 +47,8 @@ public:
 	bool summary_diversity;		
 	bool summary_fst;				
 	bool summary_tajima_d;	
-	
-	double skyline_start;
-	double skyline_stop;
-	double skyline_step;
+		
+	vector<double> skyline_values;			// start, stop, step
 	
 	bool skyline_tmrca;	
 	bool skyline_proportions;

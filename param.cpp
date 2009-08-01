@@ -22,26 +22,13 @@ using std::vector;
 Parameters::Parameters() {
 	
 	// default parameter values
+	// leaving value vectors empty purposely
 	push_times_back = false;
-	push_times_back_start = INF;
-	push_times_back_stop = INF;
-	
 	prune_to_trunk = false;
-	
 	prune_to_label = false;
-	prune_to_label_label = 0;
-	
 	trim_ends = false;
-	trim_ends_start = INF;
-	trim_ends_stop = INF;
-	
-	section_tree = false;
-	section_tree_start = INF;
-	section_tree_window = INF;
-	section_tree_step = INF;
-	
+	section_tree = false;	
 	time_slice = false;
-	time_slice_time = INF;
 	
 	print_hp_tree = false;
 	
@@ -53,10 +40,6 @@ Parameters::Parameters() {
 	summary_diversity = false;		
 	summary_fst = false;				
 	summary_tajima_d = false;	
-	
-	skyline_start = INF;
-	skyline_stop = INF;
-	skyline_step = INF;
 	
 	skyline_tmrca = false;	
 	skyline_proportions = false;
@@ -119,15 +102,10 @@ void Parameters::importLine(string line) {
 		
 	// SETTING PARAMETERS	
 	if (pstring == "pushtimesback") { 
-		if (values.size() == 1) {
+		if (values.size() == 1 || values.size() == 2) {
 			push_times_back = true; 
-			push_times_back_stop = values[0];			
-		}
-		if (values.size() == 2) {
-			push_times_back = true; 
-			push_times_back_start = values[0];	
-			push_times_back_start = values[1];		
-		}		
+			push_times_back_values = values;			
+		}	
 	}
 	
 	if (pstring == "prunetotrunk") { 
@@ -137,31 +115,28 @@ void Parameters::importLine(string line) {
 	if (pstring == "prunetolabel") { 
 		if (values.size() == 1) {
 			prune_to_label = true; 
-			prune_to_label_label = (int) values[0];			
+			prune_to_label_values = values;			
 		}
 	}	
 	
 	if (pstring == "trimends") { 
 		if (values.size() == 2) {
 			trim_ends = true; 
-			trim_ends_start = values[0];
-			trim_ends_stop = values[1];	
+			trim_ends_values = values;
 		}
 	}	
 	
 	if (pstring == "sectiontree") { 
 		if (values.size() == 3) {
 			section_tree = true; 
-			section_tree_start = values[0];
-			section_tree_window = values[1];
-			section_tree_step = values[2];
+			section_tree_values = values;
 		}
 	}	
 
 	if (pstring == "timeslice") { 
 		if (values.size() == 1) {
 			time_slice = true; 
-			time_slice_time = values[0];	
+			time_slice_values = values;	
 		}
 	}		
 	
@@ -179,13 +154,8 @@ void Parameters::importLine(string line) {
 	if (pstring == "summarytajimad") { summary_tajima_d = true; }	
 	
 	if (pstring == "skylinesettings") { 
-		if (values.size() == 1) {
-			skyline_step = values[0];			
-		}
-		if (values.size() == 3) {
-			skyline_start = values[0]; 
-			skyline_stop = values[1];	
-			skyline_step = values[2];		
+		if (values.size() == 1 || values.size() == 3) {
+			skyline_values = values;		
 		}		
 	}
 
@@ -202,6 +172,5 @@ void Parameters::importLine(string line) {
 /* prints parameters */
 void Parameters::print() {
 
-	
 
 }
