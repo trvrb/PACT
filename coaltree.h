@@ -6,9 +6,6 @@ This object stores and manipulates coalescent trees, rooted bifurcating trees wi
 #ifndef CTREE_H
 #define CTREE_H
 
-#include <vector>
-using std::vector;
-
 #include "tree.hh"
 #include "node.h"
 
@@ -16,7 +13,9 @@ class CoalescentTree {
 
 public:
 	CoalescentTree(string);					// constructor, takes a parentheses string as input
-											// can only be "migrate" or "beast"
+											// starts with most recent sample set at time = 0
+											// sharing a most recent sample time ensures skyline calculations 
+											// will work properly
 
 	// TREE MANIPULATION
 	void pushTimesBack(double);				// push dates to agree with a most recent sample date at t
@@ -50,8 +49,7 @@ public:
 	// LABEL STATISTICS		
 	double getLength();						// return total tree length
 	double getLength(int);					// return length with this label
-	vector<double> getLengths();	
-	vector<double> getLabelPro();			// proportion of tree with each label
+	double getLabelPro(int);				// return proportion of tree with label
 	double getTrunkPro();					// proportion of tree that can trace its history from present day samples
 	
 	// COALESCENT STATISTICS
@@ -62,14 +60,12 @@ public:
 	double getCoalWeight(int);				// total opportunity for coalescence on tree
 	double getCoalRate();
 	double getCoalRate(int);
-	vector<double> getCoalRates();		
 
 	// MIGRATION STATISTICS
 	int getMigCount();
 	int getMigCount(int,int);	
-	double getMigRate();					// normalized by 'from' length
+	double getMigRate();			
 	double getMigRate(int,int);
-	vector<double> getMigRates();
 	
 	// DIVERSITY STATISTICS	
 	double getDiversity();					// return mean of (2 * time to common ancestor) for every pair of leaf nodes

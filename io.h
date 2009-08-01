@@ -26,6 +26,7 @@ public:
 	
 	void printHPTree();						// print highest posterior tree to .rules
 	void printStatistics();					// print coalescent statistics to .stats
+//	void printSkylines();					// print skyline values to .skls	
 																			
 private:
 

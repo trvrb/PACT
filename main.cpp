@@ -50,8 +50,11 @@
 // Collects a series of measurements, usually from multiple trees
 #include "series.h"
 
-// Input of Migrate and Beast tree files and output of Mathematica trees and tables of statistics
+// Input Migrate and Beast tree files and output Mathematica trees and tables of statistics
 #include "io.h"
+
+// Set default parameters and modify via parameter file
+#include "param.h"
 
 int main(int argc, char* argv[]) {				// arguments passed from the command line
 		

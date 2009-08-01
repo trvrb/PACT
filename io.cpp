@@ -76,8 +76,8 @@ IO::IO() {
 						string paren = line.substr(pos);
 						
 						CoalescentTree ct(paren);
-						ct.pushTimesBack(2002,2007);
-				//		ct.section(2002.25,0.5,1);
+						ct.pushTimesBack(2007,2007);
+					//	ct.section(2001.75,0.5,1);
 						treelist.push_back(ct);
 						cout << "tree " << treelist.size() << " read" << endl;
 							
@@ -166,6 +166,21 @@ void IO::printStatistics() {
 
 			}
 		}	
+	}
+	
+	// TRUNK PROPORTIONS //////////////
+	for (int label = 1; label <= n; label++) {
+
+	Series s;
+	for (int i = 0; i < treelist.size(); i++) {
+		CoalescentTree ct = treelist[i];
+		ct.pruneToTrunk();
+		double n = ct.getLabelPro(label);
+		s.insert(n);
+	}
+	outStream << "pro_" << label << "\t";
+	outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+	
 	}
 	
 	

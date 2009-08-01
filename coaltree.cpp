@@ -290,6 +290,10 @@ CoalescentTree::CoalescentTree(string paren) {
 		it++;
 	}
 	
+	
+	/* pushing the most recent sample up to time = 0 */
+	pushTimesBack(0);
+	
 }
 
 /* push dates to agree with a most recent sample date at endTime */
@@ -306,37 +310,42 @@ void CoalescentTree::pushTimesBack(double endTime) {
 }
 
 /* push dates to agree with a most recent sample date at endTime and oldest sample date is startTime */
+/* will fail if used on contempory samples */
 void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 	
 	tree<Node>::iterator it, jt;
 	double presentTime = getPresentTime();
 	
-	// STRETCH OR SHRINK //////////////	 
-		 
-	// find oldest sample	
-	double oldestSample = presentTime;
-	for (tree<Node>::leaf_iterator it = nodetree.begin_leaf(); it != nodetree.end_leaf(); it++) {
-		if ((*it).getTime() < oldestSample) { 
-			oldestSample = (*it).getTime(); 
+	if (startTime < endTime) {
+	
+		// STRETCH OR SHRINK //////////////	 
+			 
+		// find oldest sample	
+		double oldestSample = presentTime;
+		for (tree<Node>::leaf_iterator lit = nodetree.begin_leaf(); lit != nodetree.end_leaf(); lit++) {
+			if ((*lit).getTime() < oldestSample) { 
+				oldestSample = (*lit).getTime(); 
+			}
 		}
+		
+		double mp = (endTime - startTime) / (presentTime - oldestSample);
+		
+		// go through tree and multiple lengths by mp	
+		for (it = nodetree.begin(); it != nodetree.end(); it++) {
+			double l = (*it).getLength();
+			(*it).setLength(l * mp);
+		}	
+		
+		// update times in tree
+		for (it = nodetree.begin(); it != nodetree.end(); it++) {
+			jt = nodetree.parent(it);
+			if (nodetree.is_valid(jt)) {
+				double t = (*jt).getTime() + (*it).getLength();
+				(*it).setTime(t);
+			}
+		}	
+	
 	}
-	
-	double mp = (endTime - startTime) / (presentTime - oldestSample);
-	
-	// go through tree and multiple lengths by mp	
-	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-		double l = (*it).getLength();
-		(*it).setLength(l * mp);
-	}	
-	
-	// update times in tree
-	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-		jt = nodetree.parent(it);
-		if (nodetree.is_valid(jt)) {
-			double t = (*jt).getTime() + (*it).getLength();
-			(*it).setTime(t);
-		}
-	}	
 
 	// PUSH BACK /////////////////////
 
@@ -893,29 +902,10 @@ double CoalescentTree::getLength(int l) {
 
 }
 
-/* get lenght of each label */
-vector<double> CoalescentTree::getLengths() { 
-
-	vector<double> lengths;
-	for (int i = 1; i <= getMaxLabel(); i++) {
-		lengths.push_back( getLength(i) );
-	}
-	return lengths;
-	
-}
-
-/* get proportion of tree with each label */
-vector<double> CoalescentTree::getLabelPro() { 
-
-	vector<double> labelPro;
-	
-	double totalLength = getLength();
-
-	for (int i = 1; i <= getMaxLabel(); i++) {
-		labelPro.push_back( getLength(i) / totalLength );
-	}
-	
-	return labelPro;
+/* get proportion of tree with label */
+double CoalescentTree::getLabelPro(int l) { 
+		
+	return getLength(l) / getLength();
 	
 }
 
@@ -1035,17 +1025,6 @@ double CoalescentTree::getCoalRate(int l) {
 	return getCoalCount(l) / getCoalWeight(l);
 }
 
-/* get coalescent rate involving each label */
-vector<double> CoalescentTree::getCoalRates() { 
-
-	vector<double> rates;
-	for (int i = 1; i <= getMaxLabel(); i++) {
-		rates.push_back( getCoalCount(i) / getCoalWeight(i) );
-	}
-	return rates;
-	
-}
-
 /* returns the count of migration events over entire tree */
 int CoalescentTree::getMigCount() {
 
@@ -1088,26 +1067,12 @@ double CoalescentTree::getMigRate() {
 }
 
 /* returns the rate of migration from label to label */
+/* this is important to check on */
+/* currently, this is set up as calculating the rate from working backwards in time */
+/* i.e. the migration rate from 1->2 is measured from the count going backwards on 2->1 divided */
+/* by the backward opportunity of 2 */
 double CoalescentTree::getMigRate(int from, int to) {
-	return getMigCount(from,to) / getLength(from);
-}
-
-/* get migration rate involving each label */
-vector<double> CoalescentTree::getMigRates() { 
-
-	vector<double> rates;
-	for (int to = 1; to <= getMaxLabel(); to++) {	
-		for (int from = 1; from <= getMaxLabel(); from++) {	
-			if (to != from) {
-		
-				rates.push_back( getMigCount(from,to) / getLength(from) );
-
-			}
-		}
-	}
-		
-	return rates;
-	
+	return getMigCount(from,to) / getLength(to);
 }
 
 /* return mean of (2 * time to common ancestor) for every pair of leaf nodes */
