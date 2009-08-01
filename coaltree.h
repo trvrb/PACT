@@ -24,7 +24,7 @@ public:
 	void pruneToLabel(int);					// reduces CoalescentTree object to only include a particular set of tips
 	void trimEnds(double,double);			// reduces CoalescentTree object to only those nodes between
 											// time start and time stop	
-	void section(double,double,double);		// break tree up into section
+	void sectionTree(double,double,double);	// break tree up into sections
 	void timeSlice(double);					// reduces CoalescentTree to all the ancestors of time slice
 	void padTree();							// TODO: fix this
 											// pads CoalescentTre with additional nodes at each coalescent event

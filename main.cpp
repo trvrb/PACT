@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {				// arguments passed from the command line
 //	double a = atof(argv[1]);
 //	double b = atof(argv[2]);
 	
+	Parameters p;
 	IO trees;
 	trees.printHPTree();
 	trees.printStatistics();

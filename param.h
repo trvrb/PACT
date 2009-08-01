@@ -30,10 +30,10 @@ public:
 	double trim_ends_start;
 	double trim_ends_stop;
 	
-	bool section;
-	double section_start;
-	double section_window;
-	double section_step;
+	bool section_tree;
+	double section_tree_start;
+	double section_tree_window;
+	double section_tree_step;
 	
 	bool time_slice;
 	double time_slice_time;

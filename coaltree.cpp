@@ -495,7 +495,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 }
 
 /* cuts up tree into multiple sections */
-void CoalescentTree::section(double start, double window, double step) {
+void CoalescentTree::sectionTree(double start, double window, double step) {
 
 	tree<Node>::iterator it, jt;
 	tree<Node> holdtree = nodetree;

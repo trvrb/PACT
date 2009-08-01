@@ -35,21 +35,21 @@ Parameters::Parameters() {
 	trim_ends_start = INF;
 	trim_ends_stop = INF;
 	
-	section = false;
-	section_start = INF;
-	section_window = INF;
-	section_step = INF;
+	section_tree = false;
+	section_tree_start = INF;
+	section_tree_window = INF;
+	section_tree_step = INF;
 	
 	time_slice = false;
 	time_slice_time = INF;
 	
-	print_hp_tree = true;
+	print_hp_tree = false;
 	
 	summary_tmrca = false;		
 	summary_length = false;			
 	summary_proportions = false;	
-	summary_coal_rates = true;		
-	summary_mig_rates = true;		
+	summary_coal_rates = false;		
+	summary_mig_rates = false;		
 	summary_diversity = false;		
 	summary_fst = false;				
 	summary_tajima_d = false;	
@@ -80,6 +80,11 @@ Parameters::Parameters() {
 	else { 
 		cout << "Unable to find in.param" << endl; 
 		cout << "Running with default parameters" << endl;
+		
+		print_hp_tree = true;		
+		summary_coal_rates = true;		
+		summary_mig_rates = true;
+		
 	}
 	
 }
@@ -87,11 +92,11 @@ Parameters::Parameters() {
 /* Reads a string and attempts to extract parameters from it */
 void Parameters::importLine(string line) {
 
+	// READING LINE STRING
 	string pstring = "";				// fill with a-z or _
 	string vstring = "";				// fill with 0-9 or . or -
 	vector<double> values;				// convert vstring to double and push here
 
-	// fill pstring and values vector
 	for (string::iterator is = line.begin(); is != line.end(); is++) {
 	
 		if (*is == '#')		// ignore rest of line after comment
@@ -100,12 +105,97 @@ void Parameters::importLine(string line) {
     		pstring += *is;
 		else if ( (*is >= '0' && *is <= '9') || *is == '.' || *is == '-')
     		vstring += *is;
-    	else {
+    	else if (vstring.size() > 0) {
     		values.push_back( atof(vstring.c_str()) );
+    		vstring = "";
     	}
 		
 	}
 	
+	if (vstring.size() > 0) {
+		values.push_back( atof(vstring.c_str()) );
+	}	
+		
+		
+	// SETTING PARAMETERS	
+	if (pstring == "pushtimesback") { 
+		if (values.size() == 1) {
+			push_times_back = true; 
+			push_times_back_stop = values[0];			
+		}
+		if (values.size() == 2) {
+			push_times_back = true; 
+			push_times_back_start = values[0];	
+			push_times_back_start = values[1];		
+		}		
+	}
+	
+	if (pstring == "prunetotrunk") { 
+		prune_to_trunk = true; 
+	}
+	
+	if (pstring == "prunetolabel") { 
+		if (values.size() == 1) {
+			prune_to_label = true; 
+			prune_to_label_label = (int) values[0];			
+		}
+	}	
+	
+	if (pstring == "trimends") { 
+		if (values.size() == 2) {
+			trim_ends = true; 
+			trim_ends_start = values[0];
+			trim_ends_stop = values[1];	
+		}
+	}	
+	
+	if (pstring == "sectiontree") { 
+		if (values.size() == 3) {
+			section_tree = true; 
+			section_tree_start = values[0];
+			section_tree_window = values[1];
+			section_tree_step = values[2];
+		}
+	}	
+
+	if (pstring == "timeslice") { 
+		if (values.size() == 1) {
+			time_slice = true; 
+			time_slice_time = values[0];	
+		}
+	}		
+	
+	if (pstring == "printhptree") { 
+		print_hp_tree = true; 
+	}	
+
+	if (pstring == "summarytmrca") { summary_tmrca = true; }
+	if (pstring == "summarylength") { summary_length = true; }
+	if (pstring == "summaryproportions") { summary_proportions = true; }
+	if (pstring == "summarycoalrates") { summary_coal_rates = true; }
+	if (pstring == "summarymigrates") { summary_mig_rates = true; }
+	if (pstring == "summarydiversity") { summary_diversity = true; }
+	if (pstring == "summaryfst") { summary_fst = true; }
+	if (pstring == "summarytajimad") { summary_tajima_d = true; }	
+	
+	if (pstring == "skylinesettings") { 
+		if (values.size() == 1) {
+			skyline_step = values[0];			
+		}
+		if (values.size() == 3) {
+			skyline_start = values[0]; 
+			skyline_stop = values[1];	
+			skyline_step = values[2];		
+		}		
+	}
+
+	if (pstring == "skylinetmrca") { skyline_tmrca = true; }
+	if (pstring == "skylineproportions") { skyline_proportions = true; }
+	if (pstring == "skylinecoalrates") { skyline_coal_rates = true; }
+	if (pstring == "skylinemigrates") { skyline_mig_rates = true; }
+	if (pstring == "skylinediversity") { skyline_diversity = true; }
+	if (pstring == "skylinefst") { skyline_fst = true; }
+	if (pstring == "skylinetajimad") { skyline_tajima_d = true; }		
 	
 }
 

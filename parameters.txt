@@ -1,22 +1,23 @@
-# parameter specifications
+### PARAMETER SPECIFICATIONS
 # pick and choose from these commands
 # include in file "in.param"
 # everything after # is ignored
+# commands need to be on separate lines
 
 ### TREE MANIPULATION
-push_times_back 2007				# push dates so that the most recent sample date is 2007
-push_times_back 2002 2007			# push dates so that the oldest sample date is 2002 and the most recent sample date is 2007 
-prune_to_trunk						# reduces tree to just the trunk
-prune_to_label 1					# reduces tree to just the tips with label 1
-trim_ends 2003 2004					# reduces tree to only those branches dated between 2003 and 2004
-section 2002 0.25 1					# reduces tree into sections, starting at 2002, leaving windows 0.25 in width 
+push times back 2007				# push dates so that the most recent sample date is 2007
+push times back 2002 2007			# push dates so that the oldest sample date is 2002 and the most recent sample date is 2007 
+prune to trunk						# reduces tree to just the trunk
+prune to label 1					# reduces tree to just the tips with label 1
+trim ends 2003 2004					# reduces tree to only those branches dated between 2003 and 2004
+section tree 2002 0.25 1			# reduces tree into sections, starting at 2002, leaving windows 0.25 in width 
 									# and moving in steps of 1
-time_slice 2005						# reduces tree to all ancestors of lineages that exist in 2005
+time slice 2005						# reduces tree to all ancestors of lineages that exist in 2005
 									# used in conjunction with diversity statistics
 
 ### TREE OUTPUT						# trees are printed in Mathematica compatible rule list format
 									# prints to out.rules
-print_hp_tree						# print highest posterior / maximum likelihood tree
+print hp tree						# print highest posterior / maximum likelihood tree
 
 
 ### SUMMARY STATISTICS				# these statistics are carried out across the entire tree
@@ -24,23 +25,23 @@ print_hp_tree						# print highest posterior / maximum likelihood tree
 summary tmrca						# summarize TMRCA
 summary length						# summarize tree length
 summary proportions					# summarize label proportions
-summary coal_rates					# summarize coalescent rates, separate rates for each label
-summary mig_rates					# summarize migration rates, separate rates for each label pair
+summary coal rates					# summarize coalescent rates, separate rates for each label
+summary mig rates					# summarize migration rates, separate rates for each label pair
 summary diversity					# summarize diversity between each pair of tips
 									# if tree is tip dated should run time_slice first
 summary fst							# summarize diversity between labels vs diversity within labels
-summary tajima_d					# summarize Tajima's D.  This is pairwise diversity - total tree length / a1.
+summary tajima d					# summarize Tajima's D.  This is pairwise diversity - total tree length / a1.
 
 ### SKYLINE STATISTICS				# need to walk these backward to keep window consistent across samples
 									# prints to out.skylines
 skyline settings 2002 2007 0.1		# split the tree starting at 2002 and ending at 2007 in steps of 0.1
-skyling settings 0.1				# split the entire tree in steps of 0.1
+skyline settings 0.1				# split the entire tree in steps of 0.1
 
 skyline tmrca						# computes the TMRCA for time slices
 skyline proportions				 	# computes label proportions for time windows
-skyline coal_rates					# computes coalescent rates for time windows
-skyline mig_rates					# computes migration rates for time windows
+skyline coal rates					# computes coalescent rates for time windows
+skyline mig rates					# computes migration rates for time windows
 skyline diversity					# computes the diversity for time slices 
 skyline fst							# computes the FST for time slices
-skyline tajima_d					# computes Tajima's D for time slices
+skyline tajima d					# computes Tajima's D for time slices
 

@@ -77,7 +77,6 @@ IO::IO() {
 						
 						CoalescentTree ct(paren);
 						ct.pushTimesBack(2007,2007);
-					//	ct.section(2001.75,0.5,1);
 						treelist.push_back(ct);
 						cout << "tree " << treelist.size() << " read" << endl;
 							
