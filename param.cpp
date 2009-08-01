@@ -21,6 +21,51 @@ using std::vector;
 
 Parameters::Parameters() {
 	
+	// default parameter values
+	push_times_back = false;
+	push_times_back_start = INF;
+	push_times_back_stop = INF;
+	
+	prune_to_trunk = false;
+	
+	prune_to_label = false;
+	prune_to_label_label = 0;
+	
+	trim_ends = false;
+	trim_ends_start = INF;
+	trim_ends_stop = INF;
+	
+	section = false;
+	section_start = INF;
+	section_window = INF;
+	section_step = INF;
+	
+	time_slice = false;
+	time_slice_time = INF;
+	
+	print_hp_tree = true;
+	
+	summary_tmrca = false;		
+	summary_length = false;			
+	summary_proportions = false;	
+	summary_coal_rates = true;		
+	summary_mig_rates = true;		
+	summary_diversity = false;		
+	summary_fst = false;				
+	summary_tajima_d = false;	
+	
+	skyline_start = INF;
+	skyline_stop = INF;
+	skyline_step = INF;
+	
+	skyline_tmrca = false;	
+	skyline_proportions = false;
+	skyline_coal_rates = false;
+	skyline_mig_rates = false;
+	skyline_diversity = false;
+	skyline_fst = false;
+	skyline_tajima_d = false;	
+	
 	cout << "Checking parameters" << endl;
 	
 	// check to see file exists
