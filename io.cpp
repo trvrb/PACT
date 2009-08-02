@@ -30,6 +30,11 @@ IO::IO() {
 	inputFile = "in.trees";
 	outputPrefix = "out";
 
+	// PARAMETER INPUT ////////////////
+	// automatically loaded by declaring Parameter object in header
+	param.print();
+
+	// TREE INPUT /////////////////////
 	ifstream inStream;
 	inStream.open( inputFile.c_str(),ios::out);
 
@@ -76,7 +81,6 @@ IO::IO() {
 						string paren = line.substr(pos);
 						
 						CoalescentTree ct(paren);
-						ct.pushTimesBack(2007,2007);
 						treelist.push_back(ct);
 						cout << "tree " << treelist.size() << " read" << endl;
 							
@@ -90,7 +94,15 @@ IO::IO() {
 	else {
 		throw runtime_error("input file not found");
 	}
-		
+	
+	cout << endl;
+	
+}
+
+/* go through treelist and perform tree manipulation operations */
+void IO::treeManip() {
+
+
 }
 
 /* go through problist and treelist and print highest posterior probability tree */

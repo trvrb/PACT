@@ -6,6 +6,8 @@ CoalescentTrees.
 Currently, fills a vector with CoalescentTrees.  This is memory-intensive, but faster and more elegant 
 than doing multiple readthroughs of the tree file.  CoalescentTrees vector takes about 10X the memory of
 the corresponding tree file.
+
+Uses Parameter object to figure out which operations to perform.
 */
 
 #ifndef IO_H
@@ -18,17 +20,21 @@ using std::string;
 using std::vector;
 
 #include "coaltree.h"
+#include "param.h"
 
 class IO {
 
 public:
 	IO();									// constructor takes a input file
 	
+	void treeManip();						// perform tree manipulation operations
 	void printHPTree();						// print highest posterior tree to .rules
 	void printStatistics();					// print coalescent statistics to .stats
 //	void printSkylines();					// print skyline values to .skls	
 																			
 private:
+
+	Parameters param;						// parameters object, read from in.param
 
 	string inputFile;						// complete name of input tree file
 	string outputPrefix;					// prefix for output files .rules and .stats

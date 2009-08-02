@@ -49,12 +49,14 @@ Parameters::Parameters() {
 	skyline_fst = false;
 	skyline_tajima_d = false;	
 	
-	cout << "Checking parameters" << endl;
-	
 	// check to see file exists
 	string paramString;
 	ifstream paramFile ("in.param");
 	if (paramFile.is_open()) {
+	
+		cout << "Reading parameters from in.param" << endl;
+		cout << endl;
+	
 		while (! paramFile.eof() ) {
 			getline (paramFile,paramString);
 			importLine(paramString);
@@ -63,6 +65,7 @@ Parameters::Parameters() {
 	else { 
 		cout << "Unable to find in.param" << endl; 
 		cout << "Running with default parameters" << endl;
+		cout << endl;
 		
 		print_hp_tree = true;		
 		summary_coal_rates = true;		
@@ -172,5 +175,83 @@ void Parameters::importLine(string line) {
 /* prints parameters */
 void Parameters::print() {
 
+	// TREE MANIPULATION
+	if (push_times_back || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice) {
+		cout << "Tree manipulation:" << endl;
+	}
+
+	if (push_times_back) {
+		cout << "push times back ";
+		for (int i = 0; i < push_times_back_values.size(); i++) {
+			cout << push_times_back_values[i] << " ";
+		}
+		cout << endl;
+	}
+
+	if (prune_to_trunk) {
+		cout << "prune to trunk" << endl;
+	}	
+	
+	if (prune_to_label) {
+		cout << "prune to label " << push_times_back_values[0] << endl;
+	}	
+	
+	if (trim_ends) {
+		cout << "trim ends " << trim_ends_values[0] << " " << trim_ends_values[1] << endl;		
+	}
+
+	if (section_tree) {
+		cout << "section tree " << section_tree_values[0] << " " << section_tree_values[1] << " " << section_tree_values[2] << endl;		
+	}	
+
+	if (time_slice) {
+		cout << "time slice " << time_slice_values[0] << endl;
+	}		
+	
+	if (push_times_back || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice) {
+		cout << endl;
+	}
+	
+	// TREE STRUCTURE
+	if (print_hp_tree) {
+		cout << "Tree structure:" << endl;
+		cout << "print hp tree" << endl;
+		cout << endl;
+	}	
+	
+	// SUMMARY STATISTICS
+	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates
+		|| summary_diversity || summary_fst || summary_tajima_d) {
+		cout << "Summary statistics:" << endl;
+	}
+	if (summary_tmrca) { cout << "tmrca" << endl; }
+	if (summary_length) { cout << "length" << endl; }
+	if (summary_proportions) { cout << "proportions" << endl; }
+	if (summary_coal_rates) { cout << "coal rates" << endl; }
+	if (summary_mig_rates) { cout << "mig rates" << endl; }
+	if (summary_diversity) { cout << "diversity" << endl; }
+	if (summary_fst) { cout << "fst" << endl; }	
+	if (summary_tajima_d) { cout << "tajima d" << endl; }	
+	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates
+		|| summary_diversity || summary_fst || summary_tajima_d) {
+		cout << endl;
+	}
+
+	// SKYLINE STATISTICS
+	if (skyline_tmrca || skyline_proportions || skyline_coal_rates || skyline_mig_rates
+		|| skyline_diversity || skyline_fst || skyline_tajima_d) {
+		cout << "Summary statistics:" << endl;
+	}
+	if (skyline_tmrca) { cout << "tmrca" << endl; }
+	if (skyline_proportions) { cout << "proportions" << endl; }
+	if (skyline_coal_rates) { cout << "coal rates" << endl; }
+	if (skyline_mig_rates) { cout << "mig rates" << endl; }
+	if (skyline_diversity) { cout << "diversity" << endl; }
+	if (skyline_fst) { cout << "fst" << endl; }	
+	if (skyline_tajima_d) { cout << "tajima d" << endl; }	
+	if (skyline_tmrca || skyline_proportions || skyline_coal_rates || skyline_mig_rates
+		|| skyline_diversity || skyline_fst || skyline_tajima_d) {
+		cout << endl;
+	}
 
 }
