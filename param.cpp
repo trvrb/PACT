@@ -177,7 +177,7 @@ void Parameters::print() {
 
 	// TREE MANIPULATION
 	if (push_times_back || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice) {
-		cout << "Tree manipulation:" << endl;
+		cout << "Tree manipulation" << endl;
 	}
 
 	if (push_times_back) {
@@ -222,7 +222,7 @@ void Parameters::print() {
 	// SUMMARY STATISTICS
 	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates
 		|| summary_diversity || summary_fst || summary_tajima_d) {
-		cout << "Summary statistics:" << endl;
+		cout << "Summary statistics" << endl;
 	}
 	if (summary_tmrca) { cout << "tmrca" << endl; }
 	if (summary_length) { cout << "length" << endl; }
@@ -240,7 +240,7 @@ void Parameters::print() {
 	// SKYLINE STATISTICS
 	if (skyline_tmrca || skyline_proportions || skyline_coal_rates || skyline_mig_rates
 		|| skyline_diversity || skyline_fst || skyline_tajima_d) {
-		cout << "Summary statistics:" << endl;
+		cout << "Skyline statistics" << endl;
 	}
 	if (skyline_tmrca) { cout << "tmrca" << endl; }
 	if (skyline_proportions) { cout << "proportions" << endl; }

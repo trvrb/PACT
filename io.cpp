@@ -35,6 +35,8 @@ IO::IO() {
 	param.print();
 
 	// TREE INPUT /////////////////////
+	cout << "Reading trees from in.trees" << endl;
+	
 	ifstream inStream;
 	inStream.open( inputFile.c_str(),ios::out);
 
