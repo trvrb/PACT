@@ -1,4 +1,5 @@
 /* coaltree.cpp
+Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
 Member function definitions for CoalescentTree class
 */
 
@@ -695,7 +696,7 @@ void CoalescentTree::printRuleList(string outputFile) {
 
 	/* initializing output stream */
 	ofstream outStream;
-	outStream.open( outputFile.c_str(),ios::out);
+	outStream.open( outputFile.c_str(),ios::app);
 
 	tree<Node>::iterator it, jt;
 
@@ -1071,6 +1072,10 @@ double CoalescentTree::getMigRate() {
 /* currently, this is set up as calculating the rate from working backwards in time */
 /* i.e. the migration rate from 1->2 is measured from the count going backwards on 2->1 divided */
 /* by the backward opportunity of 2 */
+/* getMigCount(from,to) / getLength(to) */
+/* this needs attention */
+/* seems to match with empirical estimates with getMigCount(from,to) / getLength() */
+/* seems wrong however */
 double CoalescentTree::getMigRate(int from, int to) {
 	return getMigCount(from,to) / getLength(to);
 }

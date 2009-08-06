@@ -1,4 +1,5 @@
 /* io.h
+Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
 IO class definition
 This object reads a BEAST or Migrate treefile and performs calculations on the resulting vector of
 CoalescentTrees.
@@ -30,7 +31,7 @@ public:
 	void treeManip();						// perform tree manipulation operations
 	void printHPTree();						// print highest posterior tree to .rules
 	void printStatistics();					// print coalescent statistics to .stats
-//	void printSkylines();					// print skyline values to .skls	
+	void printSkylines();					// print skyline values to .skylines
 																			
 private:
 

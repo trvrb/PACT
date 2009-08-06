@@ -1,4 +1,5 @@
 /* node.cpp
+Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
 Member function definitions for Node class
 */
 

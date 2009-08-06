@@ -1,4 +1,5 @@
 /* param.h
+Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
 This contains all the global variables used by pact, can be modified later if necessary
 */
 
@@ -18,6 +19,10 @@ public:
 	Parameters();						// constructor, imports parameters from in.param if available
 
 	void print();						// prints parameter listing
+
+	bool manip();						// are any tree manipulation parameters true?
+	bool summary();						// are any summary parameters true?
+	bool skyline();						// are any skyline parameters true?
 
 	// PARAMETERS
 	bool push_times_back;

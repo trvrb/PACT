@@ -1,4 +1,5 @@
 /* param.cpp
+Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
 Member function definitions for Parameter class
 Parameter values are all global
 */
@@ -157,9 +158,9 @@ void Parameters::importLine(string line) {
 	if (pstring == "summarytajimad") { summary_tajima_d = true; }	
 	
 	if (pstring == "skylinesettings") { 
-		if (values.size() == 1 || values.size() == 3) {
-			skyline_values = values;		
-		}		
+		if (values.size() == 3) { 
+			skyline_values = values;			
+		}			
 	}
 
 	if (pstring == "skylinetmrca") { skyline_tmrca = true; }
@@ -176,7 +177,7 @@ void Parameters::importLine(string line) {
 void Parameters::print() {
 
 	// TREE MANIPULATION
-	if (push_times_back || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice) {
+	if ( manip() ) {
 		cout << "Tree manipulation" << endl;
 	}
 
@@ -208,7 +209,7 @@ void Parameters::print() {
 		cout << "time slice " << time_slice_values[0] << endl;
 	}		
 	
-	if (push_times_back || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice) {
+	if ( manip() ) {
 		cout << endl;
 	}
 	
@@ -220,10 +221,7 @@ void Parameters::print() {
 	}	
 	
 	// SUMMARY STATISTICS
-	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates
-		|| summary_diversity || summary_fst || summary_tajima_d) {
-		cout << "Summary statistics" << endl;
-	}
+	if ( summary() ) { cout << "Summary statistics" << endl; }
 	if (summary_tmrca) { cout << "tmrca" << endl; }
 	if (summary_length) { cout << "length" << endl; }
 	if (summary_proportions) { cout << "proportions" << endl; }
@@ -232,15 +230,14 @@ void Parameters::print() {
 	if (summary_diversity) { cout << "diversity" << endl; }
 	if (summary_fst) { cout << "fst" << endl; }	
 	if (summary_tajima_d) { cout << "tajima d" << endl; }	
-	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates
-		|| summary_diversity || summary_fst || summary_tajima_d) {
-		cout << endl;
-	}
+	if ( summary() ) { cout << endl; }
 
 	// SKYLINE STATISTICS
-	if (skyline_tmrca || skyline_proportions || skyline_coal_rates || skyline_mig_rates
-		|| skyline_diversity || skyline_fst || skyline_tajima_d) {
-		cout << "Skyline statistics" << endl;
+	if ( skyline() ) { 
+		cout << "Skyline statistics";
+		cout << " " << skyline_values[0];
+		cout << " " << skyline_values[1];
+		cout << " " << skyline_values[2] << endl;
 	}
 	if (skyline_tmrca) { cout << "tmrca" << endl; }
 	if (skyline_proportions) { cout << "proportions" << endl; }
@@ -249,9 +246,34 @@ void Parameters::print() {
 	if (skyline_diversity) { cout << "diversity" << endl; }
 	if (skyline_fst) { cout << "fst" << endl; }	
 	if (skyline_tajima_d) { cout << "tajima d" << endl; }	
-	if (skyline_tmrca || skyline_proportions || skyline_coal_rates || skyline_mig_rates
-		|| skyline_diversity || skyline_fst || skyline_tajima_d) {
-		cout << endl;
-	}
+	if ( skyline() ) { cout << endl; }
 
+}
+
+bool Parameters::manip() {
+	bool boolean;
+	if (push_times_back || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice)
+		boolean = true;
+	else 
+		boolean = false;
+	return boolean;
+}
+
+bool Parameters::summary() {
+	bool boolean;
+	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_diversity || summary_fst || summary_tajima_d)
+		boolean = true;
+	else 
+		boolean = false;
+	return boolean;
+}
+
+bool Parameters::skyline() {
+	bool boolean;
+	if ( skyline_values.size() == 3 &&
+		(skyline_tmrca || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d) )
+		boolean = true;
+	else 
+		boolean = false;
+	return boolean;
 }
