@@ -1219,6 +1219,43 @@ double CoalescentTree::getTajimaD() {
 }
 
 
+/* returns vector of tip names */
+vector<string> CoalescentTree::getTipNames() {
+
+	vector<string> names;
+	for (tree<Node>::leaf_iterator lit = nodetree.begin_leaf(); lit != nodetree.end_leaf(); lit++) {
+		names.push_back( (*lit).getName() );
+	}
+	return names;
+
+}
+
+double CoalescentTree::getTime(string name) {
+	tree<Node>::iterator it = findNode(name);	
+	return (*it).getTime();
+}
+
+int CoalescentTree::getLabel(string name) {
+	tree<Node>::iterator it = findNode(name);	
+	return (*it).getLabel();
+}
+
+/* time it takes for a named tip to coalesce with the trunk */
+double CoalescentTree::timeToTrunk(string name) {
+
+	tree<Node>::iterator it, jt;
+	it = findNode(name);
+	jt = it;
+	
+	/* walk back from this node until trunk is reached */
+	while ( !(*jt).getTrunk() ) {
+		jt = nodetree.parent(jt);
+	}
+	
+	return (*it).getTime() - (*jt).getTime();	
+
+}
+
 /* removes extraneous nodes from tree */
 void CoalescentTree::reduce() {
 
@@ -1270,12 +1307,22 @@ int CoalescentTree::renumber(int n) {
 tree<Node>::iterator CoalescentTree::findNode(int n) {
 	
 	tree<Node>::iterator it;
-	
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		if ((*it).getNumber() == n)
 			break;
 	}
+	return it;
+	
+}
 
+/* given a name, returns iterator to associated node, or if not found, returns iterator to end of tree */
+tree<Node>::iterator CoalescentTree::findNode(string name) {
+	
+	tree<Node>::iterator it;
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+		if ((*it).getName() == name)
+			break;
+	}
 	return it;
 	
 }

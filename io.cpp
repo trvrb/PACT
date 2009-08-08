@@ -47,6 +47,12 @@ IO::IO() {
 		outStream.open( outputFile.c_str(),ios::out);
 		outStream.close();
 	}
+	
+	if (param.tips()) {
+		outputFile = outputPrefix + ".tips";
+		outStream.open( outputFile.c_str(),ios::out);
+		outStream.close();
+	}	
 
 	if (param.skyline()) {
 		outputFile = outputPrefix + ".skylines";
@@ -285,6 +291,45 @@ void IO::printStatistics() {
 		}
 				
 
+		outStream.close();
+	
+	}
+
+}
+
+/* go through treelist and summarize tip statistics */
+void IO::printTips() {
+
+	if (param.tips()) {
+
+		/* initializing output stream */
+		string outputFile = outputPrefix + ".tips";
+		ofstream outStream;
+		outStream.open( outputFile.c_str(),ios::app);
+		
+		outStream << "statistic\tname\tlabel\ttime\tlower\tmean\tupper" << endl; 
+		
+		/* get vector of tip names */
+		vector<string> tipNames = treelist[0].getTipNames();
+		
+		// TIME TO TRUNK //////////////
+		if (param.tips_time_to_trunk) {
+			cout << "Printing time to trunk for tips to " << outputFile << endl;
+			for (int n = 0; n < tipNames.size(); n++) {
+				string tip = tipNames[n];
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					double n = treelist[i].timeToTrunk(tip);
+					s.insert(n);
+				}
+				outStream << "time_to_trunk" << "\t";
+				outStream << tip << "\t";
+				outStream << treelist[0].getLabel(tip) << "\t";
+				outStream << treelist[0].getTime(tip) << "\t";				
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;		
+			}
+		}
+	
 		outStream.close();
 	
 	}

@@ -7,6 +7,12 @@ This object stores and manipulates coalescent trees, rooted bifurcating trees wi
 #ifndef CTREE_H
 #define CTREE_H
 
+#include <string>
+using std::string;
+
+#include <vector>
+using std::vector;
+
 #include "tree.hh"
 #include "node.h"
 
@@ -46,7 +52,6 @@ public:
 	int getLeafCount();						// returns the count of leaf nodes in tree
 	int getNodeCount();						// returns the total number of nodes in tree
 
-
 	// LABEL STATISTICS		
 	double getLength();						// return total tree length
 	double getLength(int);					// return length with this label
@@ -76,6 +81,13 @@ public:
 	double getFst();						// Fst = (divBetween - divWithin) / divBetween
 	double getTajimaD();					// return D = pi - S/a1, where pi is diversity, S is the total tree length, 
 											// and a1 is a normalization factor
+
+	// TIP STATISTICS
+	vector<string> getTipNames();			// returns vector of tip names
+	double getTime(string);
+	int getLabel(string);
+	double timeToTrunk(string);				// time it takes for a named tip to coalesce with the trunk
+	
 									
 private:
 	tree<Node> nodetree;					// linked tree containing Node objects		
@@ -86,6 +98,7 @@ private:
 	int renumber(int);						// renumbers tree in preorder traversal starting from int 
 											// returning 1 greater than the max in the tree
 	tree<Node>::iterator findNode(int);		// return iterator to a Node in nodetree based upon matching number
+	tree<Node>::iterator findNode(string);	// return iterator to a Node in nodetree based upon matching name	
 											// if not found, returns iterator to end of tree
 												
 	tree<Node>::iterator commonAncestor(tree<Node>::iterator,tree<Node>::iterator);

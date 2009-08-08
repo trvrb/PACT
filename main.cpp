@@ -46,6 +46,7 @@ int main() {
 	trees.treeManip();
 	trees.printHPTree();
 	trees.printStatistics();
+	trees.printTips();
 	trees.printSkylines();
 
 	return 0;

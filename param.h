@@ -22,6 +22,7 @@ public:
 
 	bool manip();						// are any tree manipulation parameters true?
 	bool summary();						// are any summary parameters true?
+	bool tips();
 	bool skyline();						// are any skyline parameters true?
 
 	// PARAMETERS
@@ -52,6 +53,8 @@ public:
 	bool summary_diversity;		
 	bool summary_fst;				
 	bool summary_tajima_d;	
+	
+	bool tips_time_to_trunk;
 		
 	vector<double> skyline_values;			// start, stop, step
 	

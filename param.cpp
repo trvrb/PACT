@@ -42,6 +42,8 @@ Parameters::Parameters() {
 	summary_fst = false;				
 	summary_tajima_d = false;	
 	
+	tips_time_to_trunk = false;
+	
 	skyline_tmrca = false;	
 	skyline_proportions = false;
 	skyline_coal_rates = false;
@@ -155,7 +157,9 @@ void Parameters::importLine(string line) {
 	if (pstring == "summarymigrates") { summary_mig_rates = true; }
 	if (pstring == "summarydiversity") { summary_diversity = true; }
 	if (pstring == "summaryfst") { summary_fst = true; }
-	if (pstring == "summarytajimad") { summary_tajima_d = true; }	
+	if (pstring == "summarytajimad") { summary_tajima_d = true; }
+	
+	if (pstring == "tipstimetotrunk") { tips_time_to_trunk = true; }	
 	
 	if (pstring == "skylinesettings") { 
 		if (values.size() == 3) { 
@@ -232,6 +236,11 @@ void Parameters::print() {
 	if (summary_tajima_d) { cout << "tajima d" << endl; }	
 	if ( summary() ) { cout << endl; }
 
+	// TIP STATISTICS
+	if ( tips() ) { cout << "Tip statistics" << endl; }
+	if (tips_time_to_trunk) { cout << "time to trunk" << endl; }
+	if ( tips() ) { cout << endl; }	
+
 	// SKYLINE STATISTICS
 	if ( skyline() ) { 
 		cout << "Skyline statistics";
@@ -262,6 +271,15 @@ bool Parameters::manip() {
 bool Parameters::summary() {
 	bool boolean;
 	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_diversity || summary_fst || summary_tajima_d)
+		boolean = true;
+	else 
+		boolean = false;
+	return boolean;
+}
+
+bool Parameters::tips() {
+	bool boolean;
+	if (tips_time_to_trunk)
 		boolean = true;
 	else 
 		boolean = false;
