@@ -424,7 +424,7 @@ from  ------			 	to	--
 
 */
 void CoalescentTree::trimEnds(double start, double stop) {
-		
+			
 	/* erase nodes from the tree where neither the node nor its parent are between start and stop */
 	tree<Node>::iterator it, jt;
 	it = nodetree.begin();
@@ -436,7 +436,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 	
 			/* if node > stop and parent < stop, erase children and prune node back to stop */
 			/* this pruning causes a leaf node to become an internal node */
-			if ((*it).getTime() > stop && (*jt).getTime() <= stop) {
+			if ((*it).getTime() > stop && (*jt).getTime() < stop) {
 			
 				(*it).setTime( stop );
 				(*it).setLength( (*it).getTime() - (*jt).getTime() );
@@ -449,13 +449,14 @@ void CoalescentTree::trimEnds(double start, double stop) {
 			/* if node > start and parent < start, push parent up to start */
 			/* and reparent anc[node] to be a child of root */
 			/* neither node nore anc[node] can be root */
-			else if ((*it).getTime() > start && (*jt).getTime() < start && nodetree.depth(it) > 1) {	
+			else if ((*it).getTime() > start && (*jt).getTime() < start) {	 //  && nodetree.depth(it) > 1
+			
 				(*jt).setTime(start);
 				(*jt).setLength(0.0);
 				(*jt).setInclude(false);
-				Node tempNode(-1);
-				nodetree.move_ontop(nodetree.append_child(nodetree.begin(),tempNode),jt);
+				nodetree.move_after(nodetree.begin(),jt);
 				it = nodetree.begin();
+			
 			}
 			
 			else {
@@ -470,10 +471,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
     }
     
     /* second pass for nodes < start */
-    it = nodetree.begin();
-    (*it).setTime(start);
-    (*it).setLength(0.0);
-	(*it).setInclude(false);    
+    it = nodetree.begin();   
 	while(it != nodetree.end()) {	
 		if ((*it).getTime() < start && nodetree.depth(it) > 0) {
 			it = nodetree.erase(it);
@@ -482,7 +480,10 @@ void CoalescentTree::trimEnds(double start, double stop) {
     		it++;
     	}
     }
-               
+    
+    // eliminate extraneous root
+    nodetree.erase(nodetree.begin());
+    
 	// go through tree and update lengths based on times
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
@@ -492,7 +493,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 	}	               
                
 	reduce();
-		
+					
 }
 
 /* cuts up tree into multiple sections */
@@ -753,9 +754,7 @@ void CoalescentTree::printRuleList(string outputFile) {
 	/* print mapping of nodes to coordinates */
   	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-		if (nodetree.depth(it) == 0) {
-			count = 0;
-		}
+		//if (nodetree.depth(it) == 0) { count = 0; }		// this resets count for each subtree
 		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
 		count++;
 	}

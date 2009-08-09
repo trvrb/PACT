@@ -37,11 +37,11 @@ tips time to trunk
 
 ### SKYLINE STATISTICS				# need to walk these backward to keep window consistent across samples
 									# prints to out.skylines
-#skyline settings 2002 2007 0.1		# split the tree starting at 2002 and ending at 2007 in steps of 0.1
+skyline settings 2002 2007 0.1		# split the tree starting at 2002 and ending at 2007 in steps of 0.1
 
 #skyline tmrca						# computes the TMRCA for time slices
-#skyline proportions				# computes label proportions for trunk along time windows
-#skyline coal rates					# computes coalescent rates for time windows
+skyline proportions					# computes label proportions for trunk along time windows
+skyline coal rates					# computes coalescent rates for time windows
 #skyline mig rates					# computes migration rates for time windows
 #skyline diversity					# computes the diversity for time slices 
 #skyline fst						# computes the FST for time slices

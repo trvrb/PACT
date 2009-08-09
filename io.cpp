@@ -238,16 +238,16 @@ void IO::printStatistics() {
 		
 		outStream << "statistic\tlower\tmean\tupper" << endl; 
 		
-		int n = treelist[0].getMaxLabel();
+		int maxLabel = treelist[0].getMaxLabel();
 
-		// TRUNK PROPORTIONS //////////////
+		// LABEL PROPORTIONS //////////////
 		if (param.summary_proportions) {
 			cout << "Printing trunk proportion summary to " << outputFile << endl;
-			for (int label = 1; label <= n; label++) {
+			for (int label = 1; label <= maxLabel; label++) {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
 					CoalescentTree ct = treelist[i];
-					ct.pruneToTrunk();
+			//		ct.pruneToTrunk();
 					double n = ct.getLabelPro(label);
 					s.insert(n);
 				}
@@ -259,7 +259,7 @@ void IO::printStatistics() {
 		// COALESCENCE /////////////////////
 		if (param.summary_coal_rates) {
 			cout << "Printing coalescent summary to " << outputFile << endl;	
-			for (int label = 1; label <= n; label++) {
+			for (int label = 1; label <= maxLabel; label++) {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
 					double n = treelist[i].getCoalRate(label);
@@ -273,8 +273,8 @@ void IO::printStatistics() {
 		// MIGRATION ///////////////////////
 		if (param.summary_mig_rates) {		
 			cout << "Printing migration summary to " << outputFile << endl;
-			for (int from = 1; from <= n; from++) {
-				for (int to = 1; to <= n; to++) {	
+			for (int from = 1; from <= maxLabel; from++) {
+				for (int to = 1; to <= maxLabel; to++) {	
 					if (from != to) {
 		
 						Series s;
@@ -348,7 +348,7 @@ void IO::printSkylines() {
 		
 		outStream << "statistic\ttime\tlower\tmean\tupper" << endl; 
 		
-		int n = treelist[0].getMaxLabel();
+		int maxLabel = treelist[0].getMaxLabel();
 		double start = param.skyline_values[0];
 		double stop = param.skyline_values[1];
 		double step = param.skyline_values[2];
@@ -357,7 +357,7 @@ void IO::printSkylines() {
 		if (param.skyline_coal_rates) {
 			cout << "Printing coalescent skyline to " << outputFile << endl;
 			
-			for (int label = 1; label <= n; label++) {
+			for (int label = 1; label <= maxLabel; label++) {
 				for (double t = start; t + step <= stop; t += step) {
 			
 					Series s;
@@ -374,6 +374,29 @@ void IO::printSkylines() {
 				}
 			}
 		}
+		
+		// LABEL PROPORTIONS /////////////////////
+		if (param.skyline_proportions) {
+			cout << "Printing trunk proportions skyline to " << outputFile << endl;
+			
+			for (int label = 1; label <= maxLabel; label++) {
+				for (double t = start; t + step <= stop; t += step) {
+			
+					Series s;
+					for (int i = 0; i < treelist.size(); i++) {
+						CoalescentTree ct = treelist[i];
+						ct.trimEnds(t,t+step);
+					//	ct.pruneToTrunk();
+						double n = ct.getLabelPro(label);
+						s.insert(n);
+					}
+					outStream << "pro_" << label << "\t";
+					outStream << t + step / (double) 2 << "\t";
+					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+					
+				}
+			}
+		}		
 		
 		outStream.close();
 	

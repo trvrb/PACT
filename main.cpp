@@ -18,6 +18,11 @@
 	Finish with parameters (skylines need implementing).
 */
 
+/*	Bugs:
+	pruneToTrunk followed by trimEnds fails, while the reverse works
+
+*/
+
 /*
 	tree.hh: Copyright 2001-2006 Kasper Peeters <kasper.peeters@aei.mpg.de>
 */

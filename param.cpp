@@ -182,39 +182,40 @@ void Parameters::print() {
 
 	// TREE MANIPULATION
 	if ( manip() ) {
+	
 		cout << "Tree manipulation" << endl;
-	}
-
-	if (push_times_back) {
-		cout << "push times back ";
-		for (int i = 0; i < push_times_back_values.size(); i++) {
-			cout << push_times_back_values[i] << " ";
+	
+		if (push_times_back) {
+			cout << "push times back ";
+			for (int i = 0; i < push_times_back_values.size(); i++) {
+				cout << push_times_back_values[i] << " ";
+			}
+			cout << endl;
 		}
+	
+		if (prune_to_trunk) {
+			cout << "prune to trunk" << endl;
+		}	
+		
+		if (prune_to_label) {
+			cout << "prune to label " << push_times_back_values[0] << endl;
+		}	
+		
+		if (trim_ends) {
+			cout << "trim ends " << trim_ends_values[0] << " " << trim_ends_values[1] << endl;		
+		}
+	
+		if (section_tree) {
+			cout << "section tree " << section_tree_values[0] << " " << section_tree_values[1] << " " << section_tree_values[2] << endl;		
+		}	
+	
+		if (time_slice) {
+			cout << "time slice " << time_slice_values[0] << endl;
+		}		
+	
+	
 		cout << endl;
-	}
-
-	if (prune_to_trunk) {
-		cout << "prune to trunk" << endl;
-	}	
 	
-	if (prune_to_label) {
-		cout << "prune to label " << push_times_back_values[0] << endl;
-	}	
-	
-	if (trim_ends) {
-		cout << "trim ends " << trim_ends_values[0] << " " << trim_ends_values[1] << endl;		
-	}
-
-	if (section_tree) {
-		cout << "section tree " << section_tree_values[0] << " " << section_tree_values[1] << " " << section_tree_values[2] << endl;		
-	}	
-
-	if (time_slice) {
-		cout << "time slice " << time_slice_values[0] << endl;
-	}		
-	
-	if ( manip() ) {
-		cout << endl;
 	}
 	
 	// TREE STRUCTURE
@@ -225,38 +226,42 @@ void Parameters::print() {
 	}	
 	
 	// SUMMARY STATISTICS
-	if ( summary() ) { cout << "Summary statistics" << endl; }
-	if (summary_tmrca) { cout << "tmrca" << endl; }
-	if (summary_length) { cout << "length" << endl; }
-	if (summary_proportions) { cout << "proportions" << endl; }
-	if (summary_coal_rates) { cout << "coal rates" << endl; }
-	if (summary_mig_rates) { cout << "mig rates" << endl; }
-	if (summary_diversity) { cout << "diversity" << endl; }
-	if (summary_fst) { cout << "fst" << endl; }	
-	if (summary_tajima_d) { cout << "tajima d" << endl; }	
-	if ( summary() ) { cout << endl; }
+	if ( summary() ) { 
+		cout << "Summary statistics" << endl;
+		if (summary_tmrca) { cout << "tmrca" << endl; }
+		if (summary_length) { cout << "length" << endl; }
+		if (summary_proportions) { cout << "proportions" << endl; }
+		if (summary_coal_rates) { cout << "coal rates" << endl; }
+		if (summary_mig_rates) { cout << "mig rates" << endl; }
+		if (summary_diversity) { cout << "diversity" << endl; }
+		if (summary_fst) { cout << "fst" << endl; }	
+		if (summary_tajima_d) { cout << "tajima d" << endl; }	
+		cout << endl; 
+	}
 
 	// TIP STATISTICS
-	if ( tips() ) { cout << "Tip statistics" << endl; }
-	if (tips_time_to_trunk) { cout << "time to trunk" << endl; }
-	if ( tips() ) { cout << endl; }	
+	if ( tips() ) { 
+		cout << "Tip statistics" << endl;
+		if (tips_time_to_trunk) { cout << "time to trunk" << endl; }
+		cout << endl; 
+	}	
 
 	// SKYLINE STATISTICS
-	if ( skyline() ) { 
+	if ( skyline() ) {
 		cout << "Skyline statistics";
 		cout << " " << skyline_values[0];
 		cout << " " << skyline_values[1];
 		cout << " " << skyline_values[2] << endl;
+		if (skyline_tmrca) { cout << "tmrca" << endl; }
+		if (skyline_proportions) { cout << "proportions" << endl; }
+		if (skyline_coal_rates) { cout << "coal rates" << endl; }
+		if (skyline_mig_rates) { cout << "mig rates" << endl; }
+		if (skyline_diversity) { cout << "diversity" << endl; }
+		if (skyline_fst) { cout << "fst" << endl; }	
+		if (skyline_tajima_d) { cout << "tajima d" << endl; }	
+		cout << endl;
 	}
-	if (skyline_tmrca) { cout << "tmrca" << endl; }
-	if (skyline_proportions) { cout << "proportions" << endl; }
-	if (skyline_coal_rates) { cout << "coal rates" << endl; }
-	if (skyline_mig_rates) { cout << "mig rates" << endl; }
-	if (skyline_diversity) { cout << "diversity" << endl; }
-	if (skyline_fst) { cout << "fst" << endl; }	
-	if (skyline_tajima_d) { cout << "tajima d" << endl; }	
-	if ( skyline() ) { cout << endl; }
-
+	
 }
 
 bool Parameters::manip() {
