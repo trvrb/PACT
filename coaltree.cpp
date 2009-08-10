@@ -449,7 +449,7 @@ void CoalescentTree::trimEnds(double start, double stop) {
 			/* if node > start and parent < start, push parent up to start */
 			/* and reparent anc[node] to be a child of root */
 			/* neither node nore anc[node] can be root */
-			else if ((*it).getTime() > start && (*jt).getTime() < start) {	 //  && nodetree.depth(it) > 1
+			else if ((*it).getTime() > start && (*jt).getTime() < start) {
 			
 				(*jt).setTime(start);
 				(*jt).setLength(0.0);
@@ -469,21 +469,18 @@ void CoalescentTree::trimEnds(double start, double stop) {
     		it++;
     	}
     }
-    
+        
     /* second pass for nodes < start */
     it = nodetree.begin();   
 	while(it != nodetree.end()) {	
-		if ((*it).getTime() < start && nodetree.depth(it) > 0) {
+		if ((*it).getTime() < start) {
 			it = nodetree.erase(it);
 		}
 		else {
     		it++;
     	}
     }
-    
-    // eliminate extraneous root
-    nodetree.erase(nodetree.begin());
-    
+        
 	// go through tree and update lengths based on times
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
