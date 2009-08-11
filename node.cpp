@@ -8,6 +8,19 @@ using std::string;
 
 #include "node.h"
 
+Node::Node() {
+	
+	number = -1;
+	name = "";
+	length = 0.0;
+	time = 0.0;
+	label = 1;
+	leaf = false;
+	trunk = false;
+	include = true;
+		
+}
+
 Node::Node(int n) {
 	
 	number = n;
@@ -19,6 +32,15 @@ Node::Node(int n) {
 	trunk = false;
 	include = true;
 		
+}
+
+// overloaded comparison operator
+bool Node::operator==(Node &other) {
+
+	int i = (*this).getNumber();
+	int j = other.getNumber();
+	return i == j;
+
 }
 
 /* Get functions */

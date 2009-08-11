@@ -13,7 +13,10 @@ using std::string;
 class Node {
 
 public:
-	Node(int);						// creation requires a name
+	Node();							// defaults to -1
+	Node(int);						// set number on creation
+	
+	bool operator==(Node &other);
 	
 	// GET FUNCTIONS
 	int getNumber();

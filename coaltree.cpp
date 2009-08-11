@@ -517,16 +517,39 @@ void CoalescentTree::sectionTree(double start, double window, double step) {
 			trimEnds(t,t + window);	
 			current = renumber(current);			// need unique node numbers
 			
-			it = newtree.begin();
-			jt = nodetree.begin();	
-			newtree.replace(it,jt);			
-		
-			newtree.insert(newtree.begin(),tempNode);
+		//	printTree();
 			
+		//	it = newtree.begin();
+		//	jt = nodetree.begin();	
+		//	newtree.replace(it,jt);			
+		
+		//	newtree.insert(newtree.begin(),tempNode);
+		//	newtree.move_after(newtree.begin(),nodetree.begin());
+		
+			// need to move multiple sibling branches
+			// need four sibling iterators, to1 to2 from1 from2
+			tree<Node>::sibling_iterator to1, to2, from1, from2;
+	
+			from1 = nodetree.begin();
+			from2 = nodetree.begin();
+			while ( nodetree.is_valid(nodetree.next_sibling(from2)) ){
+				from2 = nodetree.next_sibling(from2);
+			}
+
+			to1 = newtree.begin();
+			to2 = newtree.begin();
+			while ( newtree.is_valid(newtree.next_sibling(to2)) ){
+				to2 = newtree.next_sibling(to2);
+			}
+					
+			newtree.merge(to1,to2,from1,from2,true);
+	
+	//		newtree.append_children(newtree.begin(),from1,from2);
+	
 		}
 	}
 
-	newtree.erase(newtree.begin());
+//	newtree.erase(newtree.begin());
 	nodetree = newtree;
 	
 }

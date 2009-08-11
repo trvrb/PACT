@@ -1482,18 +1482,18 @@ void tree<T, tree_node_allocator>::merge(sibling_iterator to1,   sibling_iterato
    {
    sibling_iterator fnd;
    while(from1!=from2) {
-      if((fnd=std::find(to1, to2, (*from1))) != to2) { // element found
-         if(from1.begin()==from1.end()) { // full depth reached
-            if(duplicate_leaves)
-               append_child(parent(to1), (*from1));
-            }
-         else { // descend further
-            merge(fnd.begin(), fnd.end(), from1.begin(), from1.end(), duplicate_leaves);
-            }
-         }
-      else { // element missing
+//      if((fnd=std::find(to1, to2, (*from1))) != to2) { // element found
+//         if(from1.begin()==from1.end()) { // full depth reached
+//            if(duplicate_leaves)
+//               append_child(parent(to1), (*from1));
+//            }
+//         else { // descend further
+//            merge(fnd.begin(), fnd.end(), from1.begin(), from1.end(), duplicate_leaves);
+//            }
+//         }
+//      else { // element missing
          insert_subtree(to2, from1);
-         }
+//         }
       ++from1;
       }
    }
