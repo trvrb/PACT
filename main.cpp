@@ -45,6 +45,9 @@
 // Set default parameters and modify via parameter file
 #include "param.h"
 
+// Functions for PDF export
+#include "pdf.h"
+
 int main() {
 			
 	IO trees;

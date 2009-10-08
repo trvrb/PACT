@@ -765,7 +765,7 @@ void CoalescentTree::printRuleList(string outputFile) {
 	outStream << endl;
 	
 	
-	/* print mapping of labels in Mathematica format */
+	/* print mapping of nodes to labels */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {	
 		outStream << (*it).getNumber() << "->" << (*it).getLabel() << " ";
 	}
@@ -779,6 +779,13 @@ void CoalescentTree::printRuleList(string outputFile) {
 		count++;
 	}
 	outStream << endl;	
+	  	  	
+	/* print mapping of nodes to names */
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {	
+		if ((*it).getName() != "")
+			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
+	}
+	outStream << endl;  	  	
 	  	  	
 	outStream.close();
 	  	  	
@@ -924,7 +931,7 @@ double CoalescentTree::getLength(int l) {
 
 /* get proportion of tree with label */
 double CoalescentTree::getLabelPro(int l) { 
-		
+
 	return getLength(l) / getLength();
 	
 }
