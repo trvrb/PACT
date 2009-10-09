@@ -361,10 +361,28 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 }
 
 /* reduces a tree to just its trunk, takes most recent sample and works backward from this */
-void CoalescentTree::pruneToTrunk() {
+void CoalescentTree::pruneToTrunk(float t) {
+
+	/* go through tree and append to trunk set */
+	/* only the last 1/100 of the time span is considered */
+	double presentTime = getPresentTime();
+	tree<Node>::iterator it, jt;
+	it = nodetree.begin();
+	(*it).setTrunk(true);
+	while(it != nodetree.end()) {
+		/* find nodes at present */
+		if ((*it).getTime() > presentTime - t) {
+			jt = it;
+			/* move up tree adding nodes to trunk set */
+			while (nodetree.is_valid(jt)) {
+				(*jt).setTrunk(true);
+				jt = nodetree.parent(jt);
+			}
+		}
+		it++;
+	}	
 	
-	/* erase other nodes from the tree */
-	tree<Node>::iterator it;	
+	/* erase other nodes from the tree */	
 	it = nodetree.begin();
 	while(it != nodetree.end()) {
 		if ( !(*it).getTrunk() ) {
@@ -605,28 +623,8 @@ void CoalescentTree::timeSlice(double slice) {
     	}
     }    
     
-    /* peel back trunk */
-	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-		jt = nodetree.parent(it);
-		if ( nodetree.is_valid(jt) && nodetree.number_of_children(it) == 1) {	
-			kt = nodetree.child(it,0);
-			(*kt).setLength( (*kt).getLength() + (*it).getLength() );	
-			nodetree.reparent(jt,it);								// push child node up to be sibling of node
-			nodetree.erase(it);										// erase node									
-			it = nodetree.begin();
-		}
-		if (nodetree.number_of_children(it) == 2) {
-			break;
-		}
-	}
-
-	// adjust root    
-	nodetree.move_after(nodetree.begin(),++nodetree.begin());
-	nodetree.erase(nodetree.begin());
-	(*nodetree.begin()).setLength(0.0);
-
+	peelBack();
 	reduce();
-
 
 }
 
@@ -723,19 +721,22 @@ void CoalescentTree::printRuleList(string outputFile) {
 
 	/* reorder tree so that the bottom node of two sister nodes always has the most recent child more children */
 	/* this combined with preorder traversal will insure the trunk follows a rough diagonal */
-	it = nodetree.begin();
-	while(it != nodetree.end()) {
-		jt = nodetree.next_sibling(it);
-		if (nodetree.is_valid(jt)) {
-			int cit = nodetree.size(it);
-			int cjt = nodetree.size(jt);
-			if (cit > cjt) {
-				nodetree.swap(jt,it);
-				it = nodetree.begin();
-			}
-		}
-		it++;
-	}
+//	it = nodetree.begin();
+//	while(it != nodetree.end()) {
+//		jt = nodetree.next_sibling(it);
+//		if (nodetree.is_valid(jt)) {
+//			int cit = nodetree.size(it);
+//			int cjt = nodetree.size(jt);
+//			if (cit > cjt) {
+//				nodetree.swap(jt,it);
+//				it = nodetree.begin();
+//			}
+//		}
+//		it++;
+//	}
+
+	/* setting up y-axis ordering, x-axis is date */
+	adjustCoords();
 	
 	/* print leaf nodes */
 	/* a node may be a leaf on the current tree, but not a leaf on the original tree */
@@ -771,21 +772,27 @@ void CoalescentTree::printRuleList(string outputFile) {
 	}
 	outStream << endl;
 	
+//	/* print mapping of nodes to coordinates */
+//  	int count = 0;
+//	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+//		//if (nodetree.depth(it) == 0) { count = 0; }		// this resets count for each subtree
+//		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
+//		count++;
+//	}
+//	outStream << endl;
+
 	/* print mapping of nodes to coordinates */
-  	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-		//if (nodetree.depth(it) == 0) { count = 0; }		// this resets count for each subtree
-		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
-		count++;
+		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << (*it).getCoord() << "} ";	
 	}
-	outStream << endl;	
-	  	  	
+	outStream << endl;
+		  	  	
 	/* print mapping of nodes to names */
-	for (it = nodetree.begin(); it != nodetree.end(); it++) {	
-		if ((*it).getName() != "")
-			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
-	}
-	outStream << endl;  	  	
+//	for (it = nodetree.begin(); it != nodetree.end(); it++) {	
+//		if ((*it).getName() != "")
+//			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
+//	}
+//	outStream << endl;  	  	
 	  	  	
 	outStream.close();
 	  	  	
@@ -1291,20 +1298,94 @@ void CoalescentTree::reduce() {
 	events or migration events associated with them */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
-		if (nodetree.is_valid(jt) && nodetree.number_of_children(it) == 1) {	// no coalescence
-			kt = nodetree.child(it,0);
-			if ( (*it).getLabel() == (*kt).getLabel() ) {						// no migration
-//				cout << "it = " << *it << ", kt = " << *kt << endl;
-				(*kt).setLength( (*kt).getLength() + (*it).getLength() );	
- 				nodetree.reparent(jt,it);										// push child node up to be sibling of node
- 				nodetree.erase(it);												// erase node									
-				it = nodetree.begin();
+		if (nodetree.is_valid(jt)) {
+			if (nodetree.number_of_children(it) == 1) {								// no coalescence	
+				kt = nodetree.child(it,0);
+				if ((*jt).getLabel() == (*it).getLabel()) { 						// mo migration
+	//				cout << "it = " << *it << ", kt = " << *kt << endl;
+					(*kt).setLength( (*kt).getLength() + (*it).getLength() );	
+					nodetree.reparent(jt,it);										// push child node up to be sibling of node
+					nodetree.erase(it);												// erase node									
+					it = nodetree.begin();
+				}
 			}
 		}
 	}
 
 }
 
+/* peels back trunk. works from root forward, stopping when first split is reached */
+void CoalescentTree::peelBack() {
+
+	tree<Node>::iterator it, jt, kt;
+
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+		jt = nodetree.parent(it);
+		if ( nodetree.is_valid(jt) && nodetree.number_of_children(it) == 1) {	
+			kt = nodetree.child(it,0);
+			(*kt).setLength( (*kt).getLength() + (*it).getLength() );	
+			nodetree.reparent(jt,it);								// push child node up to be sibling of node
+			nodetree.erase(it);										// erase node									
+			it = nodetree.begin();
+		}
+		if (nodetree.number_of_children(it) == 2) {
+			break;
+		}
+	}
+
+	// adjust root    
+	nodetree.move_after(nodetree.begin(),++nodetree.begin());
+	nodetree.erase(nodetree.begin());
+	(*nodetree.begin()).setLength(0.0);
+	
+}	
+	
+void CoalescentTree::adjustCoords() {
+
+	tree<Node>::iterator it, jt;
+
+	/* reorder tree so that the bottom node of two sister nodes always has the most recent child more children */
+	/* this combined with preorder traversal will insure the trunk follows a rough diagonal */
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		jt = nodetree.next_sibling(it);
+		if (nodetree.is_valid(jt)) {
+			int cit = nodetree.size(it);
+			int cjt = nodetree.size(jt);
+			if (cit > cjt) {
+				nodetree.swap(jt,it);
+				it = nodetree.begin();
+			}
+		}
+		it++;
+	}
+
+	/* set coords of tips according to preorder traversal */
+  	int count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+		if ( (*it).getLeaf() ) {
+			(*it).setCoord(count);		
+		}
+		count++;
+	}
+	
+	/* revise coords of internal nodes according to postorder traversal */
+  	tree<Node>::post_order_iterator post_it, post_jt, post_kt;
+  	for (post_it = nodetree.begin_post(); post_it != nodetree.end_post(); post_it++) {
+  		if (nodetree.number_of_children(post_it) == 1) {
+  			post_jt = nodetree.child(post_it,0);
+  			(*post_it).setCoord((*post_jt).getCoord());	
+  		}  		  	
+  		if (nodetree.number_of_children(post_it) == 2) {
+  			post_jt = nodetree.child(post_it,0);
+  			post_kt = nodetree.child(post_it,1);
+  			double avg = ( (*post_jt).getCoord() + (*post_kt).getCoord() ) / (double) 2;
+  			(*post_it).setCoord(avg);	
+  		}
+	}	
+
+}	
+	
 /* returns maximium node associated with a node in the tree */
 int CoalescentTree::getMaxNumber() {
 

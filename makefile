@@ -1,5 +1,5 @@
-pact: main.o node.o coaltree.o series.o io.o param.o pdf.o
-	g++ -o pact main.o node.o coaltree.o series.o io.o param.o pdf.o
+pact: main.o node.o coaltree.o series.o io.o param.o
+	g++ -o pact main.o node.o coaltree.o series.o io.o param.o
 main.o: main.cpp node.h coaltree.h series.h io.h param.h
 	g++ -c main.cpp 
 node.o: node.cpp node.h 
@@ -12,7 +12,5 @@ io.o: io.cpp io.h
 	g++ -c io.cpp 	
 param.o: param.cpp param.h 
 	g++ -c param.cpp 
-pdf.o: pdf.cpp pdf.h 
-	g++ -c pdf.cpp 	
 clean: 
 	rm *.o pact

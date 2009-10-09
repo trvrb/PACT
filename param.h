@@ -30,6 +30,7 @@ public:
 	vector<double> push_times_back_values;	// start, stop
 	
 	bool prune_to_trunk;
+	vector<double> prune_to_trunk_values;	// time back
 	
 	bool prune_to_label;
 	vector<double> prune_to_label_values;	// label

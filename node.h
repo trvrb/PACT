@@ -24,6 +24,7 @@ public:
 	double getLength();
 	double getTime();
 	int getLabel();
+	double getCoord();
 	bool getLeaf();
 	bool getTrunk();
 	bool getInclude();
@@ -34,6 +35,7 @@ public:
 	void setLength(double);
 	void setTime(double);
 	void setLabel(int);
+	void setCoord(double);
 	void setLeaf(bool);
 	void setTrunk(bool);
 	void setInclude(bool);
@@ -44,6 +46,7 @@ private:
 	double length;					// length of the branch leading into the node
 	double time;					// date of the node	
 	int label;						// numeric label associated with node
+	double coord;					// y-axis coordinate, used for tree drawing
 	bool leaf;						// is this node a leaf?
 	bool trunk;						// is this node part of the trunk?
 	bool include;					// include this node when performing calculations?

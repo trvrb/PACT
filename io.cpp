@@ -156,7 +156,8 @@ void IO::treeManip() {
 			
 			// PRUNE TO TRUNK
 			if (param.prune_to_trunk) {
-				treelist[i].pruneToTrunk();
+				int time = (param.prune_to_trunk_values)[0];
+				treelist[i].pruneToTrunk(time);
 			}
 			
 			// PRUNE TO LABEL
@@ -221,6 +222,7 @@ void IO::printHPTree() {
 		}
 		
 		treelist[index].printRuleList(outputFile);
+//		treelist[index].printTree();
 	
 	}
 

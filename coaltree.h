@@ -27,7 +27,7 @@ public:
 	// TREE MANIPULATION
 	void pushTimesBack(double);				// push dates to agree with a most recent sample date at t
 	void pushTimesBack(double,double);		// oldest sample and most recent sample	
-	void pruneToTrunk();					// reduces CoalescentTree object to trunk
+	void pruneToTrunk(float);				// reduces CoalescentTree object to trunk
 	void pruneToLabel(int);					// reduces CoalescentTree object to only include a particular set of tips
 	void trimEnds(double,double);			// reduces CoalescentTree object to only those nodes between
 											// time start and time stop	
@@ -94,6 +94,8 @@ private:
 										
 	// HELPER FUNCTIONS
 	void reduce();							// goes through tree and removes inconsequential nodes	
+	void peelBack();						// removes excess root from tree
+	void adjustCoords();					// sets coords in Nodes to allow tree drawing
 	int getMaxNumber();						// return larger number in tree
 	int renumber(int);						// renumbers tree in preorder traversal starting from int 
 											// returning 1 greater than the max in the tree

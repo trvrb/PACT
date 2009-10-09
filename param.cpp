@@ -115,7 +115,10 @@ void Parameters::importLine(string line) {
 	}
 	
 	if (pstring == "prunetotrunk") { 
-		prune_to_trunk = true; 
+		if (values.size() == 1) {
+			prune_to_trunk = true;
+			prune_to_trunk_values = values;			
+		} 
 	}
 	
 	if (pstring == "prunetolabel") { 
@@ -194,11 +197,11 @@ void Parameters::print() {
 		}
 	
 		if (prune_to_trunk) {
-			cout << "prune to trunk" << endl;
+			cout << "prune to trunk" << prune_to_trunk_values[0] << endl;
 		}	
 		
 		if (prune_to_label) {
-			cout << "prune to label " << push_times_back_values[0] << endl;
+			cout << "prune to label " << prune_to_label_values[0] << endl;
 		}	
 		
 		if (trim_ends) {
