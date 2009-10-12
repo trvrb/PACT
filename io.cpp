@@ -156,7 +156,7 @@ void IO::treeManip() {
 			
 			// PRUNE TO TRUNK
 			if (param.prune_to_trunk) {
-				int time = (param.prune_to_trunk_values)[0];
+				double time = (param.prune_to_trunk_values)[0];
 				treelist[i].pruneToTrunk(time);
 			}
 			
@@ -223,7 +223,7 @@ void IO::printHPTree() {
 		
 		treelist[index].printRuleList(outputFile);
 //		treelist[index].printTree();
-	
+		
 	}
 
 }
@@ -241,6 +241,32 @@ void IO::printStatistics() {
 		outStream << "statistic\tlower\tmean\tupper" << endl; 
 		
 		int maxLabel = treelist[0].getMaxLabel();
+
+		// TMRCA  //////////////
+		if (param.summary_tmrca) {
+			cout << "Printing TMRCA summary to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getTMRCA();
+				s.insert(n);
+			}
+			outStream << "tmrca" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+		}
+		
+		// LENGTH  //////////////
+		if (param.summary_length) {
+			cout << "Printing length summary to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getLength();
+				s.insert(n);
+			}
+			outStream << "length" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+		}		
 
 		// LABEL PROPORTIONS //////////////
 		if (param.summary_proportions) {
@@ -291,8 +317,190 @@ void IO::printStatistics() {
 				}	
 			}
 		}
-				
 
+		// DIVERSITY  //////////////
+		if (param.summary_diversity) {
+			cout << "Printing diversity summary to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDiversity();
+				s.insert(n);
+			}
+			outStream << "div" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+		}	
+		
+		// FST  //////////////
+		if (param.summary_fst) {
+			cout << "Printing FST summary to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getFst();
+				s.insert(n);
+			}
+			outStream << "fst" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+		}	
+		
+		// TAJIMA'S D  //////////////
+		if (param.summary_tajima_d) {
+			cout << "Printing Tajima's D summary to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getTajimaD();
+				s.insert(n);
+			}
+			outStream << "tajimad" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+		}			
+
+		outStream.close();
+	
+	}
+
+}
+
+/* go through treelist and calculate skyline statistics */
+void IO::printSkylines() {
+
+	if (param.skyline()) {
+
+		/* initializing output stream */
+		string outputFile = outputPrefix + ".skylines";
+		ofstream outStream;
+		outStream.open( outputFile.c_str(),ios::app);
+		
+		outStream << "statistic\ttime\tlower\tmean\tupper" << endl; 
+		
+		int maxLabel = treelist[0].getMaxLabel();
+		double start = param.skyline_values[0];
+		double stop = param.skyline_values[1];
+		double step = param.skyline_values[2];
+
+		// TMRCA /////////////////////
+		if (param.skyline_tmrca) {
+			cout << "Printing TMRCA skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					double n = ct.getTMRCA();
+					s.insert(n);
+				}
+				outStream << "tmrca" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}
+		
+		// LENGTH /////////////////////
+		if (param.skyline_length) {
+			cout << "Printing length skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					double n = ct.getLength();
+					s.insert(n);
+				}
+				outStream << "length" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}		
+
+		// LABEL PROPORTIONS /////////////////////
+		if (param.skyline_proportions) {
+			cout << "Printing trunk proportions skyline to " << outputFile << endl;
+			
+			for (int label = 1; label <= maxLabel; label++) {
+				for (double t = start; t + step <= stop; t += step) {
+			
+					Series s;
+					for (int i = 0; i < treelist.size(); i++) {
+						CoalescentTree ct = treelist[i];
+						ct.trimEnds(t,t+step);
+					//	ct.pruneToTrunk();
+						double n = ct.getLabelPro(label);
+						s.insert(n);
+					}
+					outStream << "pro_" << label << "\t";
+					outStream << t + step / (double) 2 << "\t";
+					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+					
+				}
+			}
+		}
+	
+		// COALESCENCE /////////////////////
+		if (param.skyline_coal_rates) {
+			cout << "Printing coalescent skyline to " << outputFile << endl;
+			
+			for (int label = 1; label <= maxLabel; label++) {
+				for (double t = start; t + step <= stop; t += step) {
+			
+					Series s;
+					for (int i = 0; i < treelist.size(); i++) {
+						CoalescentTree ct = treelist[i];
+						ct.trimEnds(t,t+step);
+						double n = ct.getCoalRate(label);
+						s.insert(n);
+					}
+					outStream << "coal_" << label << "\t";
+					outStream << t + step / (double) 2 << "\t";
+					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+					
+				}
+			}
+		}
+		
+		// MIGRATION ///////////////////////
+		if (param.skyline_mig_rates) {		
+			cout << "Printing migration skyline to " << outputFile << endl;
+			for (int from = 1; from <= maxLabel; from++) {
+				for (int to = 1; to <= maxLabel; to++) {	
+					if (from != to) {
+						for (double t = start; t + step <= stop; t += step) {
+		
+							Series s;
+							for (int i = 0; i < treelist.size(); i++) {
+								CoalescentTree ct = treelist[i];
+								ct.trimEnds(t,t+step);
+								double n = ct.getMigRate(from,to);
+								s.insert(n);
+							}
+							outStream << "mig_" << from << "_" << to << "\t";
+							outStream << t + step / (double) 2 << "\t";
+							outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+		
+						}
+					}
+				}	
+			}
+		}		
+		
+		// DIVERSITY /////////////////////
+		if (param.skyline_tmrca) {
+			cout << "Printing TMRCA skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					double n = ct.getTMRCA();
+					s.insert(n);
+				}
+				outStream << "tmrca" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}		
+				
 		outStream.close();
 	
 	}
@@ -332,74 +540,6 @@ void IO::printTips() {
 			}
 		}
 	
-		outStream.close();
-	
-	}
-
-}
-
-/* go through treelist and calculate skyline statistics */
-void IO::printSkylines() {
-
-	if (param.skyline()) {
-
-		/* initializing output stream */
-		string outputFile = outputPrefix + ".skylines";
-		ofstream outStream;
-		outStream.open( outputFile.c_str(),ios::app);
-		
-		outStream << "statistic\ttime\tlower\tmean\tupper" << endl; 
-		
-		int maxLabel = treelist[0].getMaxLabel();
-		double start = param.skyline_values[0];
-		double stop = param.skyline_values[1];
-		double step = param.skyline_values[2];
-	
-		// COALESCENCE /////////////////////
-		if (param.skyline_coal_rates) {
-			cout << "Printing coalescent skyline to " << outputFile << endl;
-			
-			for (int label = 1; label <= maxLabel; label++) {
-				for (double t = start; t + step <= stop; t += step) {
-			
-					Series s;
-					for (int i = 0; i < treelist.size(); i++) {
-						CoalescentTree ct = treelist[i];
-						ct.trimEnds(t,t+step);
-						double n = ct.getCoalRate(label);
-						s.insert(n);
-					}
-					outStream << "coal_" << label << "\t";
-					outStream << t + step / (double) 2 << "\t";
-					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
-					
-				}
-			}
-		}
-		
-		// LABEL PROPORTIONS /////////////////////
-		if (param.skyline_proportions) {
-			cout << "Printing trunk proportions skyline to " << outputFile << endl;
-			
-			for (int label = 1; label <= maxLabel; label++) {
-				for (double t = start; t + step <= stop; t += step) {
-			
-					Series s;
-					for (int i = 0; i < treelist.size(); i++) {
-						CoalescentTree ct = treelist[i];
-						ct.trimEnds(t,t+step);
-					//	ct.pruneToTrunk();
-						double n = ct.getLabelPro(label);
-						s.insert(n);
-					}
-					outStream << "pro_" << label << "\t";
-					outStream << t + step / (double) 2 << "\t";
-					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
-					
-				}
-			}
-		}		
-		
 		outStream.close();
 	
 	}

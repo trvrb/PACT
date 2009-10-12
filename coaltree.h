@@ -27,7 +27,7 @@ public:
 	// TREE MANIPULATION
 	void pushTimesBack(double);				// push dates to agree with a most recent sample date at t
 	void pushTimesBack(double,double);		// oldest sample and most recent sample	
-	void pruneToTrunk(float);				// reduces CoalescentTree object to trunk
+	void pruneToTrunk(double);				// reduces CoalescentTree object to trunk
 	void pruneToLabel(int);					// reduces CoalescentTree object to only include a particular set of tips
 	void trimEnds(double,double);			// reduces CoalescentTree object to only those nodes between
 											// time start and time stop	

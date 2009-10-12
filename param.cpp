@@ -45,6 +45,7 @@ Parameters::Parameters() {
 	tips_time_to_trunk = false;
 	
 	skyline_tmrca = false;	
+	skyline_length = false;
 	skyline_proportions = false;
 	skyline_coal_rates = false;
 	skyline_mig_rates = false;
@@ -171,6 +172,7 @@ void Parameters::importLine(string line) {
 	}
 
 	if (pstring == "skylinetmrca") { skyline_tmrca = true; }
+	if (pstring == "skylinelength") { skyline_length = true; }
 	if (pstring == "skylineproportions") { skyline_proportions = true; }
 	if (pstring == "skylinecoalrates") { skyline_coal_rates = true; }
 	if (pstring == "skylinemigrates") { skyline_mig_rates = true; }
@@ -256,6 +258,7 @@ void Parameters::print() {
 		cout << " " << skyline_values[1];
 		cout << " " << skyline_values[2] << endl;
 		if (skyline_tmrca) { cout << "tmrca" << endl; }
+		if (skyline_length) { cout << "length" << endl; }
 		if (skyline_proportions) { cout << "proportions" << endl; }
 		if (skyline_coal_rates) { cout << "coal rates" << endl; }
 		if (skyline_mig_rates) { cout << "mig rates" << endl; }
@@ -297,7 +300,7 @@ bool Parameters::tips() {
 bool Parameters::skyline() {
 	bool boolean;
 	if ( skyline_values.size() == 3 &&
-		(skyline_tmrca || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d) )
+		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d) )
 		boolean = true;
 	else 
 		boolean = false;

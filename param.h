@@ -60,6 +60,7 @@ public:
 	vector<double> skyline_values;			// start, stop, step
 	
 	bool skyline_tmrca;	
+	bool skyline_length;
 	bool skyline_proportions;
 	bool skyline_coal_rates;
 	bool skyline_mig_rates;

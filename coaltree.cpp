@@ -361,7 +361,7 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 }
 
 /* reduces a tree to just its trunk, takes most recent sample and works backward from this */
-void CoalescentTree::pruneToTrunk(float t) {
+void CoalescentTree::pruneToTrunk(double t) {
 
 	/* go through tree and append to trunk set */
 	/* only the last 1/100 of the time span is considered */
@@ -429,6 +429,7 @@ void CoalescentTree::pruneToLabel(int label) {
     	}
     }
         
+   	peelBack();     
 	reduce();
 				
 }
@@ -453,12 +454,13 @@ void CoalescentTree::trimEnds(double start, double stop) {
 		if (nodetree.is_valid(jt)) {
 	
 			/* if node > stop and parent < stop, erase children and prune node back to stop */
-			/* this pruning causes a leaf node to become an internal node */
+			/* this pruning causes an internal node to become an leaf node */
 			if ((*it).getTime() > stop && (*jt).getTime() < stop) {
 			
 				(*it).setTime( stop );
 				(*it).setLength( (*it).getTime() - (*jt).getTime() );
-				(*it).setLeaf(false);
+				//(*it).setLeaf(false);
+				(*it).setLeaf(true);
 				nodetree.erase_children(it);
 				it = nodetree.begin();
 			
@@ -586,7 +588,7 @@ void CoalescentTree::timeSlice(double slice) {
 		jt = nodetree.parent(it);
 	
 		/* if node > slice and parent < slice, erase children and prune node back to stop */
-		/* this pruning causes a leaf node to become an internal node */
+		/* this pruning causes an internal node to become a leaf node */
 		if ((*it).getTime() > slice && (*jt).getTime() <= slice) {
 		
 			// adjusting node
@@ -717,26 +719,10 @@ void CoalescentTree::printRuleList(string outputFile) {
 	ofstream outStream;
 	outStream.open( outputFile.c_str(),ios::app);
 
-	tree<Node>::iterator it, jt;
-
-	/* reorder tree so that the bottom node of two sister nodes always has the most recent child more children */
-	/* this combined with preorder traversal will insure the trunk follows a rough diagonal */
-//	it = nodetree.begin();
-//	while(it != nodetree.end()) {
-//		jt = nodetree.next_sibling(it);
-//		if (nodetree.is_valid(jt)) {
-//			int cit = nodetree.size(it);
-//			int cjt = nodetree.size(jt);
-//			if (cit > cjt) {
-//				nodetree.swap(jt,it);
-//				it = nodetree.begin();
-//			}
-//		}
-//		it++;
-//	}
-
 	/* setting up y-axis ordering, x-axis is date */
 	adjustCoords();
+	
+	tree<Node>::iterator it, jt;
 	
 	/* print leaf nodes */
 	/* a node may be a leaf on the current tree, but not a leaf on the original tree */
@@ -772,15 +758,6 @@ void CoalescentTree::printRuleList(string outputFile) {
 	}
 	outStream << endl;
 	
-//	/* print mapping of nodes to coordinates */
-//  	int count = 0;
-//	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-//		//if (nodetree.depth(it) == 0) { count = 0; }		// this resets count for each subtree
-//		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << count << "} ";	
-//		count++;
-//	}
-//	outStream << endl;
-
 	/* print mapping of nodes to coordinates */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << (*it).getCoord() << "} ";	
@@ -788,11 +765,11 @@ void CoalescentTree::printRuleList(string outputFile) {
 	outStream << endl;
 		  	  	
 	/* print mapping of nodes to names */
-//	for (it = nodetree.begin(); it != nodetree.end(); it++) {	
-//		if ((*it).getName() != "")
-//			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
-//	}
-//	outStream << endl;  	  	
+	for (it = nodetree.begin(); it != nodetree.end(); it++) {	
+		if ((*it).getName() != "")
+			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
+	}
+	outStream << endl;  	  	
 	  	  	
 	outStream.close();
 	  	  	
@@ -1301,7 +1278,7 @@ void CoalescentTree::reduce() {
 		if (nodetree.is_valid(jt)) {
 			if (nodetree.number_of_children(it) == 1) {								// no coalescence	
 				kt = nodetree.child(it,0);
-				if ((*jt).getLabel() == (*it).getLabel()) { 						// mo migration
+				if ((*kt).getLabel() == (*it).getLabel()) { 						// mo migration
 	//				cout << "it = " << *it << ", kt = " << *kt << endl;
 					(*kt).setLength( (*kt).getLength() + (*it).getLength() );	
 					nodetree.reparent(jt,it);										// push child node up to be sibling of node
@@ -1334,9 +1311,12 @@ void CoalescentTree::peelBack() {
 	}
 
 	// adjust root    
-	nodetree.move_after(nodetree.begin(),++nodetree.begin());
-	nodetree.erase(nodetree.begin());
-	(*nodetree.begin()).setLength(0.0);
+	it = nodetree.begin();
+	if (nodetree.number_of_children(it) == 1) {
+		nodetree.move_after(nodetree.begin(),++nodetree.begin());
+		nodetree.erase(nodetree.begin());
+		(*nodetree.begin()).setLength(0.0);
+	}
 	
 }	
 	
@@ -1363,10 +1343,11 @@ void CoalescentTree::adjustCoords() {
 	/* set coords of tips according to preorder traversal */
   	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
+	//	if (nodetree.depth(it) == 0) { count = 0; }		// this resets count for each subtree
 		if ( (*it).getLeaf() ) {
-			(*it).setCoord(count);		
+			(*it).setCoord(count);	
+			count++;
 		}
-		count++;
 	}
 	
 	/* revise coords of internal nodes according to postorder traversal */

@@ -22,28 +22,30 @@ print hp tree						# print highest posterior / maximum likelihood tree
 
 ### SUMMARY STATISTICS				# these statistics are carried out across the entire tree
 									# prints to out.stats
-#summary tmrca						# summarize TMRCA
-#summary length						# summarize tree length
-summary proportions					# summarize label proportions on trunk of phylogeny
+summary tmrca						# summarize TMRCA
+summary length						# summarize tree length
+summary proportions					# summarize label proportions on trunk of the genealogy
 summary coal rates					# summarize coalescent rates, separate rates for each label
 summary mig rates					# summarize migration rates, separate rates for each label pair
-#summary diversity					# summarize diversity between each pair of tips
+summary diversity					# summarize diversity between each pair of tips
 									# if tree is tip dated should run time_slice first
-#summary fst						# summarize diversity between labels vs diversity within labels
-#summary tajima d					# summarize Tajima's D.  This is pairwise diversity - total tree length / a1.
-
-### TIP STATISTICS
-tips time to trunk
+summary fst							# summarize diversity between labels vs diversity within labels
+summary tajima d					# summarize Tajima's D.  This is pairwise diversity - total tree length / a1.
 
 ### SKYLINE STATISTICS				# need to walk these backward to keep window consistent across samples
 									# prints to out.skylines
 skyline settings 2002 2007 0.1		# split the tree starting at 2002 and ending at 2007 in steps of 0.1
 
-#skyline tmrca						# computes the TMRCA for time slices
+skyline tmrca						# computes the TMRCA for time slices
+skyline length						# computes the total length of time slices
 skyline proportions					# computes label proportions for trunk along time windows
 skyline coal rates					# computes coalescent rates for time windows
-#skyline mig rates					# computes migration rates for time windows
-#skyline diversity					# computes the diversity for time slices 
+skyline mig rates					# computes migration rates for time windows
+skyline diversity					# computes the diversity for time slices 
 #skyline fst						# computes the FST for time slices
 #skyline tajima d					# computes Tajima's D for time slices
+
+### TIP STATISTICS					# these statistics are carried out on each tip
+									# prints to out.tips
+tips time to trunk					# computes the time it takes for each tip to coalesce with the genealogy trunk
 
