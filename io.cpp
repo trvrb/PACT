@@ -153,11 +153,16 @@ void IO::treeManip() {
 					treelist[i].pushTimesBack(start,stop);
 				}			
 			}
+
+			// RENEW TRUNK
+			if (param.renew_trunk) {
+				double time = (param.renew_trunk_values)[0];
+				treelist[i].renewTrunk(time);
+			}
 			
 			// PRUNE TO TRUNK
 			if (param.prune_to_trunk) {
-				double time = (param.prune_to_trunk_values)[0];
-				treelist[i].pruneToTrunk(time);
+				treelist[i].pruneToTrunk();
 			}
 			
 			// PRUNE TO LABEL
@@ -485,17 +490,51 @@ void IO::printSkylines() {
 		}		
 		
 		// DIVERSITY /////////////////////
-		if (param.skyline_tmrca) {
-			cout << "Printing TMRCA skyline to " << outputFile << endl;
+		if (param.skyline_diversity) {
+			cout << "Printing diversity skyline to " << outputFile << endl;
 			for (double t = start; t + step <= stop; t += step) {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
 					CoalescentTree ct = treelist[i];
 					ct.timeSlice(t + step / (double) 2);
-					double n = ct.getTMRCA();
+					double n = ct.getDiversity();
 					s.insert(n);
 				}
-				outStream << "tmrca" << "\t";
+				outStream << "div" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}	
+		
+		// FST /////////////////////
+		if (param.skyline_fst) {
+			cout << "Printing FST skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					double n = ct.getFst();
+					s.insert(n);
+				}
+				outStream << "fst" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}
+		
+		// TAJIMA D /////////////////////
+		if (param.skyline_tajima_d) {
+			cout << "Printing Tajima D skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					double n = ct.getTajimaD();
+					s.insert(n);
+				}
+				outStream << "tajimad" << "\t";
 				outStream << t + step / (double) 2 << "\t";
 				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 			}

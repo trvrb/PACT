@@ -361,12 +361,16 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 }
 
 /* reduces a tree to just its trunk, takes most recent sample and works backward from this */
-void CoalescentTree::pruneToTrunk(double t) {
+void CoalescentTree::renewTrunk(double t) {
 
 	/* go through tree and append to trunk set */
-	/* only the last 1/100 of the time span is considered */
 	double presentTime = getPresentTime();
 	tree<Node>::iterator it, jt;
+	
+	for(it = nodetree.begin(); it != nodetree.end(); it++) {
+		(*it).setTrunk(false);
+	}
+	
 	it = nodetree.begin();
 	(*it).setTrunk(true);
 	while(it != nodetree.end()) {
@@ -381,8 +385,14 @@ void CoalescentTree::pruneToTrunk(double t) {
 		}
 		it++;
 	}	
+				
+}
+
+/* reduces a tree to just its trunk, takes most recent sample and works backward from this */
+void CoalescentTree::pruneToTrunk() {
 	
 	/* erase other nodes from the tree */	
+	tree<Node>::iterator it;
 	it = nodetree.begin();
 	while(it != nodetree.end()) {
 		if ( !(*it).getTrunk() ) {

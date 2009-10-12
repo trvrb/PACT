@@ -25,6 +25,7 @@ Parameters::Parameters() {
 	// default parameter values
 	// leaving value vectors empty purposely
 	push_times_back = false;
+	renew_trunk = false;
 	prune_to_trunk = false;
 	prune_to_label = false;
 	trim_ends = false;
@@ -114,12 +115,16 @@ void Parameters::importLine(string line) {
 			push_times_back_values = values;			
 		}	
 	}
+
+	if (pstring == "renewtrunk") { 
+		if (values.size() == 1) {
+			renew_trunk = true;
+			renew_trunk_values = values;			
+		} 
+	}
 	
 	if (pstring == "prunetotrunk") { 
-		if (values.size() == 1) {
-			prune_to_trunk = true;
-			prune_to_trunk_values = values;			
-		} 
+		prune_to_trunk = true;
 	}
 	
 	if (pstring == "prunetolabel") { 
@@ -197,9 +202,13 @@ void Parameters::print() {
 			}
 			cout << endl;
 		}
+
+		if (renew_trunk) {
+			cout << "renew trunk " << renew_trunk_values[0] << endl;
+		}	
 	
 		if (prune_to_trunk) {
-			cout << "prune to trunk" << prune_to_trunk_values[0] << endl;
+			cout << "prune to trunk" << endl;
 		}	
 		
 		if (prune_to_label) {
@@ -272,7 +281,7 @@ void Parameters::print() {
 
 bool Parameters::manip() {
 	bool boolean;
-	if (push_times_back || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice)
+	if (push_times_back || renew_trunk || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice)
 		boolean = true;
 	else 
 		boolean = false;

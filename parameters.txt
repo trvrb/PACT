@@ -7,7 +7,8 @@
 ### TREE MANIPULATION
 push times back 2007				# push dates so that the most recent sample date is 2007
 push times back 2002 2007			# push dates so that the oldest sample date is 2002 and the most recent sample date is 2007 
-prune to trunk 1					# reduces tree to just the trunk, working backwards from all samples within 1 year of most recent
+renew trunk 1						# updates trunk, working backwards from all samples within 1 year of most recent
+prune to trunk						# reduces tree to just the trunk
 prune to label 1					# reduces tree to just the tips with label 1
 trim ends 2003 2004					# reduces tree to only those branches dated between 2003 and 2004
 section tree 2002 0.25 1			# reduces tree into sections, starting at 2002, leaving windows 0.25 in width 
@@ -42,8 +43,8 @@ skyline proportions					# computes label proportions for trunk along time window
 skyline coal rates					# computes coalescent rates for time windows
 skyline mig rates					# computes migration rates for time windows
 skyline diversity					# computes the diversity for time slices 
-#skyline fst						# computes the FST for time slices
-#skyline tajima d					# computes Tajima's D for time slices
+skyline fst							# computes the FST for time slices
+skyline tajima d					# computes Tajima's D for time slices
 
 ### TIP STATISTICS					# these statistics are carried out on each tip
 									# prints to out.tips

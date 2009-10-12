@@ -29,8 +29,10 @@ public:
 	bool push_times_back;
 	vector<double> push_times_back_values;	// start, stop
 	
+	bool renew_trunk;
+	vector<double> renew_trunk_values;		// time
+	
 	bool prune_to_trunk;
-	vector<double> prune_to_trunk_values;	// time back
 	
 	bool prune_to_label;
 	vector<double> prune_to_label_values;	// label
