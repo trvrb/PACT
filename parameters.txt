@@ -16,10 +16,10 @@ section tree 2002 0.25 1			# reduces tree into sections, starting at 2002, leavi
 time slice 2005						# reduces tree to all ancestors of lineages that exist in 2005
 									# used in conjunction with diversity statistics
 
-### TREE OUTPUT						# trees are printed in Mathematica compatible rule list format
+### TREE OUTPUT						# print highest posterior / maximum likelihood tree if tagged, 
+									# if not prints the last tree of in.trees		
+print rule tree						# trees are printed in Mathematica compatible rule list format
 									# prints to out.rules
-print hp tree						# print highest posterior / maximum likelihood tree
-
 
 ### SUMMARY STATISTICS				# these statistics are carried out across the entire tree
 									# prints to out.stats

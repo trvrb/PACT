@@ -11,8 +11,6 @@ This contains all the global variables used by pact, can be modified later if ne
 #include <vector>
 using std::vector;
 
-#define INF pow(double(10),double(100)) // 10^100 (~infinity)
-
 class Parameters {
 
 public:
@@ -46,7 +44,7 @@ public:
 	bool time_slice;
 	vector<double> time_slice_values;		// time
 	
-	bool print_hp_tree;
+	bool print_rule_tree;
 	
 	bool summary_tmrca;		
 	bool summary_length;			

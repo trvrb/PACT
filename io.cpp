@@ -36,7 +36,7 @@ IO::IO() {
 	ofstream outStream;
 	string outputFile;
 
-	if (param.print_hp_tree) {
+	if (param.print_rule_tree) {
 		outputFile = outputPrefix + ".rules";
 		outStream.open( outputFile.c_str(),ios::out);
 		outStream.close();
@@ -159,18 +159,7 @@ void IO::treeManip() {
 				double time = (param.renew_trunk_values)[0];
 				treelist[i].renewTrunk(time);
 			}
-			
-			// PRUNE TO TRUNK
-			if (param.prune_to_trunk) {
-				treelist[i].pruneToTrunk();
-			}
-			
-			// PRUNE TO LABEL
-			if (param.prune_to_label) {
-				int label = (param.prune_to_label_values)[0];
-				treelist[i].pruneToLabel(label);
-			}
-			
+						
 			// TRIM ENDS
 			if (param.trim_ends) {
 				double start = (param.trim_ends_values)[0];
@@ -191,6 +180,17 @@ void IO::treeManip() {
 				double time = (param.time_slice_values)[0];
 				treelist[i].timeSlice(time);
 			}
+						
+			// PRUNE TO LABEL
+			if (param.prune_to_label) {
+				int label = (param.prune_to_label_values)[0];
+				treelist[i].pruneToLabel(label);
+			}	
+			
+			// PRUNE TO TRUNK
+			if (param.prune_to_trunk) {
+				treelist[i].pruneToTrunk();
+			}			
 		
 		}
 
@@ -199,9 +199,9 @@ void IO::treeManip() {
 }
 
 /* go through problist and treelist and print highest posterior probability tree */
-void IO::printHPTree() {
+void IO::printTree() {
 
-	if (param.print_hp_tree) {
+	if (param.print_rule_tree) {
 
 		string outputFile = outputPrefix + ".rules";
 		cout << "Printing tree with highest posterior probability to " << outputFile << endl;

@@ -49,7 +49,7 @@ int main() {
 			
 	IO trees;
 	trees.treeManip();
-	trees.printHPTree();
+	trees.printTree();
 	trees.printStatistics();
 	trees.printTips();
 	trees.printSkylines();

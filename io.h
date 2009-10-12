@@ -29,7 +29,7 @@ public:
 	IO();									// constructor takes a input file
 	
 	void treeManip();						// perform tree manipulation operations
-	void printHPTree();						// print highest posterior tree to .rules
+	void printTree();						// print highest posterior tree to .rules
 	void printStatistics();					// print coalescent statistics to .stats
 	void printTips();						// print tip statistics to .tips
 	void printSkylines();					// print skyline values to .skylines

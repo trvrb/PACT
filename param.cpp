@@ -32,7 +32,7 @@ Parameters::Parameters() {
 	section_tree = false;	
 	time_slice = false;
 	
-	print_hp_tree = false;
+	print_rule_tree = false;
 	
 	summary_tmrca = false;		
 	summary_length = false;			
@@ -72,7 +72,7 @@ Parameters::Parameters() {
 		cout << "Running with default parameters" << endl;
 		cout << endl;
 		
-		print_hp_tree = true;		
+		print_rule_tree = true;		
 		summary_coal_rates = true;		
 		summary_mig_rates = true;
 		
@@ -155,8 +155,8 @@ void Parameters::importLine(string line) {
 		}
 	}		
 	
-	if (pstring == "printhptree") { 
-		print_hp_tree = true; 
+	if (pstring == "printruletree") { 
+		print_rule_tree = true; 
 	}	
 
 	if (pstring == "summarytmrca") { summary_tmrca = true; }
@@ -206,15 +206,7 @@ void Parameters::print() {
 		if (renew_trunk) {
 			cout << "renew trunk " << renew_trunk_values[0] << endl;
 		}	
-	
-		if (prune_to_trunk) {
-			cout << "prune to trunk" << endl;
-		}	
-		
-		if (prune_to_label) {
-			cout << "prune to label " << prune_to_label_values[0] << endl;
-		}	
-		
+			
 		if (trim_ends) {
 			cout << "trim ends " << trim_ends_values[0] << " " << trim_ends_values[1] << endl;		
 		}
@@ -226,16 +218,23 @@ void Parameters::print() {
 		if (time_slice) {
 			cout << "time slice " << time_slice_values[0] << endl;
 		}		
+
+		if (prune_to_label) {
+			cout << "prune to label " << prune_to_label_values[0] << endl;
+		}
 	
-	
+		if (prune_to_trunk) {
+			cout << "prune to trunk" << endl;
+		}	
+			
 		cout << endl;
 	
 	}
 	
 	// TREE STRUCTURE
-	if (print_hp_tree) {
+	if (print_rule_tree) {
 		cout << "Tree structure:" << endl;
-		cout << "print hp tree" << endl;
+		cout << "print rule tree" << endl;
 		cout << endl;
 	}	
 	
