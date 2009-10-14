@@ -41,6 +41,9 @@ using std::vector;
 using std::runtime_error;
 using std::out_of_range;
 
+#include <cstdlib>
+using std::atof;
+
 #include <cmath>
 
 #include "coaltree.h"
@@ -278,7 +281,13 @@ CoalescentTree::CoalescentTree(string paren) {
 				/* replace parenthesis with new node label */		
 				stringstream out;
 				out << current;
-				paren = paren.substr(0,openParen) + out.str() + paren.substr(closeParen+1,paren.length());
+				string insert = out.str();
+
+				// this creates a new string every cycle
+				paren = paren.substr(0,openParen) + insert + paren.substr(closeParen+1,paren.length());
+	
+				// this modifies the paren string, expected this to be faster, but it doesn't seem to be
+		//		paren.replace(openParen,closeParen-openParen+1,insert);
 				
 				current++;			
 				break;
@@ -577,15 +586,8 @@ void CoalescentTree::sectionTree(double start, double window, double step) {
 			trimEnds(t,t + window);	
 			current = renumber(current);			// need unique node numbers
 			
-		//	printTree();
-			
-		//	it = newtree.begin();
-		//	jt = nodetree.begin();	
-		//	newtree.replace(it,jt);			
-		
-		//	newtree.insert(newtree.begin(),tempNode);
-		//	newtree.move_after(newtree.begin(),nodetree.begin());
-		
+			//	printTree();
+					
 			// need to move multiple sibling branches
 			// need four sibling iterators, to1 to2 from1 from2
 			tree<Node>::sibling_iterator to1, to2, from1, from2;
@@ -604,12 +606,9 @@ void CoalescentTree::sectionTree(double start, double window, double step) {
 					
 			newtree.merge(to1,to2,from1,from2,true);
 	
-	//		newtree.append_children(newtree.begin(),from1,from2);
-	
 		}
 	}
 
-//	newtree.erase(newtree.begin());
 	nodetree = newtree;
 	
 }
@@ -752,6 +751,7 @@ Output is:
 	tree rules
 	label rules
 	coordinate rules 
+	tip name rules
 */	
 void CoalescentTree::printRuleList(string outputFile) {
 
