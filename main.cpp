@@ -56,15 +56,28 @@ You should have received a copy of the GNU General Public License along with PAC
 using std::cout;
 using std::endl;
 
+#include <stdexcept>
+using std::runtime_error;
+using std::out_of_range;
+
 int main() {
 			
-	cout << "PACT Copyright 2009 Trevor Bedford" << endl << endl;			
-	IO trees;
-	trees.treeManip();
-	trees.printTree();
-	trees.printStatistics();
-	trees.printTips();
-	trees.printSkylines();
+	try {
+		cout << "PACT Copyright 2009 Trevor Bedford" << endl << endl;			
+		IO trees;
+		trees.treeManip();
+		trees.printTree();
+		trees.printStatistics();
+		trees.printTips();
+		trees.printSkylines();
+	}
+	catch (runtime_error rex) {
+		cout << "<<< runtime_error >>>" << endl;
+		cout << rex.what() << endl;
+	}
+	catch (...) {
+		cout << "An exception occured, exiting" << endl;
+	}
 
 	return 0;
 }

@@ -42,44 +42,12 @@ using std::vector;
 
 IO::IO() {
 
-	inputFile = "in.trees";
-	outputPrefix = "out";
-	
-	// ZEROING OUTPUT FILES ///////////
-	// append from now on
-	// only zero files that will be used later
-	ofstream outStream;
-	string outputFile;
-
-	if (param.print_rule_tree) {
-		outputFile = outputPrefix + ".rules";
-		outStream.open( outputFile.c_str(),ios::out);
-		outStream.close();
-	}
-
-	if (param.summary()) {
-		outputFile = outputPrefix + ".stats";
-		outStream.open( outputFile.c_str(),ios::out);
-		outStream.close();
-	}
-	
-	if (param.tips()) {
-		outputFile = outputPrefix + ".tips";
-		outStream.open( outputFile.c_str(),ios::out);
-		outStream.close();
-	}	
-
-	if (param.skyline()) {
-		outputFile = outputPrefix + ".skylines";
-		outStream.open( outputFile.c_str(),ios::out);
-		outStream.close();	
-	}
-
 	// PARAMETER INPUT ////////////////
 	// automatically loaded by declaring Parameter object in header
 	param.print();
 
 	// TREE INPUT /////////////////////
+	inputFile = "in.trees";
 	cout << "Reading trees from in.trees" << endl;
 	
 	ifstream inStream;
@@ -140,10 +108,41 @@ IO::IO() {
 		inStream.close();
 	}
 	else {
-		throw runtime_error("input file not found");
+		throw runtime_error("tree file in.trees not found");
 	}
 	
 	cout << endl;
+	
+	// ZEROING OUTPUT FILES ///////////
+	// append from now on
+	// only zero files that will be used later
+	outputPrefix = "out";
+	ofstream outStream;
+	string outputFile;
+
+	if (param.print_rule_tree) {
+		outputFile = outputPrefix + ".rules";
+		outStream.open( outputFile.c_str(),ios::out);
+		outStream.close();
+	}
+
+	if (param.summary()) {
+		outputFile = outputPrefix + ".stats";
+		outStream.open( outputFile.c_str(),ios::out);
+		outStream.close();
+	}
+	
+	if (param.tips()) {
+		outputFile = outputPrefix + ".tips";
+		outStream.open( outputFile.c_str(),ios::out);
+		outStream.close();
+	}	
+
+	if (param.skyline()) {
+		outputFile = outputPrefix + ".skylines";
+		outStream.open( outputFile.c_str(),ios::out);
+		outStream.close();	
+	}
 	
 }
 
@@ -436,7 +435,7 @@ void IO::printSkylines() {
 
 		// LABEL PROPORTIONS /////////////////////
 		if (param.skyline_proportions) {
-			cout << "Printing trunk proportions skyline to " << outputFile << endl;
+			cout << "Printing proportions skyline to " << outputFile << endl;
 			
 			for (int label = 1; label <= maxLabel; label++) {
 				for (double t = start; t + step <= stop; t += step) {

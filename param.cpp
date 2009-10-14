@@ -36,6 +36,10 @@ using std::vector;
 #include <cstdlib>
 using std::atof;
 
+#include <stdexcept>
+using std::runtime_error;
+using std::out_of_range;
+
 #include "param.h"
 
 Parameters::Parameters() {
@@ -86,13 +90,14 @@ Parameters::Parameters() {
 		}
 	}
 	else { 
-		cout << "Unable to find in.param" << endl; 
-		cout << "Running with default parameters" << endl;
-		cout << endl;
+		throw runtime_error("parameter file in.param not found");
+//		cout << "Unable to find in.param" << endl; 
+//		cout << "Running with default parameters" << endl;
+//		cout << endl;
 		
-		print_rule_tree = true;		
-		summary_coal_rates = true;		
-		summary_mig_rates = true;
+//		print_rule_tree = true;		
+//		summary_coal_rates = true;		
+//		summary_mig_rates = true;
 		
 	}
 	
@@ -211,7 +216,7 @@ void Parameters::print() {
 	// TREE MANIPULATION
 	if ( manip() ) {
 	
-		cout << "Tree manipulation" << endl;
+		cout << "Tree manipulation:" << endl;
 	
 		if (push_times_back) {
 			cout << "push times back ";
@@ -258,7 +263,7 @@ void Parameters::print() {
 	
 	// SUMMARY STATISTICS
 	if ( summary() ) { 
-		cout << "Summary statistics" << endl;
+		cout << "Summary statistics:" << endl;
 		if (summary_tmrca) { cout << "tmrca" << endl; }
 		if (summary_length) { cout << "length" << endl; }
 		if (summary_proportions) { cout << "proportions" << endl; }
@@ -272,14 +277,14 @@ void Parameters::print() {
 
 	// TIP STATISTICS
 	if ( tips() ) { 
-		cout << "Tip statistics" << endl;
+		cout << "Tip statistics:" << endl;
 		if (tips_time_to_trunk) { cout << "time to trunk" << endl; }
 		cout << endl; 
 	}	
 
 	// SKYLINE STATISTICS
 	if ( skyline() ) {
-		cout << "Skyline statistics";
+		cout << "Skyline statistics:";
 		cout << " " << skyline_values[0];
 		cout << " " << skyline_values[1];
 		cout << " " << skyline_values[2] << endl;

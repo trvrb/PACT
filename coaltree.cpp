@@ -37,6 +37,10 @@ using std::set;
 #include <vector>
 using std::vector;
 
+#include <stdexcept>
+using std::runtime_error;
+using std::out_of_range;
+
 #include <cmath>
 
 #include "coaltree.h"
@@ -148,6 +152,17 @@ CoalescentTree::CoalescentTree(string paren) {
 	while (paren.at(0) == '(') {
 	
 //		cout << paren << endl;
+		
+		// make sure that parentheses are matched, counting '(' and counting ')'
+		int leftcount = 0;
+		int rightcount = 0;
+		for ( is=paren.begin(); is < paren.end(); is++ ) {
+			if (*is == '(') { leftcount++; }
+			if (*is == ')') { rightcount++; }
+		}
+		if (leftcount != rightcount) {
+			throw runtime_error("unmatched parentheses in in.trees");
+		}
 			
 		int left, right, from, to, openParen, closeParen, openMig, closeMig;	
 		double leftLength, rightLength, migLength;
