@@ -2,8 +2,25 @@
 	(P)osterior (A)nalysis of (C)oalescent (T)rees 
 	Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
 
-	This program is designed to interpret and manipulate labeled phylogenetic trees.  Statistics 
+	This program is designed to interpret and manipulate labeled evolutionary trees.  Statistics 
 	regarding the structured coalescent may be calculated.
+*/
+
+/*	tree.hh: Copyright 2001-2006 Kasper Peeters <kasper.peeters@aei.mpg.de> */
+
+/*
+This file is part of PACT.
+
+PACT is free software: you can redistribute it and/or modify it under the terms of the GNU General 
+Public License as published by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+PACT is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
+implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General 
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with PACT.  If not, see 
+<http://www.gnu.org/licenses/>.
 */
 
 /*	Agenda:
@@ -15,16 +32,6 @@
 		What sort of primitives would be necessary to make this work?
 	Build command-line options.
 	Tests?
-	Finish with parameters (skylines need implementing).
-*/
-
-/*	Bugs:
-	pruneToTrunk followed by trimEnds fails, while the reverse works
-
-*/
-
-/*
-	tree.hh: Copyright 2001-2006 Kasper Peeters <kasper.peeters@aei.mpg.de>
 */
 
 // Template class for standard library style tree
@@ -45,8 +52,13 @@
 // Set default parameters and modify via parameter file
 #include "param.h"
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 int main() {
 			
+	cout << "PACT Copyright 2009 Trevor Bedford" << endl << endl;			
 	IO trees;
 	trees.treeManip();
 	trees.printTree();
