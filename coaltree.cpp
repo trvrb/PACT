@@ -27,6 +27,7 @@ using std::cout;
 using std::endl;
 using std::flush;
 using std::ios;
+using std::fixed;
 
 #include <string>
 using std::string;
@@ -150,7 +151,7 @@ CoalescentTree::CoalescentTree(string paren) {
 	// read parentheses string from left to right, stop when a close parenthesis is encountered
 	// push the left and right nodes onto their own branch
 	// replace parenthesis string with their parent node ((1,2),3)  --->  (4,3)
-		
+	
 	// end when all parentheses have been eliminated
 	while (paren.at(0) == '(') {
 	
@@ -171,6 +172,8 @@ CoalescentTree::CoalescentTree(string paren) {
 		double leftLength, rightLength, migLength;
 		stringPos = 0;
 		thisString = "";
+		left = 0;
+		right = 0;
 					
 		for ( is=paren.begin(); is < paren.end(); is++ ) {
 
@@ -258,40 +261,50 @@ CoalescentTree::CoalescentTree(string paren) {
 			
 			// COALESCENT EVENTS //////////////////
 			
-			if (*is == ')') { 
-						
-				closeParen = stringPos; 
-				
-				// append a new node
-				// append this new node with two branches (left node and right node)
-								
-				tree<Node>:: iterator iterLeft, iterRight, iterNew;
-				iterLeft = findNode(left);
-				iterRight = findNode(right);	
-
-				(*iterLeft).setLength(leftLength);
-				(*iterRight).setLength(rightLength);				
-				
-				Node newNode(current);
-				newNode.setLabel( (*iterLeft).getLabel() );
+			if (*is == ')') {
 			
-				iterNew = nodetree.wrap(iterLeft,newNode);		
-				nodetree.move_after(iterLeft,iterRight);
+				// have to have stored left and right nodes
+				if (left != 0 && right != 0) {
 				
-				/* replace parenthesis with new node label */		
-				stringstream out;
-				out << current;
-				string insert = out.str();
-
-				// this creates a new string every cycle
-				paren = paren.substr(0,openParen) + insert + paren.substr(closeParen+1,paren.length());
-	
-				// this modifies the paren string, expected this to be faster, but it doesn't seem to be
-		//		paren.replace(openParen,closeParen-openParen+1,insert);
-				
-				current++;			
-				break;
+					closeParen = stringPos; 
 					
+					// append a new node
+					// append this new node with two branches (left node and right node)
+									
+					tree<Node>:: iterator iterLeft, iterRight, iterNew;
+					iterLeft = findNode(left);
+					iterRight = findNode(right);	
+	
+					(*iterLeft).setLength(leftLength);
+					(*iterRight).setLength(rightLength);				
+					
+					Node newNode(current);
+					newNode.setLabel( (*iterLeft).getLabel() );
+				
+					iterNew = nodetree.wrap(iterLeft,newNode);		
+					nodetree.move_after(iterLeft,iterRight);
+					
+					/* replace parenthesis with new node label */		
+					stringstream out;
+					out << current;
+					string insert = out.str();
+	
+					// this creates a new string every cycle
+					paren = paren.substr(0,openParen) + insert + paren.substr(closeParen+1,paren.length());
+		
+					// this modifies the paren string, expected this to be faster, but it doesn't seem to be
+			//		paren.replace(openParen,closeParen-openParen+1,insert);
+					
+					current++;			
+					break;
+				
+				}
+				
+				// this will be encountered if the string is surrounding by an extra pair of parenthesis
+				// LAMARC does this
+				else {
+					paren = ";";
+				}
 				
 			}
 	
@@ -300,8 +313,7 @@ CoalescentTree::CoalescentTree(string paren) {
 		}
 	
 	}
-		
-	
+			
 	// adding branch length to the parent node's time to get the node's time
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
 		jt = nodetree.parent(it);
@@ -310,7 +322,7 @@ CoalescentTree::CoalescentTree(string paren) {
 			(*it).setTime(t);
 		}
 	}	
-	  			
+	  			  		
 	/* go through tree and append to trunk set */
 	/* only the last 1/100 of the time span is considered */
 	double presentTime = getPresentTime();
@@ -330,10 +342,9 @@ CoalescentTree::CoalescentTree(string paren) {
 		it++;
 	}
 	
-	
 	/* pushing the most recent sample up to time = 0 */
 	pushTimesBack(0);
-	
+		
 }
 
 /* push dates to agree with a most recent sample date at endTime */
@@ -800,7 +811,7 @@ void CoalescentTree::printRuleList(string outputFile) {
 	
 	/* print mapping of nodes to coordinates */
 	for (it = nodetree.begin(); it != nodetree.end(); it++) {
-		outStream << (*it).getNumber() << "->{" << (*it).getTime() << "," << (*it).getCoord() << "} ";	
+		outStream << (*it).getNumber() << "->{" << fixed << (*it).getTime() << "," << (*it).getCoord() << "} ";	
 	}
 	outStream << endl;
 		  	  	
