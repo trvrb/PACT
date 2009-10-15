@@ -44,6 +44,7 @@ using std::out_of_range;
 
 #include <cstdlib>
 using std::atof;
+using std::atoi;
 
 #include <cmath>
 
@@ -57,6 +58,17 @@ CoalescentTree::CoalescentTree(string paren) {
 
 	string::iterator is;
 	tree<Node>:: iterator it, jt;
+	
+	// make sure that parentheses are matched, counting '(' and counting ')'
+	int leftcount = 0;
+	int rightcount = 0;
+	for ( is=paren.begin(); is < paren.end(); is++ ) {
+		if (*is == '(') { leftcount++; }
+		if (*is == ')') { rightcount++; }
+	}
+	if (leftcount != rightcount) {
+		throw runtime_error("unmatched parentheses in in.trees");
+	}
 
 	// STRIP PAREN STRING ///////////
 	// strip spaces from paren string
@@ -156,18 +168,7 @@ CoalescentTree::CoalescentTree(string paren) {
 	while (paren.at(0) == '(') {
 	
 //		cout << paren << endl;
-		
-		// make sure that parentheses are matched, counting '(' and counting ')'
-		int leftcount = 0;
-		int rightcount = 0;
-		for ( is=paren.begin(); is < paren.end(); is++ ) {
-			if (*is == '(') { leftcount++; }
-			if (*is == ')') { rightcount++; }
-		}
-		if (leftcount != rightcount) {
-			throw runtime_error("unmatched parentheses in in.trees");
-		}
-			
+					
 		int left, right, from, to, openParen, closeParen, openMig, closeMig;	
 		double leftLength, rightLength, migLength;
 		stringPos = 0;
@@ -181,77 +182,78 @@ CoalescentTree::CoalescentTree(string paren) {
 				openParen = stringPos;
 				openMig = stringPos;
 			}
+			
 			if ( (*is >= '0' && *is <= '9') || (*is >= 'A' && *is <= 'Z') || (*is >= 'a' && *is <= 'z') || *is == '.' || *is == '-' ) {
 				thisString += *is;
 			}	
-			else {
 			
-				bool stringExists;
-				if (thisString.length() > 0)
-					stringExists = true;
-				else
-					stringExists = false;
+			else {
+								
+				if (thisString.length() > 0) {
 				
-				// branch length
-				if (( *is == '[' || *is == ',' || *is == ')' ) && stringExists) {		
-					leftLength = rightLength;
-					rightLength = atof(thisString.c_str());
-				}					
-				
-				// node number
-				if (*is == ':' && stringExists) {	
-					left = right;
-					right = atoi(thisString.c_str());		
-				}
-
-				if (*is == ',') {
-					openMig = stringPos;
-				}		
-				
-				// MIGRATION EVENTS ////////////////////
-				
-				/* need to extend ctree here */
-				/* can only deal with migration events that effect a tip node */
-				/* this section is only called when brackets follow a tip node */
-				if (*is == '=' && stringExists) {
-				
-					/* grabbing migration event */
-					string labelString = thisString;
-					labelString.erase(0,1);
-					from = atoi(labelString.c_str()) + 1;
-					labelString = thisString;
-					labelString.erase(1,1);		
-					to = atoi(labelString.c_str()) + 1;
+					// branch length
+					if (*is == '[' || *is == ',' || *is == ')') {		
+						leftLength = rightLength;
+						rightLength = atof(thisString.c_str());
+					}					
 					
-				}				
-				
-				if (*is == ']') {
-				
-					closeMig = stringPos; 
-				
-					migLength = atof(thisString.c_str());
-		//			cout << tempN << " mig from " << from << " to " << to << ", at " << migLength << endl;
+					// node number
+					if (*is == ':') {	
+						left = right;
+						right = atoi(thisString.c_str());		
+					}
+	
+					if (*is == ',') {
+						openMig = stringPos;
+					}		
 					
-					// push child node back by distance equal to migLength
-					it = findNode(right);	
-					(*it).setLength( rightLength - migLength );
-		
-					// create new intermediate node
-					Node migNode(current);
-					migNode.setLabel(to);
-					migNode.setLength(migLength);
+					// MIGRATION EVENTS ////////////////////
 					
-					// wrap this new node so that it inherits the old node
-					nodetree.wrap(it,migNode);		
-							
-					/* replace parenthesis with new node label */	
-					/* code is set up to deal with the situation of two labels before a parenthesis */
-					stringstream out;
-					out << current << ":" << migLength;
-					paren = paren.substr(0,openMig+1) + out.str() + paren.substr(closeMig+1,paren.length());
+					/* need to extend ctree here */
+					/* can only deal with migration events that effect a tip node */
+					/* this section is only called when brackets follow a tip node */
+					if (*is == '=') {
 					
-					current++;			
-					break;
+						/* grabbing migration event */
+						string labelString = thisString;
+						labelString.erase(0,1);
+						from = atoi(labelString.c_str()) + 1;
+						labelString = thisString;
+						labelString.erase(1,1);		
+						to = atoi(labelString.c_str()) + 1;
+						
+					}				
+					
+					if (*is == ']') {
+					
+						closeMig = stringPos; 
+					
+						migLength = atof(thisString.c_str());
+			//			cout << tempN << " mig from " << from << " to " << to << ", at " << migLength << endl;
+						
+						// push child node back by distance equal to migLength
+						it = findNode(right);	
+						(*it).setLength( rightLength - migLength );
+			
+						// create new intermediate node
+						Node migNode(current);
+						migNode.setLabel(to);
+						migNode.setLength(migLength);
+						
+						// wrap this new node so that it inherits the old node
+						nodetree.wrap(it,migNode);		
+								
+						/* replace parenthesis with new node label */	
+						/* code is set up to deal with the situation of two labels before a parenthesis */
+						stringstream out;
+						out << current << ":" << migLength;
+						string insert = out.str();
+						paren.replace(openMig + 1,closeMig - openMig,insert);
+						
+						current++;			
+						break;
+					
+					}
 				
 				}
 								
@@ -290,17 +292,17 @@ CoalescentTree::CoalescentTree(string paren) {
 					string insert = out.str();
 	
 					// this creates a new string every cycle
-					paren = paren.substr(0,openParen) + insert + paren.substr(closeParen+1,paren.length());
+			//		paren = paren.substr(0,openParen) + insert + paren.substr(closeParen+1,paren.length());
 		
-					// this modifies the paren string, expected this to be faster, but it doesn't seem to be
-			//		paren.replace(openParen,closeParen-openParen+1,insert);
+					// this modifies the paren string: 2% faster
+					paren.replace(openParen,closeParen-openParen+1,insert);
 					
 					current++;			
 					break;
 				
 				}
 				
-				// this will be encountered if the string is surrounding by an extra pair of parenthesis
+				// this will be encountered if the string is surrounded by an extra pair of parenthesis
 				// LAMARC does this
 				else {
 					paren = ";";
