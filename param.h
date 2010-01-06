@@ -33,12 +33,17 @@ public:
 
 	void print();						// prints parameter listing
 
+	bool general();						// are any of the general parameters true?
 	bool manip();						// are any tree manipulation parameters true?
 	bool summary();						// are any summary parameters true?
 	bool tips();
 	bool skyline();						// are any skyline parameters true?
 
 	// PARAMETERS
+	
+	bool burnin;
+	vector<double> burnin_values;			// count
+	
 	bool push_times_back;
 	vector<double> push_times_back_values;	// start, stop
 	

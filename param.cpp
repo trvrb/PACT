@@ -46,6 +46,7 @@ Parameters::Parameters() {
 	
 	// default parameter values
 	// leaving value vectors empty purposely
+	burnin = false;
 	push_times_back = false;
 	renew_trunk = false;
 	prune_to_trunk = false;
@@ -133,6 +134,14 @@ void Parameters::importLine(string line) {
 		
 		
 	// SETTING PARAMETERS	
+
+	if (pstring == "burnin") { 
+		if (values.size() == 1) {
+			burnin = true; 
+			burnin_values = values;			
+		}
+	}		
+	
 	if (pstring == "pushtimesback") { 
 		if (values.size() == 1 || values.size() == 2) {
 			push_times_back = true; 
@@ -217,6 +226,19 @@ void Parameters::importLine(string line) {
 
 /* prints parameters */
 void Parameters::print() {
+
+	// GENERAL
+	if ( general() ) {
+		
+		cout << "General:" << endl;
+		
+		if (burnin) {
+			cout << "burnin " << burnin_values[0] << endl;
+		}	
+	
+		cout << endl;
+	
+	}
 
 	// TREE MANIPULATION
 	if ( manip() ) {
@@ -310,39 +332,48 @@ void Parameters::print() {
 	
 }
 
-bool Parameters::manip() {
-	bool boolean;
-	if (push_times_back || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice)
-		boolean = true;
+bool Parameters::general() {
+	bool check;
+	if (burnin)
+		check = true;
 	else 
-		boolean = false;
-	return boolean;
+		check = false;
+	return check;
+}
+
+bool Parameters::manip() {
+	bool check;
+	if (push_times_back || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice)
+		check = true;
+	else 
+		check = false;
+	return check;
 }
 
 bool Parameters::summary() {
-	bool boolean;
+	bool check;
 	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_diversity || summary_fst || summary_tajima_d)
-		boolean = true;
+		check = true;
 	else 
-		boolean = false;
-	return boolean;
+		check = false;
+	return check;
 }
 
 bool Parameters::tips() {
-	bool boolean;
+	bool check;
 	if (tips_time_to_trunk)
-		boolean = true;
+		check = true;
 	else 
-		boolean = false;
-	return boolean;
+		check = false;
+	return check;
 }
 
 bool Parameters::skyline() {
-	bool boolean;
+	bool check;
 	if ( skyline_values.size() == 3 &&
 		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d) )
-		boolean = true;
+		check = true;
 	else 
-		boolean = false;
-	return boolean;
+		check = false;
+	return check;
 }

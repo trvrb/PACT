@@ -55,6 +55,7 @@ IO::IO() {
 
 	string line;
 	int pos;
+	int treesread = 0;
 	if (inStream.is_open()) {
 		while (! inStream.eof() ) {
 			getline (inStream,line);
@@ -94,11 +95,29 @@ IO::IO() {
 					pos = line.find('(');
 					if (pos >= 0) {
 					
-						string paren = line.substr(pos);
+						// if burnin has finished
+						if (param.burnin) {
+							if ( treesread > (param.burnin_values)[0] ) {
 						
-						CoalescentTree ct(paren);
-						treelist.push_back(ct);
-						cout << "tree " << treelist.size() << " read" << endl;
+								string paren = line.substr(pos);
+								CoalescentTree ct(paren);
+								treelist.push_back(ct);
+								cout << "tree " << treelist.size() + (param.burnin_values)[0] << " read" << endl;
+							
+							}
+						
+						}
+						
+						else {
+
+							string paren = line.substr(pos);
+							CoalescentTree ct(paren);
+							treelist.push_back(ct);	
+							cout << "tree " << treelist.size() << " read" << endl;						
+						
+						}
+						
+						treesread++;
 							
 					}
 
