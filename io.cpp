@@ -132,6 +132,10 @@ IO::IO() {
 	
 	cout << endl;
 	
+	if (treelist.size() == 0) {
+		throw runtime_error("no suitable trees on which to perform analysis");
+	}
+	
 	// ZEROING OUTPUT FILES ///////////
 	// append from now on
 	// only zero files that will be used later
