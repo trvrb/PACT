@@ -66,7 +66,7 @@ using std::out_of_range;
 int main() {
 			
 	try {
-		cout << "PACT Copyright 2009 Trevor Bedford" << endl << endl;			
+		cout << "PACT 0.9.2 Copyright 2009 Trevor Bedford" << endl << endl;			
 		IO trees;
 		trees.treeManip();
 		trees.printTree();

@@ -25,6 +25,7 @@ using std::ofstream;
 using std::cout;
 using std::endl;
 using std::ios;
+using std::unitbuf;
 
 #include <stdexcept>
 using std::runtime_error;
@@ -102,8 +103,9 @@ IO::IO() {
 								string paren = line.substr(pos);
 								CoalescentTree ct(paren);
 								treelist.push_back(ct);
-								cout << "tree " << treelist.size() + (param.burnin_values)[0] << " read" << endl;
-							
+						//		cout << "tree " << treelist.size() + (param.burnin_values)[0] << " read" << endl;
+								cout << unitbuf << ".";
+						
 							}
 						
 						}
@@ -113,7 +115,8 @@ IO::IO() {
 							string paren = line.substr(pos);
 							CoalescentTree ct(paren);
 							treelist.push_back(ct);	
-							cout << "tree " << treelist.size() << " read" << endl;						
+						//	cout << "tree " << treelist.size() << " read" << endl;		
+							cout << unitbuf << ".";
 						
 						}
 						
