@@ -30,6 +30,7 @@ using std::vector;
 
 #include "tree.hh"
 #include "node.h"
+#include "rng.h"
 
 class CoalescentTree {
 
@@ -106,6 +107,7 @@ public:
 	
 									
 private:
+	RNG rgen;								// random number generator
 	tree<Node> nodetree;					// linked tree containing Node objects		
 										
 	// HELPER FUNCTIONS

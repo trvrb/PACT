@@ -52,6 +52,9 @@ You should have received a copy of the GNU General Public License along with PAC
 // Set default parameters and modify via parameter file
 #include "param.h"
 
+// Random number generator
+#include "rng.h"
+
 #include <iostream>
 using std::cout;
 using std::endl;

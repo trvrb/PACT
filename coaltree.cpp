@@ -412,32 +412,72 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 		 
 }
 
-/* reduces a tree to just its trunk, takes most recent sample and works backward from this */
+/* old version of renewTrunk.  This peels back from all current nodes. */
+//void CoalescentTree::renewTrunk(double t) {
+//
+//	/* go through tree and append to trunk set */
+//	double presentTime = getPresentTime();
+//	tree<Node>::iterator it, jt;
+//	
+//	for(it = nodetree.begin(); it != nodetree.end(); ++it) {
+//		(*it).setTrunk(false);
+//	}
+//	
+//	it = nodetree.begin();
+//	(*it).setTrunk(true);
+//	while(it != nodetree.end()) {
+//		/* find nodes at present */
+//		if ((*it).getTime() > presentTime - t) {
+//			jt = it;
+//			/* move up tree adding nodes to trunk set */
+//			while (nodetree.is_valid(jt)) {
+//				(*jt).setTrunk(true);
+//				jt = nodetree.parent(jt);
+//			}
+//		}
+//		++it;
+//	}	
+//				
+//}
+
+/* reduces a tree to just its trunk, takes a single random sample from "current" tips and works backward from this */
 void CoalescentTree::renewTrunk(double t) {
 
 	/* go through tree and append to trunk set */
 	double presentTime = getPresentTime();
 	tree<Node>::iterator it, jt;
 	
+	/* count tips and set every node as non-trunk */
+	int count = 0;	
 	for(it = nodetree.begin(); it != nodetree.end(); ++it) {
 		(*it).setTrunk(false);
+		if ((*it).getTime() > presentTime - t && (*it).getLeaf()) {
+			count++;
+		}
 	}
+
+	int selection = rgen.uniform(0,count);
+	count = 0;
 	
 	it = nodetree.begin();
 	(*it).setTrunk(true);
 	while(it != nodetree.end()) {
 		/* find nodes at present */
-		if ((*it).getTime() > presentTime - t) {
-			jt = it;
-			/* move up tree adding nodes to trunk set */
-			while (nodetree.is_valid(jt)) {
-				(*jt).setTrunk(true);
-				jt = nodetree.parent(jt);
+		if ((*it).getTime() > presentTime - t && (*it).getLeaf()) {
+			if (selection == count) {
+				jt = it;
+				/* move up tree adding nodes to trunk set */
+				while (nodetree.is_valid(jt)) {
+					(*jt).setTrunk(true);
+					jt = nodetree.parent(jt);
+				}
+				break;
 			}
+			count++;
 		}
 		++it;
 	}	
-				
+	
 }
 
 /* reduces a tree to just its trunk, takes most recent sample and works backward from this */
