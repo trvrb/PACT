@@ -50,6 +50,7 @@ Parameters::Parameters() {
 	renew_trunk = false;
 	prune_to_trunk = false;
 	prune_to_label = false;
+	collapse_labels = false;
 	trim_ends = false;
 	section_tree = false;	
 	time_slice = false;
@@ -157,6 +158,10 @@ void Parameters::importLine(string line) {
 		}
 	}	
 	
+	if (pstring == "collapselabels") { 
+		collapse_labels = true;
+	}	
+	
 	if (pstring == "trimends") { 
 		if (values.size() == 2) {
 			trim_ends = true; 
@@ -249,6 +254,10 @@ void Parameters::print() {
 		if (prune_to_trunk) {
 			cout << "prune to trunk" << endl;
 		}	
+		
+		if (collapse_labels) {
+			cout << "collapse labels" << endl;
+		}			
 			
 		cout << endl;
 	
@@ -303,7 +312,7 @@ void Parameters::print() {
 
 bool Parameters::manip() {
 	bool boolean;
-	if (push_times_back || renew_trunk || prune_to_trunk || prune_to_label || trim_ends || section_tree || time_slice)
+	if (push_times_back || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice)
 		boolean = true;
 	else 
 		boolean = false;

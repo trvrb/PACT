@@ -1,3 +1,6 @@
+# Compiling for Unix: make
+# Compiling for Windows: make CROSS=i386-mingw32-
+
 CC=$(CROSS)g++
 LD=$(CROSS)ld
 AR=$(CROSS)ar

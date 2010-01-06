@@ -50,6 +50,8 @@ public:
 	bool prune_to_label;
 	vector<double> prune_to_label_values;	// label
 	
+	bool collapse_labels;
+	
 	bool trim_ends;
 	vector<double> trim_ends_values;		// start, stop
 	

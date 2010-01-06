@@ -205,6 +205,11 @@ void IO::treeManip() {
 			if (param.prune_to_trunk) {
 				treelist[i].pruneToTrunk();
 			}			
+
+			// COLLAPSE LABELS
+			if (param.collapse_labels) {
+				treelist[i].collapseLabels();
+			}	
 		
 		}
 

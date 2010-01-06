@@ -537,6 +537,16 @@ void CoalescentTree::pruneToLabel(int label) {
 }
 
 
+/* sets all labels in tree to 1 */
+void CoalescentTree::collapseLabels() {
+
+	tree<Node>::iterator it, jt;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		(*it).setLabel(1);
+	}
+							
+}
+
 /* trims a tree at its edges 
 
    		   |-------	 			 |-----
