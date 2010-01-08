@@ -732,6 +732,44 @@ void CoalescentTree::timeSlice(double slice) {
 
 }
 
+/* Removes descendents of trunk from tree at a single slice in time */
+/* Used to calcuate time to fixation */
+void CoalescentTree::trunkSlice(double slice) {
+
+	/* desire only nodes spanning the time slice */
+	/* these nodes must be trunk nodes */
+	tree<Node>::iterator it, jt, kt;
+	it = nodetree.begin();
+	while(it != nodetree.end()) {	
+	
+		jt = nodetree.parent(it);
+	
+		/* if node > slice AND parent < slice AND node is trunk AND parent is trunk */
+		/* erase children and prune node back to stop */
+		/* this pruning causes an internal node to become a leaf node */
+		if ((*it).getTime() > slice && (*jt).getTime() <= slice && (*it).getTrunk() && (*jt).getTrunk()) {
+		
+			// adjusting node
+			(*it).setTime( slice );
+			(*it).setLength( (*it).getTime() - (*jt).getTime() );
+			(*it).setLeaf(true);
+			nodetree.erase_children(it);
+		
+			it = nodetree.begin();
+		
+		}
+		
+		else {
+    		++it;
+    	}
+    	
+    }
+        
+//	peelBack();
+//	reduce();
+
+}
+
 /* padded with extra nodes at coalescent time points */
 /* causing problems with migration tree */
 void CoalescentTree::padTree() { 

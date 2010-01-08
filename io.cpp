@@ -584,6 +584,24 @@ void IO::printSkylines() {
 				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 			}
 		}		
+		
+		// TIME TO FIX /////////////////////
+		if (param.skyline_timetofix) {
+			cout << "Printing fixation time skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					double present = t + step / (double) 2;
+					ct.trunkSlice(present);
+					double future = ct.getPresentTime();
+					s.insert(future-present);
+				}
+				outStream << "timetofix" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}		
 				
 		outStream.close();
 	

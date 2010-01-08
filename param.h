@@ -89,6 +89,7 @@ public:
 	bool skyline_diversity;
 	bool skyline_fst;
 	bool skyline_tajima_d;
+	bool skyline_timetofix;	
 	
 private:
 	void importLine(string);			// reads a string and attempts to extract parameters from it

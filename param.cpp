@@ -76,7 +76,8 @@ Parameters::Parameters() {
 	skyline_mig_rates = false;
 	skyline_diversity = false;
 	skyline_fst = false;
-	skyline_tajima_d = false;	
+	skyline_tajima_d = false;
+	skyline_timetofix = false;
 	
 	// check to see file exists
 	string paramString;
@@ -220,7 +221,8 @@ void Parameters::importLine(string line) {
 	if (pstring == "skylinemigrates") { skyline_mig_rates = true; }
 	if (pstring == "skylinediversity") { skyline_diversity = true; }
 	if (pstring == "skylinefst") { skyline_fst = true; }
-	if (pstring == "skylinetajimad") { skyline_tajima_d = true; }		
+	if (pstring == "skylinetajimad") { skyline_tajima_d = true; }
+	if (pstring == "skylinetimetofix") { skyline_timetofix = true; }
 	
 }
 
@@ -326,7 +328,8 @@ void Parameters::print() {
 		if (skyline_mig_rates) { cout << "mig rates" << endl; }
 		if (skyline_diversity) { cout << "diversity" << endl; }
 		if (skyline_fst) { cout << "fst" << endl; }	
-		if (skyline_tajima_d) { cout << "tajima d" << endl; }	
+		if (skyline_tajima_d) { cout << "tajima d" << endl; }
+		if (skyline_timetofix) { cout << "time to fix" << endl; }
 		cout << endl;
 	}
 	
@@ -371,7 +374,7 @@ bool Parameters::tips() {
 bool Parameters::skyline() {
 	bool check;
 	if ( skyline_values.size() == 3 &&
-		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d) )
+		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d || skyline_timetofix) )
 		check = true;
 	else 
 		check = false;
