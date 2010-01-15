@@ -97,7 +97,8 @@ CoalescentTree::CoalescentTree(string paren) {
 	// names can only be 0-9 A-Z a-z
 	// exported tree renames tips with consecutive numbering starting at 1
 	// go through paren string and collect tips, at the same time replace names with matching numbers in paren string
-	// if first character of name is a number and the second character is a letter, assume first character is label
+	// if first characters of name are numbers and the same contains letters, 
+	// then the first characters until a letter is reached are assumed to be the label
 
 	vector<Node> tipsList;
 	int current = 1;
@@ -118,14 +119,33 @@ CoalescentTree::CoalescentTree(string paren) {
 			Node thisNode(current);
 			thisNode.setName(thisString);
 			
-			// label is the first character of node string, incremented by 1
-			// only attempt this if first character is number and second character is letter
-			// otherwise set to 1
-			if ( (thisString[0] >= '0' && thisString[0] <= '9') &&
-					( (thisString[1] >= 'A' && thisString[1] <= 'Z') || (thisString[1] >= 'a' && thisString[1] <= '1') ) ) {
-				thisNode.setLabel(atoi(thisString.substr(0,1).c_str()) + 1);
-			}
+			// label is the first digit characters of node string, incremented by 1
 			
+			// if string contains a letter
+			bool containsLetter = false;
+			for (int i = 0; i < thisString.length(); ++i) {
+				if ( (thisString[i] >= 'A' && thisString[i] <= 'Z') || (thisString[i] >= 'a' && thisString[i] <= 'z') ) {
+					containsLetter = true;
+				}
+			}
+							
+			if (containsLetter) {
+			
+				// construct substring of initial numbers
+				string labelString = "";
+				int count = 0;
+				while (thisString[count] >= '0' && thisString[count] <= '9') {
+					labelString += thisString[count];
+					++count;
+				}
+			
+				// set label to this substring
+				if (labelString.length() > 0) {
+					thisNode.setLabel(atoi(labelString.c_str()) + 1);
+				}
+			
+			}
+					
 			thisNode.setLeaf(true);
 			
 			tipsList.push_back(thisNode);
