@@ -51,7 +51,8 @@ public:
 											// time start and time stop	
 	void sectionTree(double,double,double);	// break tree up into sections
 	void timeSlice(double);					// reduces CoalescentTree to all the ancestors of time slice
-	void trunkSlice(double);				// removes from CoalescentTree all descendents of trunk at slice of time 	
+	void trunkSlice(double);				// removes from CoalescentTree all descendents of trunk at slice of time
+	void leafSlice(double, double);			// reduces CoalescentTree to ancestors of leafs in a window of time
 	void padTree();							// TODO: fix this
 											// pads CoalescentTre with additional nodes at each coalescent event
 											// included mainly for compatibility with TreePlot	

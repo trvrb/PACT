@@ -765,10 +765,53 @@ void CoalescentTree::trunkSlice(double slice) {
     	
     }
         
-//	peelBack();
-//	reduce();
+}
+
+/* Reduces tree to just the ancestors of leaf nodes existing in a particular window of time */
+/* Used to calcuate diversity, TMRCA and Tajima's D for a window of time */
+void CoalescentTree::leafSlice(double start, double stop) {
+
+	/* desire only nodes spanning the time slice */
+	/* find these nodes and add them and their ancestors to a set */
+	set<int> sliceset; 
+	tree<Node>::iterator it, jt, kt;
+	it = nodetree.begin();
+	while(it != nodetree.end()) {	
+	
+		/* if node > start AND node < stop && node is leaf */
+		/* add ancestors to sliceset */
+		/* there will be no children to erase */
+		if ((*it).getTime() > start && (*it).getTime() <= stop && (*it).getLeaf()) {
+		
+			// move up tree adding nodes to sliceset
+			jt = it;
+			while (nodetree.is_valid(jt)) {
+				sliceset.insert( (*jt).getNumber() );
+				jt = nodetree.parent(jt);
+			}
+				
+		}
+		
+		++it;
+    	
+    }
+    
+	/* erase other nodes from the tree */
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		if (sliceset.end() == sliceset.find( (*it).getNumber() )) {
+			it = nodetree.erase(it);
+		}
+		else {
+    		++it;
+    	}
+    }    
+    
+	peelBack();
+	reduce();
 
 }
+
 
 /* padded with extra nodes at coalescent time points */
 /* causing problems with migration tree */
