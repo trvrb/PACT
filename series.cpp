@@ -30,6 +30,8 @@ using std::out_of_range;
 using std::multiset;
 
 #include <cmath>
+using std::isnan;
+using std::isinf;
 
 #include "series.h"
 
@@ -39,7 +41,9 @@ Series::Series() {
 
 /* inserts value into growing set */
 void Series::insert(double n) {
-	values.insert(n);
+	if (!isnan(n) && !isinf(n)) {
+		values.insert(n);
+	}
 }
 
 /* clears all stored values */
@@ -65,15 +69,18 @@ double Series::at(int n) {
 /* returns arithmetic mean of stored values */
 double Series::mean() {
 
-	if (values.size() == 0) {
-		throw out_of_range("Series::mean");
-	}
-
 	double mean = 0.0;
-	for (multiset<double>::iterator is = values.begin(); is != values.end(); is++ ) {
-		mean += *is;
+
+	if (values.size() != 0) {
+		for (multiset<double>::iterator is = values.begin(); is != values.end(); is++ ) {
+			mean += *is;
+		}
+		mean /= (double) values.size();
 	}
-	mean /= (double) values.size();
+	else {
+		mean /= mean;
+	}
+	
 	return mean;
 		
 }
@@ -82,20 +89,21 @@ double Series::mean() {
 /* using the empirical distribution function with averaging */
 double Series::quantile(double p) {
 
-	if (values.size() == 0) {
-		throw out_of_range("Series::quantile");
-	}
+	double q = 0.0;						// quantile value
 
-	double q;						// quantile value
-	
-	int n = values.size();			// sample size
-	int j = floor(n*p);				// integer part
-	double g = n*p - floor(n*p);	// fractional part
-	
-	if (g > 0 || n == 1)			// samples are ordered 0 to N-1
-		q = at(j);				
-	else
-		q = 0.5 * ( at(j-1) + at(j));
+	if (values.size() != 0) {
+		int n = values.size();			// sample size
+		int j = floor(n*p);				// integer part
+		double g = n*p - floor(n*p);	// fractional part
+		
+		if (g > 0 || n == 1)			// samples are ordered 0 to N-1
+			q = at(j);				
+		else
+			q = 0.5 * ( at(j-1) + at(j));
+	}
+	else {
+		q /= q; 
+	}
 
 	return q;
 
