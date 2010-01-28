@@ -1093,7 +1093,22 @@ double CoalescentTree::getRootTime() {
 
 /* amount of time it takes for all samples to coalesce */
 double CoalescentTree::getTMRCA() {
-	return getPresentTime() - getRootTime();
+	
+	int leafcount = 0;
+	for (tree<Node>::leaf_iterator it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		leafcount++;
+	}
+	
+	double tmrca = 0.0;
+	if (leafcount > 1) {
+		tmrca = getPresentTime() - getRootTime();
+	}
+	else {
+		tmrca /= tmrca;
+	}
+	
+	return tmrca;
+	
 }
 
 /* number of labels 1 to n */
