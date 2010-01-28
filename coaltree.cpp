@@ -460,6 +460,42 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 //				
 //}
 
+/* reduces a tree to a random subset of samples */
+void CoalescentTree::reduceTips(double pro) {
+
+	/* start by finding all tips with this label */
+	set<int> tipset; 
+	tree<Node>::iterator it, jt;
+	
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ( rgen.uniform(0,1) < pro && (*it).getLeaf() ) {
+		
+			/* move up tree adding nodes to label set */
+			jt = it;
+			while (nodetree.is_valid(jt)) {
+				tipset.insert( (*jt).getNumber() );
+				jt = nodetree.parent(jt);
+			}
+		
+		}
+	}
+			
+	/* erase other nodes from the tree */
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		if (tipset.end() == tipset.find( (*it).getNumber() )) {
+			it = nodetree.erase(it);
+		}
+		else {
+    		++it;
+    	}
+    }
+        
+   	peelBack();     
+	reduce();
+				
+}
+
 /* reduces a tree to just its trunk, takes a single random sample from "current" tips and works backward from this */
 void CoalescentTree::renewTrunk(double t) {
 

@@ -194,6 +194,12 @@ void IO::treeManip() {
 				}			
 			}
 
+			// REDUCE TIPS
+			if (param.reduce_tips) {
+				double pro = (param.reduce_tips_values)[0];
+				treelist[i].reduceTips(pro);
+			}	
+
 			// RENEW TRUNK
 			if (param.renew_trunk) {
 				double time = (param.renew_trunk_values)[0];
@@ -272,7 +278,6 @@ void IO::printTree() {
 		}
 		
 		treelist[index].printRuleList(outputFile);
-//		treelist[index].printTree();
 		
 	}
 

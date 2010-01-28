@@ -48,6 +48,7 @@ Parameters::Parameters() {
 	// leaving value vectors empty purposely
 	burnin = false;
 	push_times_back = false;
+	reduce_tips = false;
 	renew_trunk = false;
 	prune_to_trunk = false;
 	prune_to_label = false;
@@ -149,6 +150,13 @@ void Parameters::importLine(string line) {
 			push_times_back_values = values;			
 		}	
 	}
+	
+	if (pstring == "reducetips") { 
+		if (values.size() == 1) {
+			reduce_tips = true; 
+			reduce_tips_values = values;			
+		}
+	}	
 
 	if (pstring == "renewtrunk") { 
 		if (values.size() == 1) {
@@ -254,6 +262,10 @@ void Parameters::print() {
 			}
 			cout << endl;
 		}
+		
+		if (reduce_tips) {
+			cout << "reduce tips " << reduce_tips_values[0] << endl;
+		}		
 
 		if (renew_trunk) {
 			cout << "renew trunk " << renew_trunk_values[0] << endl;
@@ -346,7 +358,7 @@ bool Parameters::general() {
 
 bool Parameters::manip() {
 	bool check;
-	if (push_times_back || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice)
+	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice)
 		check = true;
 	else 
 		check = false;

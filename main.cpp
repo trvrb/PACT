@@ -7,6 +7,7 @@
 */
 
 /*	tree.hh: Copyright 2001-2006 Kasper Peeters <kasper.peeters@aei.mpg.de> */
+/*	rng.h, rng.cpp: Copyright 1997-2006 Ken Wilder */
 
 /*
 This file is part of PACT.
@@ -21,17 +22,6 @@ Public License for more details.
 
 You should have received a copy of the GNU General Public License along with PACT.  If not, see 
 <http://www.gnu.org/licenses/>.
-*/
-
-/*	Agenda:
-	Fix padTree
-	Include migration events in PrintParen
-	Is there a way to split coal_tree?
-		Seems like a good split would be printing / information functions vs. manipulation functions.
-		Also, there are a number of low level functions that would be nice to add.  Things like move_branch.
-		What sort of primitives would be necessary to make this work?
-	Build command-line options.
-	Tests?
 */
 
 // Template class for standard library style tree
@@ -66,7 +56,7 @@ using std::out_of_range;
 int main() {
 			
 	try {
-		cout << "PACT 0.9.2 Copyright 2009 Trevor Bedford" << endl << endl;			
+		cout << "PACT 0.9.3 Copyright 2009 Trevor Bedford" << endl << endl;			
 		IO trees;
 		trees.treeManip();
 		trees.printTree();

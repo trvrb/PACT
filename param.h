@@ -47,6 +47,9 @@ public:
 	bool push_times_back;
 	vector<double> push_times_back_values;	// start, stop
 	
+	bool reduce_tips;
+	vector<double> reduce_tips_values;		// count
+	
 	bool renew_trunk;
 	vector<double> renew_trunk_values;		// time
 	
