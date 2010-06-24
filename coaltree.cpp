@@ -74,7 +74,7 @@ CoalescentTree::CoalescentTree(string paren) {
 	// strip spaces from paren string
 	// strip & and following character, replace following : with =
 	// assumes migration events follow the format [&M 5 3:8.49916e-05]
-	is = paren.begin() ;
+	is = paren.begin();
 	bool mig = false;
 	while (is < paren.end()) {
 		if (*is == ' ')
@@ -779,9 +779,9 @@ void CoalescentTree::timeSlice(double slice) {
 			it = nodetree.erase(it);
 		}
 		else {
-    		++it;
+	   		++it;
     	}
-    }    
+	}    
     
 	peelBack();
 	reduce();
@@ -1465,7 +1465,7 @@ double CoalescentTree::getTajimaD() {
 
 	double div = getDiversity();
 	double S = getLength();
-
+	
 	double a1 = 0.0;
 	double a2 = 0.0;	
 	int n = getLeafCount();
@@ -1473,12 +1473,12 @@ double CoalescentTree::getTajimaD() {
 		a1 += 1 / (double) i;
 		a2 += 1 / (double) (i*i);		
 	}
-		
-	double e1 = (1.0/a1) * ((double)(n+1) / (3*(n-1)) - (1.0/a1));
+				
+	double e1 = (1.0/a1) * ((double)(n+1) / (3*(n-1)) - (1.0/a1));	
 	double e2 = (1.0 / (a1*a1 + a2) ) * ( (double)(2*(n*n+n+3)) / (9*n*(n-1)) - (double)(n+2) / (n*a1) + a2/(a1*a1) );
 	double denom = sqrt(e1*S + e2*S*(S-1));
-
 	double tajima = (div - S/a1) / denom;	
+	
 	return tajima;
 
 }
