@@ -70,272 +70,74 @@ CoalescentTree::CoalescentTree(string paren) {
 		throw runtime_error("unmatched parentheses in in.trees");
 	}
 
-	// STRIP PAREN STRING ///////////
-	// strip spaces from paren string
-	// strip & and following character, replace following : with =
-	// assumes migration events follow the format [&M 5 3:8.49916e-05]
-	is = paren.begin();
-	bool mig = false;
-	while (is < paren.end()) {
-		if (*is == ' ')
-			is = paren.erase(is);
-		else if (*is == '&') {
-			is = paren.erase(is);
-			is = paren.erase(is);
-			mig = true;
-		}
-		else if (*is == ':' && mig) {
-			*is = '=';
-			mig = false;
-		}
-		else
-			is++;
-	}
-
-	// GATHER TIPS ////////////////
-	// read in node names, filling tips vector
-	// names can only be 0-9 A-Z a-z
-	// exported tree renames tips with consecutive numbering starting at 1
-	// go through paren string and collect tips, at the same time replace names with matching numbers in paren string
-	// if first characters of name are numbers and the same contains letters, 
-	// then the first characters until a letter is reached are assumed to be the label
-
-	vector<Node> tipsList;
-	int current = 1;
-	int stringPos = 0;
-	string thisString = "";
-	
-	while (stringPos < paren.length()) {
-		
-		char thisChar = paren[stringPos];
-		
-		if ( (thisChar >= 'A' && thisChar <= 'Z') || (thisChar >= 'a' && thisChar <= 'z') || (thisChar >= '0' && thisChar <= '9') ) {
-			thisString += thisChar;
-		} 	  	
-				
-		else if (thisChar == ':' && thisString.length() > 0) {
-							
-			/* nodetree update */	
-			Node thisNode(current);
-			thisNode.setName(thisString);
-			
-			// label is the first digit characters of node string, incremented by 1
-			
-			// if string contains a letter
-			bool containsLetter = false;
-			for (int i = 0; i < thisString.length(); ++i) {
-				if ( (thisString[i] >= 'A' && thisString[i] <= 'Z') || (thisString[i] >= 'a' && thisString[i] <= 'z') ) {
-					containsLetter = true;
-				}
-			}
-							
-			if (containsLetter) {
-			
-				// construct substring of initial numbers
-				string labelString = "";
-				int count = 0;
-				while (thisString[count] >= '0' && thisString[count] <= '9') {
-					labelString += thisString[count];
-					++count;
-				}
-			
-				// set label to this substring
-				if (labelString.length() > 0) {
-					thisNode.setLabel(atoi(labelString.c_str()) + 1);
-				}
-			
-			}
-					
-			thisNode.setLeaf(true);
-			
-			tipsList.push_back(thisNode);
-
-			/* replace name with number */	
-			stringstream out;
-			out << current;
-			paren = paren.substr(0,stringPos - thisString.size()) + out.str() + paren.substr(stringPos,paren.length());
-			
-			/* move counter back */
-			/* need to take into acount the length of the digits */
-			stringPos -= thisString.size() - (out.str()).length() + 1;		
-			
-			thisString = "";
-			current++;
-		
-		}
-		
-		else {
-			thisString = "";
-		}
-		
-		stringPos++;
-		
-	}
-		
 	// STARTING TREE /////////////////
-	// construct starting point for tree (multifurcation from root)
-	it = nodetree.set_head(tipsList[0]);
-	for(int i = 1; i < tipsList.size(); i++) {
-		it = nodetree.insert_after(it, tipsList[i]);
-   	}
-  	
-  	// CONSTRUCT TREE /////////////////////
-	// read parentheses string from left to right, stop when a close parenthesis is encountered
-	// push the left and right nodes onto their own branch
-	// replace parenthesis string with their parent node ((1,2),3)  --->  (4,3)
+	// starting point as single root node
+	Node rootNode = Node(0);
+	it = nodetree.set_head(rootNode);
 	
-	// end when all parentheses have been eliminated
-	while (paren.at(0) == '(') {
+	// WALK THROUGH NEWICK STRING ////
+	// collect a substring, stop at ( ) , :
 	
-//		cout << paren << endl;
-					
-		int left, right, from, to, openParen, closeParen, openMig, closeMig;	
-		double leftLength, rightLength, migLength;
-		stringPos = 0;
-		thisString = "";
-		left = 0;
-		right = 0;
-					
-		for ( is=paren.begin(); is < paren.end(); ++is ) {
-
-			if (*is == '(') {
-				openParen = stringPos;
-				openMig = stringPos;
-			}
-			
-			if ( (*is >= '0' && *is <= '9') || (*is >= 'A' && *is <= 'Z') || (*is >= 'a' && *is <= 'z') || *is == '.' || *is == '-' ) {
-				thisString += *is;
-			}	
-			
-			else {
-								
-				if (thisString.length() > 0) {
-				
-					// branch length
-					if (*is == '[' || *is == ',' || *is == ')') {		
-						leftLength = rightLength;
-						rightLength = atof(thisString.c_str());
-					}					
-					
-					// node number
-					if (*is == ':') {	
-						left = right;
-						right = atoi(thisString.c_str());		
-					}
+	string thisString = "";
+	int nodeCount = 1;
+	bool lengthCheck = false;
 	
-					if (*is == ',') {
-						openMig = stringPos;
-					}		
-					
-					// MIGRATION EVENTS ////////////////////
-					
-					/* need to extend ctree here */
-					/* can only deal with migration events that effect a tip node */
-					/* this section is only called when brackets follow a tip node */
-					if (*is == '=') {
-					
-						/* grabbing migration event */
-						string labelString = thisString;
-						labelString.erase(0,1);
-						from = atoi(labelString.c_str()) + 1;
-						labelString = thisString;
-						labelString.erase(1,1);		
-						to = atoi(labelString.c_str()) + 1;
-						
-					}				
-					
-					if (*is == ']') {
-					
-						closeMig = stringPos; 
-					
-						migLength = atof(thisString.c_str());
-			//			cout << tempN << " mig from " << from << " to " << to << ", at " << migLength << endl;
-						
-						// push child node back by distance equal to migLength
-						it = findNode(right);	
-						(*it).setLength( rightLength - migLength );
-			
-						// create new intermediate node
-						Node migNode(current);
-						migNode.setLabel(to);
-						migNode.setLength(migLength);
-						
-						// wrap this new node so that it inherits the old node
-						nodetree.wrap(it,migNode);		
-								
-						/* replace parenthesis with new node label */	
-						/* code is set up to deal with the situation of two labels before a parenthesis */
-						stringstream out;
-						out << current << ":" << migLength;
-						string insert = out.str();
-						paren.replace(openMig + 1,closeMig - openMig,insert);
-						
-						current++;			
-						break;
-					
-					}
-				
-				}
-								
-				thisString = "";
-				
-			}				
-			
-			// COALESCENT EVENTS //////////////////
-			
-			if (*is == ')') {
-			
-				// have to have stored left and right nodes
-				if (left != 0 && right != 0) {
-				
-					closeParen = stringPos; 
-					
-					// append a new node
-					// append this new node with two branches (left node and right node)
-									
-					tree<Node>:: iterator iterLeft, iterRight, iterNew;
-					iterLeft = findNode(left);
-					iterRight = findNode(right);	
+	for (is = paren.begin(); is < paren.end(); ++is ) {
 	
-					(*iterLeft).setLength(leftLength);
-					(*iterRight).setLength(rightLength);				
-					
-					Node newNode(current);
-					newNode.setLabel( (*iterLeft).getLabel() );
-				
-					iterNew = nodetree.wrap(iterLeft,newNode);		
-					nodetree.move_after(iterLeft,iterRight);
-					
-					/* replace parenthesis with new node label */		
-					stringstream out;
-					out << current;
-					string insert = out.str();
-	
-					// this creates a new string every cycle
-			//		paren = paren.substr(0,openParen) + insert + paren.substr(closeParen+1,paren.length());
+		// filling thisString
+		char thisChar = *is;
+		if ( (*is >= '0' && *is <= '9') || (*is >= 'A' && *is <= 'Z') || (*is >= 'a' && *is <= 'z') || *is == '.' || *is == '-' ) {
+			thisString += *is;
+		}	  		
 		
-					// this modifies the paren string: 2% faster
-					paren.replace(openParen,closeParen-openParen+1,insert);
-					
-					current++;			
-					break;
-				
-				}
-				
-				// this will be encountered if the string is surrounded by an extra pair of parenthesis
-				// LAMARC does this
-				else {
-					paren = ";";
-				}
-				
-			}
-	
-		stringPos++;
-			
+		// : --> name node, keep pointer where it is, prime loop to update a length, set as tip
+		if (thisChar == ':'  && thisString.length() > 0) {
+			(*it).setName(thisString);
+			(*it).setLeaf(true);
+			thisString = "";
+			lengthCheck = true;
+		}	
+		
+		// : --> prime loop to update a length
+		if (thisChar == ':'  && thisString.length() == 0) {
+			lengthCheck = true;
+		}		
+		
+		//  update node name, assuming branch lengths are absent, set as tip
+		if ( (thisChar == '(' || thisChar == ')' || thisChar == ',')  && !lengthCheck && thisString.length() > 0) {
+			(*it).setName(thisString);
+			(*it).setLeaf(true);
+			thisString = "";
+		}			
+		
+		//  update node length, if lengthCheck is flagged
+		if ( (thisChar == '(' || thisChar == ')' || thisChar == ',')  && lengthCheck && thisString.length() > 0) {
+			(*it).setLength(atof(thisString.c_str()));
+			thisString = "";
+			lengthCheck = false;
+		}		
+		
+		// ( --> add child node, move pointer to this child node
+		if (thisChar == '(') {
+			Node thisNode = Node(nodeCount);
+			it = nodetree.append_child(it,thisNode);
+			nodeCount++;
 		}
-	
-	}
+
+		// , --> add sister node, move pointer to this sister node
+		if (thisChar == ',') {
+			Node thisNode = Node(nodeCount);
+			it = nodetree.insert_after(it,thisNode);
+			nodeCount++;
+		}
+		
+		// ) --> move pointer to parent node
+		if (thisChar == ')') {
+			it = nodetree.parent(it);
+		}		
 			
+	}
+	
 	// adding branch length to the parent node's time to get the node's time
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -954,6 +756,8 @@ Output is:
 	tip name rules
 */	
 void CoalescentTree::printRuleList(string outputFile) {
+
+	printTree();
 
 	/* initializing output stream */
 	ofstream outStream;
