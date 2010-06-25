@@ -115,6 +115,7 @@ private:
 	tree<Node> nodetree;					// linked tree containing Node objects		
 										
 	// HELPER FUNCTIONS
+	int initialDigits(string);				// return initial digits in a string, 34ATZ -> 34, 3454 -> 0
 	void reduce();							// goes through tree and removes inconsequential nodes	
 	void peelBack();						// removes excess root from tree
 	void adjustCoords();					// sets coords in Nodes to allow tree drawing

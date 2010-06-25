@@ -91,31 +91,37 @@ CoalescentTree::CoalescentTree(string paren) {
 		}	  		
 		
 		// : --> name node, keep pointer where it is, prime loop to update a length, set as tip
-		if (thisChar == ':'  && thisString.length() > 0) {
-			(*it).setName(thisString);
-			(*it).setLeaf(true);
-			thisString = "";
+		if (thisChar == ':') {
+		
+			if (thisString.length() > 0) {
+				(*it).setName(thisString);
+				(*it).setLeaf(true);
+				(*it).setLabel(initialDigits(thisString)+1);
+				thisString = "";
+			}
+			
 			lengthCheck = true;
+			
 		}	
+						
+		if ( (thisChar == '(' || thisChar == ')' || thisChar == ',') && thisString.length() > 0) {
 		
-		// : --> prime loop to update a length
-		if (thisChar == ':'  && thisString.length() == 0) {
-			lengthCheck = true;
-		}		
-		
-		//  update node name, assuming branch lengths are absent, set as tip
-		if ( (thisChar == '(' || thisChar == ')' || thisChar == ',')  && !lengthCheck && thisString.length() > 0) {
-			(*it).setName(thisString);
-			(*it).setLeaf(true);
+			//  update node length, if lengthCheck is flagged
+			if (lengthCheck) {
+				(*it).setLength(atof(thisString.c_str()));
+				lengthCheck = false;			
+			}
+			
+			//  update node name, assuming branch lengths are absent, set as tip
+			else {
+				(*it).setName(thisString);
+				(*it).setLeaf(true);
+				(*it).setLabel(initialDigits(thisString)+1);
+			}
+			
 			thisString = "";
+			
 		}			
-		
-		//  update node length, if lengthCheck is flagged
-		if ( (thisChar == '(' || thisChar == ')' || thisChar == ',')  && lengthCheck && thisString.length() > 0) {
-			(*it).setLength(atof(thisString.c_str()));
-			thisString = "";
-			lengthCheck = false;
-		}		
 		
 		// ( --> add child node, move pointer to this child node
 		if (thisChar == '(') {
@@ -169,6 +175,36 @@ CoalescentTree::CoalescentTree(string paren) {
 	/* pushing the most recent sample up to time = 0 */
 	pushTimesBack(0);
 		
+}
+
+/* return initial digits in a string, 34ATZ -> 34, 3454 -> 0 */
+int CoalescentTree::initialDigits(string name) {
+
+	// label is the first digit characters of node string
+	int initial = 0;
+	
+	// if string contains a letter
+	bool containsLetter = false;
+	for (int i = 0; i < name.length(); ++i) {
+		if ( (name[i] >= 'A' && name[i] <= 'Z') || (name[i] >= 'a' && name[i] <= 'z') ) {
+			containsLetter = true;
+		}
+	}
+					
+	if (containsLetter) {
+		// construct substring of initial numbers
+		string labelString = "";
+		int count = 0;
+		while (name[count] >= '0' && name[count] <= '9') {
+			labelString += name[count];
+			++count;
+		}
+		// set label to this substring
+		initial = atoi(labelString.c_str());
+	}
+	
+	return initial;
+
 }
 
 /* push dates to agree with a most recent sample date at endTime */
