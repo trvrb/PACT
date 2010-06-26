@@ -78,69 +78,150 @@ CoalescentTree::CoalescentTree(string paren) {
 	// WALK THROUGH NEWICK STRING ////
 	// collect a substring, stop at ( ) , :
 	
-	string thisString = "";
+	string nameOrLength = "";
+	string bracketed = "";
 	int nodeCount = 1;
 	bool lengthCheck = false;
+	bool bracketCheck = false;
 	
+	// fill 'nameOrLength' with names and branch lengths
+	// 'bracketed' placeholder for bracketed strings
 	for (is = paren.begin(); is < paren.end(); ++is ) {
+									
+		// OUTSIDE OF BRACKETS
+		// branch tree, update names, updates branch lengths
+		if (!bracketCheck) {
+		
+			// filling nameOrLength
+			if ( (*is >= '0' && *is <= '9') || (*is >= 'A' && *is <= 'Z') || (*is >= 'a' && *is <= 'z') || *is == '.' || *is == '-' ) {
+				nameOrLength += *is;
+			}	
+		
+			// : --> name node, keep pointer where it is, prime loop to update a length, set as tip
+			if (*is == ':') {
+			
+				if (nameOrLength.length() > 0) {
+					(*it).setName(nameOrLength);
+					(*it).setLeaf(true);
+					(*it).setLabel(initialDigits(nameOrLength)+1);
+					nameOrLength = "";
+				}
+				
+				lengthCheck = true;
+				
+			}	
+							
+			if ( (*is == '[' || *is == '(' || *is == ')' || *is == ',') && nameOrLength.length() > 0) {
+			
+				//  update node length, if lengthCheck is flagged
+				if (lengthCheck) {
+					(*it).setLength(atof(nameOrLength.c_str()));
+					lengthCheck = false;			
+				}
+				
+				//  update node name, assuming branch lengths are absent, set as tip
+				else {
+					(*it).setName(nameOrLength);
+					(*it).setLeaf(true);
+					(*it).setLabel(initialDigits(nameOrLength)+1);
+				}
+				
+				nameOrLength = "";
+				
+			}			
+			
+			// ( --> add child node, move pointer to this child node
+			if (*is == '(') {
+				Node thisNode(nodeCount);
+				it = nodetree.append_child(it,thisNode);
+				nodeCount++;
+			}
 	
-		// filling thisString
-		char thisChar = *is;
-		if ( (*is >= '0' && *is <= '9') || (*is >= 'A' && *is <= 'Z') || (*is >= 'a' && *is <= 'z') || *is == '.' || *is == '-' ) {
-			thisString += *is;
-		}	  		
-		
-		// : --> name node, keep pointer where it is, prime loop to update a length, set as tip
-		if (thisChar == ':') {
-		
-			if (thisString.length() > 0) {
-				(*it).setName(thisString);
-				(*it).setLeaf(true);
-				(*it).setLabel(initialDigits(thisString)+1);
-				thisString = "";
+			// , --> add sister node, move pointer to this sister node
+			if (*is == ',') {
+				Node thisNode(nodeCount);
+				it = nodetree.insert_after(it,thisNode);
+				nodeCount++;
 			}
 			
-			lengthCheck = true;
-			
-		}	
-						
-		if ( (thisChar == '(' || thisChar == ')' || thisChar == ',') && thisString.length() > 0) {
+			// ) --> move pointer to parent node, need to inherit state when moving up the tree
+			if (*is == ')') {
+				int childLabel = (*it).getLabel();
+				it = nodetree.parent(it);
+				(*it).setLabel(childLabel);
+			}		
 		
-			//  update node length, if lengthCheck is flagged
-			if (lengthCheck) {
-				(*it).setLength(atof(thisString.c_str()));
-				lengthCheck = false;			
-			}
-			
-			//  update node name, assuming branch lengths are absent, set as tip
-			else {
-				(*it).setName(thisString);
-				(*it).setLeaf(true);
-				(*it).setLabel(initialDigits(thisString)+1);
-			}
-			
-			thisString = "";
-			
-		}			
-		
-		// ( --> add child node, move pointer to this child node
-		if (thisChar == '(') {
-			Node thisNode = Node(nodeCount);
-			it = nodetree.append_child(it,thisNode);
-			nodeCount++;
-		}
-
-		// , --> add sister node, move pointer to this sister node
-		if (thisChar == ',') {
-			Node thisNode = Node(nodeCount);
-			it = nodetree.insert_after(it,thisNode);
-			nodeCount++;
 		}
 		
-		// ) --> move pointer to parent node
-		if (thisChar == ')') {
-			it = nodetree.parent(it);
+		// prime bracketed
+		if (*is == '[') { 
+			bracketCheck = true; 
+			bracketed = "";
 		}		
+		
+		// INSIDE OF BRACKETS
+		// update labels, add migration events
+		if (bracketCheck) {
+		
+			// fill bracketed
+			if (bracketCheck && *is != '[' && *is != ']') {
+				bracketed += *is;
+			}
+		
+			if (*is == ']') {
+			
+				// fill 4 strings delimited by ' ', ':' and '=' 
+				string::iterator ib;	
+				string stringOne = "";
+				string stringTwo = "";
+				string stringThree = "";
+				string stringFour = "";
+				int counter = 1;
+				
+				ib = bracketed.begin();
+				while (ib != bracketed.end()) {
+					if (*ib != ' ' && *ib != '=' && *ib != ':') {
+						if (counter == 1) { stringOne += *ib; }
+						if (counter == 2) { stringTwo += *ib; }
+						if (counter == 3) { stringThree += *ib; }
+						if (counter == 4) { stringFour += *ib; }
+					}
+					else {
+						++counter;
+					}
+				++ib;
+				}
+				
+				// MIGRATION
+				// insert an additional node up the tree
+				if (stringOne == "&M") {
+				
+					int from = atoi(stringTwo.c_str()) + 1;
+					int to = atoi(stringThree.c_str()) + 1;
+					double migLength = atof(stringFour.c_str());
+										
+					// push current node back by distance equal to migLength
+					double newLength = (*it).getLength() - migLength;
+					(*it).setLength(migLength);
+			//		(*it).setLabel(to); 				// this should happen automatically
+		
+					// create new intermediate node
+					Node migNode(nodeCount);
+					migNode.setLabel(from);
+					migNode.setLength(newLength);
+					nodeCount++;
+					
+					// wrap this new node so that it inherits the old node
+					it = nodetree.wrap(it,migNode);						
+					
+				}
+				
+				bracketed = "";
+				bracketCheck = false;				
+				
+			}
+		
+		}
 			
 	}
 	
@@ -793,7 +874,7 @@ Output is:
 */	
 void CoalescentTree::printRuleList(string outputFile) {
 
-	printTree();
+//	printTree();
 
 	/* initializing output stream */
 	ofstream outStream;
