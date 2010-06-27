@@ -37,6 +37,9 @@ using std::string;
 #include <vector>
 using std::vector;
 
+#include <set>
+using std::set;
+
 #include "io.h"
 #include "coaltree.h"
 #include "series.h"
@@ -229,7 +232,7 @@ void IO::treeManip() {
 						
 			// PRUNE TO LABEL
 			if (param.prune_to_label) {
-				int label = (param.prune_to_label_values)[0];
+				string label = (param.prune_to_label_values)[0];
 				treelist[i].pruneToLabel(label);
 			}	
 			
@@ -295,8 +298,10 @@ void IO::printStatistics() {
 		
 		outStream << "statistic\tlower\tmean\tupper" << endl; 
 		
-		int maxLabel = treelist[0].getMaxLabel();
-
+		set<string>::const_iterator is;
+		set<string>::const_iterator js;
+		set<string> lset = treelist[0].getLabelSet();		
+		
 		// TMRCA  //////////////
 		if (param.summary_tmrca) {
 			cout << "Printing TMRCA summary to " << outputFile << endl;
@@ -326,15 +331,14 @@ void IO::printStatistics() {
 		// LABEL PROPORTIONS //////////////
 		if (param.summary_proportions) {
 			cout << "Printing trunk proportion summary to " << outputFile << endl;
-			for (int label = 1; label <= maxLabel; label++) {
+			for (is = lset.begin(); is != lset.end(); ++is) {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
 					CoalescentTree ct = treelist[i];
-			//		ct.pruneToTrunk();
-					double n = ct.getLabelPro(label);
+					double n = ct.getLabelPro(*is);
 					s.insert(n);
 				}
-				outStream << "pro_" << label << "\t";
+				outStream << "pro_" << *is << "\t";
 				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;		
 			}
 		}
@@ -342,13 +346,13 @@ void IO::printStatistics() {
 		// COALESCENCE /////////////////////
 		if (param.summary_coal_rates) {
 			cout << "Printing coalescent summary to " << outputFile << endl;	
-			for (int label = 1; label <= maxLabel; label++) {
+			for (is = lset.begin(); is != lset.end(); ++is) {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
-					double n = treelist[i].getCoalRate(label);
+					double n = treelist[i].getCoalRate(*is);
 					s.insert(n);
 				}
-				outStream << "coal_" << label << "\t";
+				outStream << "coal_" << *is << "\t";
 				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 			}
 		}
@@ -356,8 +360,10 @@ void IO::printStatistics() {
 		// MIGRATION ///////////////////////
 		if (param.summary_mig_rates) {		
 			cout << "Printing migration summary to " << outputFile << endl;
-			for (int from = 1; from <= maxLabel; from++) {
-				for (int to = 1; to <= maxLabel; to++) {	
+			for (is = lset.begin(); is != lset.end(); ++is) {
+				for (js = lset.begin(); js != lset.end(); ++js) {
+					string from = *is;
+					string to = *js;
 					if (from != to) {
 		
 						Series s;
@@ -430,7 +436,10 @@ void IO::printSkylines() {
 		
 		outStream << "statistic\ttime\tlower\tmean\tupper" << endl; 
 		
-		int maxLabel = treelist[0].getMaxLabel();
+		set<string>::const_iterator is;
+		set<string>::const_iterator js;
+		set<string> lset = treelist[0].getLabelSet();	
+
 		double start = param.skyline_values[0];
 		double stop = param.skyline_values[1];
 		double step = param.skyline_values[2];
@@ -473,7 +482,7 @@ void IO::printSkylines() {
 		if (param.skyline_proportions) {
 			cout << "Printing proportions skyline to " << outputFile << endl;
 			
-			for (int label = 1; label <= maxLabel; label++) {
+			for (is = lset.begin(); is != lset.end(); ++is) {
 				for (double t = start; t + step <= stop; t += step) {
 			
 					Series s;
@@ -481,10 +490,10 @@ void IO::printSkylines() {
 						CoalescentTree ct = treelist[i];
 						ct.trimEnds(t,t+step);
 					//	ct.pruneToTrunk();
-						double n = ct.getLabelPro(label);
+						double n = ct.getLabelPro(*is);
 						s.insert(n);
 					}
-					outStream << "pro_" << label << "\t";
+					outStream << "pro_" << *is << "\t";
 					outStream << t + step / (double) 2 << "\t";
 					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 					
@@ -496,17 +505,17 @@ void IO::printSkylines() {
 		if (param.skyline_coal_rates) {
 			cout << "Printing coalescent skyline to " << outputFile << endl;
 			
-			for (int label = 1; label <= maxLabel; label++) {
+			for (is = lset.begin(); is != lset.end(); ++is) {
 				for (double t = start; t + step <= stop; t += step) {
 			
 					Series s;
 					for (int i = 0; i < treelist.size(); i++) {
 						CoalescentTree ct = treelist[i];
 						ct.trimEnds(t,t+step);
-						double n = ct.getCoalRate(label);
+						double n = ct.getCoalRate(*is);
 						s.insert(n);
 					}
-					outStream << "coal_" << label << "\t";
+					outStream << "coal_" << *is << "\t";
 					outStream << t + step / (double) 2 << "\t";
 					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 					
@@ -517,8 +526,10 @@ void IO::printSkylines() {
 		// MIGRATION ///////////////////////
 		if (param.skyline_mig_rates) {		
 			cout << "Printing migration skyline to " << outputFile << endl;
-			for (int from = 1; from <= maxLabel; from++) {
-				for (int to = 1; to <= maxLabel; to++) {	
+			for (is = lset.begin(); is != lset.end(); ++is) {
+				for (js = lset.begin(); js != lset.end(); ++js) {	
+					string from = *is;
+					string to = *js;
 					if (from != to) {
 						for (double t = start; t + step <= stop; t += step) {
 		

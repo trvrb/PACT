@@ -22,6 +22,9 @@ You should have received a copy of the GNU General Public License along with PAC
 #ifndef CTREE_H
 #define CTREE_H
 
+#include <set>
+using std::set;
+
 #include <string>
 using std::string;
 
@@ -46,7 +49,7 @@ public:
 	void reduceTips(double);					// reduces tree to ancestors of a subset of tips
 	void renewTrunk(double);				// renews definition of trunk
 	void pruneToTrunk();					// reduces CoalescentTree object to trunk
-	void pruneToLabel(int);					// reduces CoalescentTree object to only include a particular set of tips
+	void pruneToLabel(string);				// reduces CoalescentTree object to only include a particular set of tips
 	void collapseLabels();					// sets all labels in CoalescentTree to 1
 	void trimEnds(double,double);			// reduces CoalescentTree object to only those nodes between
 											// time start and time stop	
@@ -69,34 +72,35 @@ public:
 	double getPresentTime();				// returns most recent time in tree
 	double getRootTime();					// returns most ancient time in tree
 	double getTMRCA();						// span of time in tree
-	int getMaxLabel();						// returns the highest label present
+//	int getMaxLabel();						// returns the highest label present
 	int getLeafCount();						// returns the count of leaf nodes in tree
 	int getNodeCount();						// returns the total number of nodes in tree
 
 	// LABEL STATISTICS		
 	double getLength();						// return total tree length
-	double getLength(int);					// return length with this label
-	double getLabelPro(int);				// return proportion of tree with label
+	double getLength(string);				// return length with this label
+	double getLabelPro(string);				// return proportion of tree with label
 	double getTrunkPro();					// proportion of tree that can trace its history from present day samples
+	set<string> getLabelSet();				// return labelset
 	
 	// COALESCENT STATISTICS
 	// problem with weight calculation for sectioned data
 	int getCoalCount();						// total count of coalescent events on tree
-	int getCoalCount(int);					// count of coalescent events involving label on tree	
+	int getCoalCount(string);				// count of coalescent events involving label on tree	
 	double getCoalWeight();					// total opportunity for coalescence on tree
-	double getCoalWeight(int);				// total opportunity for coalescence on tree
+	double getCoalWeight(string);			// total opportunity for coalescence on tree
 	double getCoalRate();
-	double getCoalRate(int);
+	double getCoalRate(string);
 
 	// MIGRATION STATISTICS
 	int getMigCount();
-	int getMigCount(int,int);	
+	int getMigCount(string,string);	
 	double getMigRate();			
-	double getMigRate(int,int);
+	double getMigRate(string,string);
 	
 	// DIVERSITY STATISTICS	
 	double getDiversity();					// return mean of (2 * time to common ancestor) for every pair of leaf nodes
-	double getDiversity(int);				// diversity only involving a particular label
+	double getDiversity(string);			// diversity only involving a particular label
 	double getDiversityWithin();			// diversity where both samples have the same label
 	double getDiversityBetween();			// diversity where both samples have different labels
 	double getFst();						// Fst = (divBetween - divWithin) / divBetween
@@ -106,16 +110,17 @@ public:
 	// TIP STATISTICS
 	vector<string> getTipNames();			// returns vector of tip names
 	double getTime(string);
-	int getLabel(string);
+	string getLabel(string);
 	double timeToTrunk(string);				// time it takes for a named tip to coalesce with the trunk
 	
 									
 private:
 	RNG rgen;								// random number generator
-	tree<Node> nodetree;					// linked tree containing Node objects		
+	tree<Node> nodetree;					// linked tree containing Node objects	
+	set<string> labelset;					// set of all label names
 										
 	// HELPER FUNCTIONS
-	int initialDigits(string);				// return initial digits in a string, 34ATZ -> 34, 3454 -> 0
+	string initialDigits(string);			// return initial digits in a string, 34ATZ -> 34, 3454 -> 0
 	void reduce();							// goes through tree and removes inconsequential nodes	
 	void peelBack();						// removes excess root from tree
 	void adjustCoords();					// sets coords in Nodes to allow tree drawing

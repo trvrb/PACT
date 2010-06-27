@@ -56,7 +56,7 @@ public:
 	bool prune_to_trunk;
 	
 	bool prune_to_label;
-	vector<double> prune_to_label_values;	// label
+	vector<string> prune_to_label_values;	// label
 	
 	bool collapse_labels;
 	

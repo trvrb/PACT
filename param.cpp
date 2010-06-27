@@ -114,6 +114,7 @@ void Parameters::importLine(string line) {
 	string pstring = "";				// fill with a-z or _
 	string vstring = "";				// fill with 0-9 or . or -
 	vector<double> values;				// convert vstring to double and push here
+	vector<string> svalues;
 
 	for (string::iterator is = line.begin(); is != line.end(); is++) {
 	
@@ -172,7 +173,10 @@ void Parameters::importLine(string line) {
 	if (pstring == "prunetolabel") { 
 		if (values.size() == 1) {
 			prune_to_label = true; 
-			prune_to_label_values = values;			
+			if (vstring.size() > 0) {
+				svalues.push_back( vstring.c_str() );
+			}				
+			prune_to_label_values = svalues;			
 		}
 	}	
 	

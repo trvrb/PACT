@@ -103,7 +103,8 @@ CoalescentTree::CoalescentTree(string paren) {
 				if (nameOrLength.length() > 0) {
 					(*it).setName(nameOrLength);
 					(*it).setLeaf(true);
-					(*it).setLabel(initialDigits(nameOrLength)+1);
+					(*it).setLabel(initialDigits(nameOrLength));
+					labelset.insert(initialDigits(nameOrLength));
 					nameOrLength = "";
 				}
 				
@@ -123,7 +124,8 @@ CoalescentTree::CoalescentTree(string paren) {
 				else {
 					(*it).setName(nameOrLength);
 					(*it).setLeaf(true);
-					(*it).setLabel(initialDigits(nameOrLength)+1);
+					(*it).setLabel(initialDigits(nameOrLength));
+					labelset.insert(initialDigits(nameOrLength));
 				}
 				
 				nameOrLength = "";
@@ -146,7 +148,7 @@ CoalescentTree::CoalescentTree(string paren) {
 			
 			// ) --> move pointer to parent node, need to inherit state when moving up the tree
 			if (*is == ')') {
-				int childLabel = (*it).getLabel();
+				string childLabel = (*it).getLabel();
 				it = nodetree.parent(it);
 				(*it).setLabel(childLabel);
 			}		
@@ -196,9 +198,17 @@ CoalescentTree::CoalescentTree(string paren) {
 				// insert an additional node up the tree
 				if (stringOne == "&M") {
 				
-					int from = atoi(stringTwo.c_str()) + 1;
-					int to = atoi(stringThree.c_str()) + 1;
+					int fromInt = atoi(stringTwo.c_str()) + 1;
+					int toInt = atoi(stringThree.c_str()) + 1;
 					double migLength = atof(stringFour.c_str());
+					
+					stringstream fromStream;
+					fromStream << fromInt;
+					string from = fromStream.str();
+					
+					stringstream toStream;
+					toStream << toInt;
+					string to = toStream.str();					
 										
 					// push current node back by distance equal to migLength
 					double newLength = (*it).getLength() - migLength;
@@ -258,8 +268,8 @@ CoalescentTree::CoalescentTree(string paren) {
 		
 }
 
-/* return initial digits in a string, 34ATZ -> 34, 3454 -> 0 */
-int CoalescentTree::initialDigits(string name) {
+/* return initial digits in a string, incremented by 1, 34ATZ -> 35, 3454 -> 1 */
+string CoalescentTree::initialDigits(string name) {
 
 	// label is the first digit characters of node string
 	int initial = 0;
@@ -284,7 +294,11 @@ int CoalescentTree::initialDigits(string name) {
 		initial = atoi(labelString.c_str());
 	}
 	
-	return initial;
+	stringstream outStream;
+	outStream << initial + 1;
+	string out = outStream.str();
+	
+	return out;
 
 }
 
@@ -476,7 +490,7 @@ void CoalescentTree::pruneToTrunk() {
 
 
 /* reduces a tree to samples with a single label */
-void CoalescentTree::pruneToLabel(int label) {
+void CoalescentTree::pruneToLabel(string label) {
 
 	/* start by finding all tips with this label */
 	set<int> labelset; 
@@ -517,7 +531,7 @@ void CoalescentTree::collapseLabels() {
 
 	tree<Node>::iterator it, jt;
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
-		(*it).setLabel(1);
+		(*it).setLabel("1");
 	}
 							
 }
@@ -1033,17 +1047,17 @@ double CoalescentTree::getTMRCA() {
 }
 
 /* number of labels 1 to n */
-int CoalescentTree::getMaxLabel() {
-
-	double n = 0;
-	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it ) {
-		if ( (*it).getLabel() > n ) {
-			n = (*it).getLabel();
-		}
-	}	
-	return n;
-
-}
+//int CoalescentTree::getMaxLabel() {
+//
+//	double n = 0;
+//	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it ) {
+//		if ( (*it).getLabel() > n ) {
+//			n = (*it).getLabel();
+//		}
+//	}	
+//	return n;
+//
+//}
 
 /* number of leaf nodes */
 int CoalescentTree::getLeafCount() {
@@ -1077,7 +1091,7 @@ double CoalescentTree::getLength() {
 }
 
 /* length of the tree with label l */
-double CoalescentTree::getLength(int l) {
+double CoalescentTree::getLength(string l) {
 
 	double length = 0.0;
 	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it ) {
@@ -1090,7 +1104,7 @@ double CoalescentTree::getLength(int l) {
 }
 
 /* get proportion of tree with label */
-double CoalescentTree::getLabelPro(int l) { 
+double CoalescentTree::getLabelPro(string l) { 
 
 	return getLength(l) / getLength();
 	
@@ -1113,6 +1127,10 @@ double CoalescentTree::getTrunkPro() {
     	
 }
 
+set<string> CoalescentTree::getLabelSet() {
+	return labelset;
+}
+
 /* returns the count of coalescent events */
 int CoalescentTree::getCoalCount() {
 
@@ -1128,7 +1146,7 @@ int CoalescentTree::getCoalCount() {
 }
 
 /* returns the count of coalescent events with label */
-int CoalescentTree::getCoalCount(int l) {
+int CoalescentTree::getCoalCount(string l) {
 
 	/* count coalescent events, these are nodes with two children */
 	int count = 0;
@@ -1174,7 +1192,7 @@ double CoalescentTree::getCoalWeight() {
 }
 
 /* returns the opportunity for coalescence for label */
-double CoalescentTree::getCoalWeight(int l) {
+double CoalescentTree::getCoalWeight(string l) {
 
 	// setting step to be 1/1000 of the total length of the tree
 	double start = getRootTime();
@@ -1208,7 +1226,7 @@ double CoalescentTree::getCoalRate() {
 	return getCoalCount() / getCoalWeight();
 }
 
-double CoalescentTree::getCoalRate(int l) {
+double CoalescentTree::getCoalRate(string l) {
 	return getCoalCount(l) / getCoalWeight(l);
 }
 
@@ -1231,7 +1249,7 @@ int CoalescentTree::getMigCount() {
 }
 
 /* returns the count of migration events from label to label */
-int CoalescentTree::getMigCount(int from, int to) {
+int CoalescentTree::getMigCount(string from, string to) {
 
 	/* count migration events, these are nodes in which the parent label differs from child label */
 	tree<Node>::iterator it, jt;
@@ -1262,7 +1280,7 @@ double CoalescentTree::getMigRate() {
 /* this needs attention */
 /* seems to match with empirical estimates with getMigCount(from,to) / getLength() */
 /* seems wrong however */
-double CoalescentTree::getMigRate(int from, int to) {
+double CoalescentTree::getMigRate(string from, string to) {
 	return getMigCount(from,to) / getLength(to);
 }
 
@@ -1293,7 +1311,7 @@ double CoalescentTree::getDiversity() {
 }
 
 /* return mean of (2 * time to common ancestor) for pairs of leaf nodes with labels a and b */
-double CoalescentTree::getDiversity(int l) {
+double CoalescentTree::getDiversity(string l) {
 
 	double div = 0.0;
 	int count = 0;
@@ -1421,7 +1439,7 @@ double CoalescentTree::getTime(string name) {
 	return (*it).getTime();
 }
 
-int CoalescentTree::getLabel(string name) {
+string CoalescentTree::getLabel(string name) {
 	tree<Node>::iterator it = findNode(name);	
 	return (*it).getLabel();
 }
