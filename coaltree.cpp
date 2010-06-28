@@ -226,6 +226,13 @@ CoalescentTree::CoalescentTree(string paren) {
 					
 				}
 				
+				// LOCATION
+				// label current node
+				if (stringOne == "&state") {
+					string loc = stringTwo.c_str();
+					(*it).setLabel(loc);
+				}
+				
 				bracketed = "";
 				bracketCheck = false;				
 				
