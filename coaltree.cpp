@@ -104,7 +104,9 @@ CoalescentTree::CoalescentTree(string paren) {
 					(*it).setName(nameOrLength);
 					(*it).setLeaf(true);
 					(*it).setLabel(initialDigits(nameOrLength));
-					labelset.insert(initialDigits(nameOrLength));
+					if(initialDigits(nameOrLength) != "0") {
+						labelset.insert(initialDigits(nameOrLength));
+					}
 					nameOrLength = "";
 				}
 				
@@ -125,7 +127,9 @@ CoalescentTree::CoalescentTree(string paren) {
 					(*it).setName(nameOrLength);
 					(*it).setLeaf(true);
 					(*it).setLabel(initialDigits(nameOrLength));
-					labelset.insert(initialDigits(nameOrLength));
+					if(initialDigits(nameOrLength) != "0") {
+						labelset.insert(initialDigits(nameOrLength));
+					}
 				}
 				
 				nameOrLength = "";
@@ -218,6 +222,7 @@ CoalescentTree::CoalescentTree(string paren) {
 					// create new intermediate node
 					Node migNode(nodeCount);
 					migNode.setLabel(from);
+					labelset.insert(from);
 					migNode.setLength(newLength);
 					nodeCount++;
 					
@@ -231,6 +236,7 @@ CoalescentTree::CoalescentTree(string paren) {
 				if (stringOne == "&state") {
 					string loc = stringTwo.c_str();
 					(*it).setLabel(loc);
+					labelset.insert(loc);
 				}
 				
 				bracketed = "";
@@ -275,11 +281,11 @@ CoalescentTree::CoalescentTree(string paren) {
 		
 }
 
-/* return initial digits in a string, incremented by 1, 34ATZ -> 35, 3454 -> 1 */
+/* return initial digits in a string, incremented by 1, return 0 on failure 34ATZ -> 35, 3454 -> 0 */
 string CoalescentTree::initialDigits(string name) {
 
 	// label is the first digit characters of node string
-	int initial = 0;
+	int initial = -1;
 	
 	// if string contains a letter
 	bool containsLetter = false;
