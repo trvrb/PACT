@@ -93,7 +93,7 @@ CoalescentTree::CoalescentTree(string paren) {
 		if (!bracketCheck) {
 		
 			// filling nameOrLength
-			if ( (*is >= '0' && *is <= '9') || (*is >= 'A' && *is <= 'Z') || (*is >= 'a' && *is <= 'z') || *is == '.' || *is == '-' ) {
+			if ( (*is >= '0' && *is <= '9') || (*is >= 'A' && *is <= 'Z') || (*is >= 'a' && *is <= 'z') || *is == '.' || *is == '-' || *is == '_' ) {
 				nameOrLength += *is;
 			}	
 		
