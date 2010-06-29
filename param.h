@@ -1,5 +1,5 @@
 /* param.h
-Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
+Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
 This contains all the global variables used by pact, can be modified later if necessary
 */
 

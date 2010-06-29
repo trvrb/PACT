@@ -1,5 +1,5 @@
 /* node.h
-Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
+Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
 Node class definition
 This object represents a node in the CoalescentTree object, stores relevant attributes
 */

@@ -1,5 +1,5 @@
 /* series.h
-Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
+Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
 Series class definition
 This object holds a series of simple measurements, and associated operations.
 */

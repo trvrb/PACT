@@ -1,5 +1,5 @@
 /* param.cpp
-Copyright 2009 Trevor Bedford <bedfordt@umich.edu>
+Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
 Member function definitions for Parameter class
 Parameter values are all global
 */
