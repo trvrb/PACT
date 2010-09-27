@@ -58,6 +58,9 @@ public:
 	bool prune_to_label;
 	vector<string> prune_to_label_values;	// label
 	
+	bool prune_to_time;
+	vector<double> prune_to_time_values;	// start, stop	
+	
 	bool collapse_labels;
 	
 	bool trim_ends;

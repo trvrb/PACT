@@ -239,7 +239,14 @@ void IO::treeManip() {
 			// PRUNE TO TRUNK
 			if (param.prune_to_trunk) {
 				treelist[i].pruneToTrunk();
-			}			
+			}	
+
+			// PRUNE TO TIME
+			if (param.prune_to_time) {
+				double start = (param.prune_to_time_values)[0];
+				double stop = (param.prune_to_time_values)[1];
+				treelist[i].pruneToTime(start,stop);
+			}				
 
 			// COLLAPSE LABELS
 			if (param.collapse_labels) {

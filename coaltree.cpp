@@ -186,7 +186,7 @@ CoalescentTree::CoalescentTree(string paren) {
 				
 				ib = bracketed.begin();
 				while (ib != bracketed.end()) {
-					if (*ib != ' ' && *ib != '=' && *ib != ':') {
+					if (*ib != ' ' && *ib != '=' && *ib != ':' && *ib != '"') {
 						if (counter == 1) { stringOne += *ib; }
 						if (counter == 2) { stringTwo += *ib; }
 						if (counter == 3) { stringThree += *ib; }
@@ -233,8 +233,8 @@ CoalescentTree::CoalescentTree(string paren) {
 				
 				// LOCATION
 				// label current node
-				if (stringOne == "&state") {
-					string loc = stringTwo.c_str();
+				if (stringOne == "&states") {
+					string loc = stringThree.c_str();
 					(*it).setLabel(loc);
 					labelset.insert(loc);
 				}
@@ -506,7 +506,7 @@ void CoalescentTree::pruneToTrunk() {
 void CoalescentTree::pruneToLabel(string label) {
 
 	/* start by finding all tips with this label */
-	set<int> labelset; 
+	set<int> nodeset; 
 	tree<Node>::iterator it, jt;
 	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
@@ -515,7 +515,7 @@ void CoalescentTree::pruneToLabel(string label) {
 			/* move up tree adding nodes to label set */
 			jt = it;
 			while (nodetree.is_valid(jt)) {
-				labelset.insert( (*jt).getNumber() );
+				nodeset.insert( (*jt).getNumber() );
 				jt = nodetree.parent(jt);
 			}
 		
@@ -525,7 +525,43 @@ void CoalescentTree::pruneToLabel(string label) {
 	/* erase other nodes from the tree */
 	it = nodetree.begin();
 	while(it != nodetree.end()) {
-		if (labelset.end() == labelset.find( (*it).getNumber() )) {
+		if (nodeset.end() == nodeset.find( (*it).getNumber() )) {
+			it = nodetree.erase(it);
+		}
+		else {
+    		++it;
+    	}
+    }
+        
+   	peelBack();     
+	reduce();
+				
+}
+
+/* reduces a tree to samples within a specific time frame */
+void CoalescentTree::pruneToTime(double start, double stop) {
+
+	/* start by finding all tips within this time frame */
+	set<int> nodeset; 
+	tree<Node>::iterator it, jt;
+	
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ( (*it).getTime() > start && (*it).getTime() < stop && (*it).getLeaf() ) {
+		
+			/* move up tree adding nodes to label set */
+			jt = it;
+			while (nodetree.is_valid(jt)) {
+				nodeset.insert( (*jt).getNumber() );
+				jt = nodetree.parent(jt);
+			}
+		
+		}
+	}
+			
+	/* erase other nodes from the tree */
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		if (nodeset.end() == nodeset.find( (*it).getNumber() )) {
 			it = nodetree.erase(it);
 		}
 		else {
@@ -541,6 +577,9 @@ void CoalescentTree::pruneToLabel(string label) {
 
 /* sets all labels in tree to 1 */
 void CoalescentTree::collapseLabels() {
+
+	labelset.clear();
+	labelset.insert("1");
 
 	tree<Node>::iterator it, jt;
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
@@ -942,7 +981,7 @@ void CoalescentTree::printRuleList(string outputFile) {
 	
 	/* print mapping of nodes to labels */
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {	
-		outStream << (*it).getNumber() << "->" << (*it).getLabel() << " ";
+		outStream << (*it).getNumber() << "->\"" << (*it).getLabel() << "\" ";
 	}
 	outStream << endl;
 	

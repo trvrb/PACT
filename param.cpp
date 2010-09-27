@@ -112,7 +112,7 @@ void Parameters::importLine(string line) {
 
 	// READING LINE STRING
 	string pstring = "";				// fill with a-z or _
-	string vstring = "";				// fill with 0-9 or . or -
+	string vstring = "";				// fill with 0-9 or . or - or A-Z
 	vector<double> values;				// convert vstring to double and push here
 	vector<string> svalues;
 
@@ -120,9 +120,9 @@ void Parameters::importLine(string line) {
 	
 		if (*is == '#')		// ignore rest of line after comment
 			break; 
-		else if (*is >= 'a' && *is <= 'z')
+		else if (*is >= 'a' && *is <= 'z' && vstring.size() == 0)
     		pstring += *is;
-		else if ( (*is >= '0' && *is <= '9') || *is == '.' || *is == '-')
+		else if ( (*is >= '0' && *is <= '9') || (*is >= 'a' && *is <= 'z') || (*is >= 'A' && *is <= 'Z') || *is == '.' || *is == '-')
     		vstring += *is;
     	else if (vstring.size() > 0) {
     		values.push_back( atof(vstring.c_str()) );
@@ -179,6 +179,13 @@ void Parameters::importLine(string line) {
 			prune_to_label_values = svalues;			
 		}
 	}	
+
+	if (pstring == "prunetotime") { 
+		if (values.size() == 2) {
+			prune_to_time = true; 
+			prune_to_time_values = values;
+		}
+	}		
 	
 	if (pstring == "collapselabels") { 
 		collapse_labels = true;
@@ -294,6 +301,10 @@ void Parameters::print() {
 		if (prune_to_trunk) {
 			cout << "prune to trunk" << endl;
 		}	
+		
+		if (prune_to_time) {
+			cout << "prune to time " << prune_to_time_values[0] << " " << prune_to_time_values[1] << endl;
+		}		
 		
 		if (collapse_labels) {
 			cout << "collapse labels" << endl;
