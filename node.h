@@ -39,6 +39,8 @@ public:
 	double getLength();
 	double getTime();
 	string getLabel();
+	double getX();
+	double getY();	
 	double getCoord();
 	bool getLeaf();
 	bool getTrunk();
@@ -50,6 +52,8 @@ public:
 	void setLength(double);
 	void setTime(double);
 	void setLabel(string);
+	void setX(double);
+	void setY(double);	
 	void setCoord(double);
 	void setLeaf(bool);
 	void setTrunk(bool);
@@ -61,6 +65,8 @@ private:
 	double length;					// length of the branch leading into the node
 	double time;					// date of the node	
 	string label;					// arbitrary label associated with node
+	double xloc;					// x-axis location of the node
+	double yloc;					// y-axis location of the node	
 	double coord;					// y-axis coordinate, used for tree drawing
 	bool leaf;						// is this node a leaf?
 	bool trunk;						// is this node part of the trunk?

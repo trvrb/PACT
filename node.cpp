@@ -30,6 +30,8 @@ Node::Node() {
 	length = 0.0;
 	time = 0.0;
 	label = "1";
+	xloc = 0.0;
+	yloc = 0.0;	
 	coord = 0.0;
 	leaf = false;
 	trunk = false;
@@ -44,6 +46,8 @@ Node::Node(int n) {
 	length = 0.0;
 	time = 0.0;
 	label = "1";
+	xloc = 0.0;
+	yloc = 0.0;		
 	coord = 0.0;
 	leaf = false;
 	trunk = false;
@@ -66,6 +70,8 @@ string Node::getName() { return name; }
 double Node::getLength() { return length; }
 double Node::getTime() { return time; }
 string Node::getLabel() { return label; }
+double Node::getX() { return xloc; }
+double Node::getY() { return yloc; }
 double Node::getCoord() { return coord; }
 bool Node::getLeaf() { return leaf; }
 bool Node::getTrunk() { return trunk; }
@@ -77,6 +83,8 @@ void Node::setName(string n) { name = n; }
 void Node::setLength(double n) { length = n; }
 void Node::setTime(double n) { time = n; }
 void Node::setLabel(string n) { label = n; }
+void Node::setX(double n) { xloc = n; }
+void Node::setY(double n) { yloc = n; }
 void Node::setCoord(double n) { coord = n; }
 void Node::setLeaf(bool n) { leaf = n; }
 void Node::setTrunk(bool n) { trunk = n; }
