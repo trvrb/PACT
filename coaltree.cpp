@@ -533,7 +533,7 @@ void CoalescentTree::pruneToLabel(string label) {
     	}
     }
         
-   	peelBack();     
+//	peelBack();     
 	reduce();
 				
 }
@@ -569,7 +569,7 @@ void CoalescentTree::pruneToTime(double start, double stop) {
     	}
     }
         
-   	peelBack();     
+//	peelBack();     
 	reduce();
 				
 }

@@ -51,6 +51,7 @@ Parameters::Parameters() {
 	reduce_tips = false;
 	renew_trunk = false;
 	prune_to_trunk = false;
+	prune_to_time = false;
 	prune_to_label = false;
 	collapse_labels = false;
 	trim_ends = false;
@@ -109,7 +110,7 @@ Parameters::Parameters() {
 
 /* Reads a string and attempts to extract parameters from it */
 void Parameters::importLine(string line) {
-
+	
 	// READING LINE STRING
 	string pstring = "";				// fill with a-z or _
 	string vstring = "";				// fill with 0-9 or . or - or A-Z
@@ -293,7 +294,6 @@ void Parameters::print() {
 		if (time_slice) {
 			cout << "time slice " << time_slice_values[0] << endl;
 		}		
-
 		if (prune_to_label) {
 			cout << "prune to label " << prune_to_label_values[0] << endl;
 		}
