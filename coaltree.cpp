@@ -83,6 +83,7 @@ CoalescentTree::CoalescentTree(string paren) {
 	int nodeCount = 1;
 	bool lengthCheck = false;
 	bool bracketCheck = false;
+	bool braceCheck = false;
 	
 	// fill 'nameOrLength' with names and branch lengths
 	// 'bracketed' placeholder for bracketed strings
@@ -173,8 +174,14 @@ CoalescentTree::CoalescentTree(string paren) {
 			if (bracketCheck && *is != '[' && *is != ']') {
 				bracketed += *is;
 			}
+
+			if (*is == '{') { braceCheck = true; }
+			if (*is == '}') { braceCheck = false; }			
+			
 		
-			if (*is == ']') {
+			if (*is == ']' || (*is == ',' && braceCheck == false)) {
+			
+	//			cout << bracketed << endl;
 			
 				// fill 4 strings delimited by ' ', ':' and '=' 
 				string::iterator ib;	
@@ -186,21 +193,23 @@ CoalescentTree::CoalescentTree(string paren) {
 				
 				ib = bracketed.begin();
 				while (ib != bracketed.end()) {
-					if (*ib != ' ' && *ib != '=' && *ib != ':' && *ib != '"') {
-						if (counter == 1) { stringOne += *ib; }
-						if (counter == 2) { stringTwo += *ib; }
-						if (counter == 3) { stringThree += *ib; }
-						if (counter == 4) { stringFour += *ib; }
-					}
-					else {
-						++counter;
+					if (*ib != '&' && *ib != '{' && *ib != '}' && *ib != '"') {		// ignore these completely
+						if (*ib != ' ' && *ib != '=' && *ib != ':' && *ib != ',') {				// ignore these and increment counter
+							if (counter == 1) { stringOne += *ib; }
+							if (counter == 2) { stringTwo += *ib; }
+							if (counter == 3) { stringThree += *ib; }
+							if (counter == 4) { stringFour += *ib; }
+						}
+						else {
+							++counter;
+						}
 					}
 				++ib;
 				}
 				
 				// MIGRATION
 				// insert an additional node up the tree
-				if (stringOne == "&M") {
+				if (stringOne == "M") {
 				
 					int fromInt = atoi(stringTwo.c_str()) + 1;
 					int toInt = atoi(stringThree.c_str()) + 1;
@@ -233,14 +242,26 @@ CoalescentTree::CoalescentTree(string paren) {
 				
 				// LOCATION
 				// label current node
-				if (stringOne == "&states") {
-					string loc = stringThree.c_str();
+				if (stringOne == "states") {
+					string loc = stringTwo.c_str();
 					(*it).setLabel(loc);
 					labelset.insert(loc);
 				}
 				
+				// ANTIGENIC
+				if (stringOne == "antigenic") {
+					double xloc = atof(stringTwo.c_str());
+					(*it).setX(xloc);
+					double yloc = atof(stringThree.c_str());
+					(*it).setY(yloc);					
+				}				
+				
+				
 				bracketed = "";
-				bracketCheck = false;				
+				
+				if (*is == ']') { 
+					bracketCheck = false;
+				}
 				
 			}
 		
@@ -920,7 +941,8 @@ void CoalescentTree::printTree() {
 		}
 		cout << " (" << (*it).getTime() << ")";
 		cout << " [" << (*it).getLabel() << "]";			
-		cout << " {" << (*it).getLength() << "}";		
+		cout << " {" << (*it).getLength() << "}";	
+		cout << " <" << (*it).getX() << "," << (*it).getY() << ">";			
 		if ( !(*it).getInclude()) { 
 			cout << " *";
 		}		
