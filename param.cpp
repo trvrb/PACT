@@ -57,6 +57,7 @@ Parameters::Parameters() {
 	trim_ends = false;
 	section_tree = false;	
 	time_slice = false;
+	rotate = false;
 	
 	print_rule_tree = false;
 	
@@ -211,6 +212,13 @@ void Parameters::importLine(string line) {
 			time_slice = true; 
 			time_slice_values = values;	
 		}
+	}	
+	
+	if (pstring == "rotate") { 
+		if (values.size() == 1) {
+			rotate = true; 
+			rotate_values = values;	
+		}
 	}		
 	
 	if (pstring == "printruletree") { 
@@ -308,6 +316,10 @@ void Parameters::print() {
 		
 		if (collapse_labels) {
 			cout << "collapse labels" << endl;
+		}	
+		
+		if (rotate) {
+			cout << "rotate" << rotate_values[0] << endl;
 		}			
 			
 		cout << endl;
@@ -373,7 +385,7 @@ bool Parameters::general() {
 
 bool Parameters::manip() {
 	bool check;
-	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice)
+	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice || rotate)
 		check = true;
 	else 
 		check = false;

@@ -252,6 +252,12 @@ void IO::treeManip() {
 			if (param.collapse_labels) {
 				treelist[i].collapseLabels();
 			}	
+			
+			// ROTATE
+			if (param.rotate) {
+				double deg = (param.rotate_values)[0];
+				treelist[i].rotateLoc(deg);
+			}			
 		
 		}
 

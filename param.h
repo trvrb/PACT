@@ -72,6 +72,9 @@ public:
 	bool time_slice;
 	vector<double> time_slice_values;		// time
 	
+	bool rotate;
+	vector<double> rotate_values;			// degrees	
+	
 	bool print_rule_tree;
 	
 	bool summary_tmrca;		

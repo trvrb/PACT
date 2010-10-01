@@ -62,6 +62,7 @@ public:
 	void padTree();							// TODO: fix this
 											// pads CoalescentTre with additional nodes at each coalescent event
 											// included mainly for compatibility with TreePlot	
+	void rotateLoc(double);					// rotate X&Y locations around origin
 
 	// TREE STRUCTURE
 	void printTree();						// print indented tree with coalescent times			

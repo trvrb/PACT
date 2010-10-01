@@ -252,9 +252,6 @@ CoalescentTree::CoalescentTree(string paren) {
 				if (stringOne == "antigenic") {
 					double xloc = atof(stringTwo.c_str());
 					double yloc = atof(stringThree.c_str());
-					double deg = 0.5;
-					xloc = xloc * cos(deg) - yloc * sin(deg);
-					yloc = xloc * sin(deg) + yloc * cos(deg);
 					(*it).setX(xloc);
 					(*it).setY(yloc);					
 				}				
@@ -915,6 +912,20 @@ void CoalescentTree::padTree() {
 	
 	}
 			  	
+}
+
+/* rotate X&Y locations around origin with degrees in radians */
+void CoalescentTree::rotateLoc(double deg) {
+
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it ) {
+		double xloc = (*it).getX();
+		double yloc = (*it).getY();
+		xloc = xloc * cos(deg) - yloc * sin(deg);
+		yloc = xloc * sin(deg) + yloc * cos(deg);
+		(*it).setX(xloc);
+		(*it).setY(yloc);
+	}	
+
 }
 
 /* Print indented tree */
