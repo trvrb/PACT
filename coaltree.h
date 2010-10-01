@@ -47,7 +47,8 @@ public:
 	void pushTimesBack(double);				// push dates to agree with a most recent sample date at t
 	void pushTimesBack(double,double);		// oldest sample and most recent sample	
 	void reduceTips(double);					// reduces tree to ancestors of a subset of tips
-	void renewTrunk(double);				// renews definition of trunk
+	void renewTrunk(double);				// renews definition of trunk, working back from all recent tips
+	void renewTrunkRandom(double);			// renews definition of trunk, working back from a random tip
 	void pruneToTrunk();					// reduces CoalescentTree object to trunk
 	void pruneToLabel(string);				// reduces CoalescentTree object to only include a particular set of tips
 	void pruneToTime(double,double);		// reduces CoalescentTree object to only include tips in a certain time frame

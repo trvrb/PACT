@@ -282,20 +282,7 @@ CoalescentTree::CoalescentTree(string paren) {
 	/* only the last 1/100 of the time span is considered */
 	double presentTime = getPresentTime();
 	double trunkTime = presentTime / (double) 100;
-	it = nodetree.begin();
-	(*it).setTrunk(true);
-	while(it != nodetree.end()) {
-		/* find nodes at present */
-		if ((*it).getTime() > presentTime - trunkTime) {
-			jt = it;
-			/* move up tree adding nodes to trunk set */
-			while (nodetree.is_valid(jt)) {
-				(*jt).setTrunk(true);
-				jt = nodetree.parent(jt);
-			}
-		}
-		++it;
-	}
+	renewTrunk(trunkTime);
 	
 	/* pushing the most recent sample up to time = 0 */
 	pushTimesBack(0);
@@ -400,32 +387,32 @@ void CoalescentTree::pushTimesBack(double startTime, double endTime) {
 }
 
 /* old version of renewTrunk.  This peels back from all current nodes. */
-//void CoalescentTree::renewTrunk(double t) {
-//
-//	/* go through tree and append to trunk set */
-//	double presentTime = getPresentTime();
-//	tree<Node>::iterator it, jt;
-//	
-//	for(it = nodetree.begin(); it != nodetree.end(); ++it) {
-//		(*it).setTrunk(false);
-//	}
-//	
-//	it = nodetree.begin();
-//	(*it).setTrunk(true);
-//	while(it != nodetree.end()) {
-//		/* find nodes at present */
-//		if ((*it).getTime() > presentTime - t) {
-//			jt = it;
-//			/* move up tree adding nodes to trunk set */
-//			while (nodetree.is_valid(jt)) {
-//				(*jt).setTrunk(true);
-//				jt = nodetree.parent(jt);
-//			}
-//		}
-//		++it;
-//	}	
-//				
-//}
+void CoalescentTree::renewTrunk(double t) {
+
+	/* go through tree and append to trunk set */
+	double presentTime = getPresentTime();
+	tree<Node>::iterator it, jt;
+	
+	for(it = nodetree.begin(); it != nodetree.end(); ++it) {
+		(*it).setTrunk(false);
+	}
+	
+	it = nodetree.begin();
+	(*it).setTrunk(true);
+	while(it != nodetree.end()) {
+		/* find nodes at present */
+		if ((*it).getTime() > presentTime - t) {
+			jt = it;
+			/* move up tree adding nodes to trunk set */
+			while (nodetree.is_valid(jt)) {
+				(*jt).setTrunk(true);
+				jt = nodetree.parent(jt);
+			}
+		}
+		++it;
+	}	
+}				
+
 
 /* reduces a tree to a random subset of samples */
 void CoalescentTree::reduceTips(double pro) {
@@ -464,7 +451,7 @@ void CoalescentTree::reduceTips(double pro) {
 }
 
 /* reduces a tree to just its trunk, takes a single random sample from "current" tips and works backward from this */
-void CoalescentTree::renewTrunk(double t) {
+void CoalescentTree::renewTrunkRandom(double t) {
 
 	/* go through tree and append to trunk set */
 	double presentTime = getPresentTime();
@@ -1018,7 +1005,13 @@ void CoalescentTree::printRuleList(string outputFile) {
 		if ((*it).getName() != "")
 			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
 	}
-	outStream << endl;  	  	
+	outStream << endl;  
+	
+	/* print mapping of nodes to X and Y locations */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {	
+		outStream << (*it).getNumber() << "->{" << (*it).getX() << "," << (*it).getY() << "} ";	
+	}
+	outStream << endl;  	
 	  	  	
 	outStream.close();
 	  	  	
