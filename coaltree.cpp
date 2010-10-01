@@ -251,8 +251,11 @@ CoalescentTree::CoalescentTree(string paren) {
 				// ANTIGENIC
 				if (stringOne == "antigenic") {
 					double xloc = atof(stringTwo.c_str());
-					(*it).setX(xloc);
 					double yloc = atof(stringThree.c_str());
+					double deg = 0.5;
+					xloc = xloc * cos(deg) - yloc * sin(deg);
+					yloc = xloc * sin(deg) + yloc * cos(deg);
+					(*it).setX(xloc);
 					(*it).setY(yloc);					
 				}				
 				

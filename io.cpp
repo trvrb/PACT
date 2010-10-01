@@ -206,7 +206,7 @@ void IO::treeManip() {
 			// RENEW TRUNK
 			if (param.renew_trunk) {
 				double time = (param.renew_trunk_values)[0];
-				treelist[i].renewTrunk(time);
+				treelist[i].renewTrunkRandom(time);
 			}
 						
 			// TRIM ENDS
