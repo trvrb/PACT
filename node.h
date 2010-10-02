@@ -40,7 +40,8 @@ public:
 	double getTime();
 	string getLabel();
 	double getX();
-	double getY();	
+	double getY();
+	double getRate();	
 	double getCoord();
 	bool getLeaf();
 	bool getTrunk();
@@ -54,6 +55,7 @@ public:
 	void setLabel(string);
 	void setX(double);
 	void setY(double);	
+	void setRate(double);		
 	void setCoord(double);
 	void setLeaf(bool);
 	void setTrunk(bool);
@@ -67,6 +69,7 @@ private:
 	string label;					// arbitrary label associated with node
 	double xloc;					// x-axis location of the node
 	double yloc;					// y-axis location of the node	
+	double rate;					// rate of branch leading into the node
 	double coord;					// y-axis coordinate, used for tree drawing
 	bool leaf;						// is this node a leaf?
 	bool trunk;						// is this node part of the trunk?

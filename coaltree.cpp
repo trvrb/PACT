@@ -240,7 +240,7 @@ CoalescentTree::CoalescentTree(string paren) {
 					
 				}
 				
-				// LOCATION
+				// STATE / LABEL
 				// label current node
 				if (stringOne == "states") {
 					string loc = stringTwo.c_str();
@@ -254,6 +254,12 @@ CoalescentTree::CoalescentTree(string paren) {
 					double yloc = atof(stringThree.c_str());
 					(*it).setX(xloc);
 					(*it).setY(yloc);					
+				}	
+				
+				// RATE
+				if (stringOne == "rate") {
+					double rate = atof(stringTwo.c_str());
+					(*it).setRate(rate);
 				}				
 				
 				
@@ -946,6 +952,7 @@ void CoalescentTree::printTree() {
 		cout << " [" << (*it).getLabel() << "]";			
 		cout << " {" << (*it).getLength() << "}";	
 		cout << " <" << (*it).getX() << "," << (*it).getY() << ">";			
+		cout << " |" << (*it).getRate() << "|";			
 		if ( !(*it).getInclude()) { 
 			cout << " *";
 		}		
