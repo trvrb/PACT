@@ -737,34 +737,36 @@ void CoalescentTree::timeSlice(double slice) {
 	while(it != nodetree.end()) {	
 	
 		jt = nodetree.parent(it);
+		
+		if (nodetree.is_valid(jt)) {
 	
-		/* if node > slice and parent < slice, erase children and prune node back to stop */
-		/* this pruning causes an internal node to become a leaf node */
-		if ((*it).getTime() > slice && (*jt).getTime() <= slice) {
-		
-			// adjusting node
-			(*it).setTime( slice );
-			(*it).setLength( (*it).getTime() - (*jt).getTime() );
-			(*it).setLeaf(true);
-			nodetree.erase_children(it);
+			/* if node > slice and parent < slice, erase children and prune node back to stop */
+			/* this pruning causes an internal node to become a leaf node */
+			if ((*it).getTime() > slice && (*jt).getTime() <= slice) {
 			
-			// move up tree adding nodes to sliceset
-			jt = it;
-			while (nodetree.is_valid(jt)) {
-				sliceset.insert( (*jt).getNumber() );
-				jt = nodetree.parent(jt);
+				// adjusting node
+				(*it).setTime( slice );
+				(*it).setLength( (*it).getTime() - (*jt).getTime() );
+				(*it).setLeaf(true);
+				nodetree.erase_children(it);
+				
+				// move up tree adding nodes to sliceset
+				jt = it;
+				while (nodetree.is_valid(jt)) {
+					sliceset.insert( (*jt).getNumber() );
+					jt = nodetree.parent(jt);
+				}
+				
+				it = nodetree.begin();
+			
 			}
-			
-			it = nodetree.begin();
-		
-		}
-		
-		else {
-    		++it;
+			else { ++it; }
+    	
     	}
+    	else { ++it; }
     	
     }
-    
+        
 	/* erase other nodes from the tree */
 	it = nodetree.begin();
 	while(it != nodetree.end()) {
@@ -1503,6 +1505,41 @@ double CoalescentTree::getTajimaD() {
 
 }
 
+/* return mean X location across all tips in the tree */
+double CoalescentTree::getMeanX() {
+
+	double xloc = 0.0;
+	int count = 0;
+
+	/* iterating over every leaf node */
+	tree<Node>::leaf_iterator it;
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		xloc += (*it).getX();
+		count++;
+	}
+	
+	xloc /= (double) count;
+	return xloc;
+	
+}
+
+/* return mean Y location across all tips in the tree */
+double CoalescentTree::getMeanY() {
+
+	double yloc = 0.0;
+	int count = 0;
+
+	/* iterating over every leaf node */
+	tree<Node>::leaf_iterator it;
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		yloc += (*it).getY();
+		count++;
+	}
+	
+	yloc /= (double) count;
+	return yloc;
+	
+}
 
 /* returns vector of tip names */
 vector<string> CoalescentTree::getTipNames() {

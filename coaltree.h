@@ -110,6 +110,10 @@ public:
 	double getTajimaD();					// return D = pi - S/a1, where pi is diversity, S is the total tree length, 
 											// and a1 is a normalization factor
 
+	// LOCATION STATISTICS
+	double getMeanX();						// return mean X location across all tips in the tree
+	double getMeanY();						// return mean Y location across all tips in the tree
+
 	// TIP STATISTICS
 	vector<string> getTipNames();			// returns vector of tip names
 	double getTime(string);

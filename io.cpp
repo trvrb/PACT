@@ -631,6 +631,42 @@ void IO::printSkylines() {
 				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 			}
 		}		
+		
+
+		// X LOCATION /////////////////////
+		if (param.skyline_xmean) {
+			cout << "Printing X location skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					double n = ct.getMeanX();
+					s.insert(n);
+				}
+				outStream << "xmean" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+//				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			}
+		}	
+		
+		// Y LOCATION /////////////////////
+		if (param.skyline_ymean) {
+			cout << "Printing Y location skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					double n = ct.getMeanY();
+					s.insert(n);
+				}
+				outStream << "ymean" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			}
+		}			
 				
 		outStream.close();
 	
