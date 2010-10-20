@@ -716,7 +716,7 @@ void IO::printSkylines() {
 			cout << "Printing loc grid skyline to " << outputFile << endl;
 			for (double t = start; t + step <= stop; t += step) {
 				
-				outStream << "locgrid" << "\t" << t + step / (double) 2;
+				outStream << "locgrid" << "\t" << t;
 				
 				multiset< vector<double> > locset;
 				
