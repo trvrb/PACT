@@ -113,6 +113,9 @@ public:
 	// LOCATION STATISTICS
 	double getMeanX();						// return mean X location across all tips in the tree
 	double getMeanY();						// return mean Y location across all tips in the tree
+	
+	// RATE STATISTICS
+	double getMeanRate();					// return mean rate across all tips in the tree	
 
 	// TIP STATISTICS
 	vector<string> getTipNames();			// returns vector of tip names

@@ -1548,6 +1548,24 @@ double CoalescentTree::getMeanY() {
 	
 }
 
+/* return mean rate across all tips in the tree */
+double CoalescentTree::getMeanRate() {
+
+	double rate = 0.0;
+	int count = 0;
+
+	/* iterating over every leaf node */
+	tree<Node>::leaf_iterator it;
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		rate += (*it).getRate();
+		count++;
+	}
+	
+	rate /= (double) count;
+	return rate;
+	
+}
+
 /* returns vector of tip names */
 vector<string> CoalescentTree::getTipNames() {
 

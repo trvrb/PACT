@@ -101,6 +101,7 @@ public:
 	bool skyline_timetofix;
 	bool skyline_xmean;
 	bool skyline_ymean;
+	bool skyline_ratemean;
 	
 private:
 	void importLine(string);			// reads a string and attempts to extract parameters from it

@@ -83,6 +83,7 @@ Parameters::Parameters() {
 	skyline_timetofix = false;
 	skyline_xmean = false;
 	skyline_ymean = false;
+	skyline_ratemean = false;
 	
 	// check to see file exists
 	string paramString;
@@ -254,7 +255,8 @@ void Parameters::importLine(string line) {
 	if (pstring == "skylinetajimad") { skyline_tajima_d = true; }
 	if (pstring == "skylinetimetofix") { skyline_timetofix = true; }
 	if (pstring == "skylinexmean") { skyline_xmean = true; }	
-	if (pstring == "skylineymean") { skyline_ymean = true; }	
+	if (pstring == "skylineymean") { skyline_ymean = true; }
+	if (pstring == "skylineratemean") { skyline_ratemean = true; }	
 	
 }
 
@@ -374,7 +376,8 @@ void Parameters::print() {
 		if (skyline_tajima_d) { cout << "tajima d" << endl; }
 		if (skyline_timetofix) { cout << "time to fix" << endl; }
 		if (skyline_xmean) { cout << "x mean" << endl; }
-		if (skyline_ymean) { cout << "y mean" << endl; }		
+		if (skyline_ymean) { cout << "y mean" << endl; }	
+		if (skyline_ratemean) { cout << "rate mean" << endl; }			
 		cout << endl;
 	}
 	
@@ -419,7 +422,7 @@ bool Parameters::tips() {
 bool Parameters::skyline() {
 	bool check;
 	if ( skyline_values.size() == 3 &&
-		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d || skyline_timetofix || skyline_xmean || skyline_ymean) )
+		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d || skyline_timetofix || skyline_xmean || skyline_ymean || skyline_ratemean) )
 		check = true;
 	else 
 		check = false;
