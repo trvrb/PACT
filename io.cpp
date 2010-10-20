@@ -39,6 +39,7 @@ using std::vector;
 
 #include <set>
 using std::set;
+using std::multiset;
 
 #include "io.h"
 #include "coaltree.h"
@@ -709,6 +710,50 @@ void IO::printSkylines() {
 				outStream << endl;
 			}
 		}			
+		
+		// LOC GRID /////////////////////
+		if (param.skyline_locgrid) {
+			cout << "Printing loc grid skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				
+				outStream << "locgrid" << "\t" << t + step / (double) 2;
+				
+				multiset< vector<double> > locset;
+				
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					vector<double> xlocs = ct.getTipsX();
+					vector<double> ylocs = ct.getTipsY();
+					for (int i = 0; i < xlocs.size(); i++) {
+						vector<double> v;
+						v.push_back(xlocs[i]);
+						v.push_back(ylocs[i]);
+						locset.insert(v);
+					}
+				
+				}
+				
+				double step = 0.25;
+				for (double x = -10.0; x <= 8.0; x += step) {
+					for (double y = -4.0; y <= 4.0; y += step) {
+					
+						int count = 0;
+						for (multiset< vector<double> >::iterator is = locset.begin(); is != locset.end(); is++ ) {
+							double thisx = (*is).at(0);
+							double thisy = (*is).at(1);
+							if (thisx < x + 0.5*step && thisx > x - 0.5*step && thisy < y + 0.5*step && thisy > y - 0.5*step) {
+								count++;
+							}
+						}
+						outStream << "\t" << count;
+				
+					}
+				}
+				
+				outStream << endl;
+			}
+		}					
 				
 		outStream.close();
 	
