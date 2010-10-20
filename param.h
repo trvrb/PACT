@@ -102,6 +102,7 @@ public:
 	bool skyline_xmean;
 	bool skyline_ymean;
 	bool skyline_ratemean;
+	bool skyline_locsample;	
 	
 private:
 	void importLine(string);			// reads a string and attempts to extract parameters from it

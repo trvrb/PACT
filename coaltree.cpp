@@ -1566,6 +1566,29 @@ double CoalescentTree::getMeanRate() {
 	
 }
 
+vector<double> CoalescentTree::getTipsX() {
+
+	vector<double> tiplocs;
+	for (tree<Node>::leaf_iterator lit = nodetree.begin_leaf(); lit != nodetree.end_leaf(); ++lit) {
+		double x = (*lit).getX();
+		tiplocs.push_back(x);
+	}
+	return tiplocs;
+
+}
+
+vector<double> CoalescentTree::getTipsY() {
+
+	vector<double> tiplocs;
+	for (tree<Node>::leaf_iterator lit = nodetree.begin_leaf(); lit != nodetree.end_leaf(); ++lit) {
+		double y = (*lit).getY();
+		tiplocs.push_back(y);
+	}
+	return tiplocs;
+
+}
+
+
 /* returns vector of tip names */
 vector<string> CoalescentTree::getTipNames() {
 

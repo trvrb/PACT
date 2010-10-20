@@ -683,7 +683,32 @@ void IO::printSkylines() {
 				outStream << t + step / (double) 2 << "\t";
 				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			}
-		}		
+		}	
+		
+		// LOC SAMPLE /////////////////////
+		if (param.skyline_locsample) {
+			cout << "Printing loc sample skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				outStream << "locsample" << "\t" << t + step / (double) 2;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t + step / (double) 2);
+					vector<double> xlocs = ct.getTipsX();
+					vector<double> ylocs = ct.getTipsY();
+					int length = xlocs.size();
+					if (length > 50000) { length = 50000; }
+					for (int i = 0; i < length; i++) {
+						double x = xlocs[i];
+						double y = ylocs[i];
+						if (x < 0.001 && x > -0.001) { x = 0.0; }
+						if (y < 0.001 && y > -0.001) { y = 0.0; }
+						outStream << "\t{" << x << "," << y << "}";
+					}
+				}
+				outStream << endl;
+			}
+		}			
 				
 		outStream.close();
 	
