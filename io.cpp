@@ -793,6 +793,44 @@ void IO::printTips() {
 				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;		
 			}
 		}
+		
+		// X LOC HISTORY //////////////
+		if (param.tips_x_loc_history) {
+			cout << "Printing x loc history for tips to " << outputFile << endl;
+			for (int n = 0; n < tipNames.size(); n++) {
+			
+				string tip = tipNames[n];
+				outStream << "x_loc_history" << "\t";
+				outStream << tip << "\t";
+				
+				vector<CoalescentTree> subtreelist;
+				for (vector<CoalescentTree>::iterator it = treelist.begin(); it != treelist.end(); it++ ) {
+					CoalescentTree ct = *it;
+					ct.pruneToName(tip);
+					subtreelist.push_back(ct);
+				}		
+					
+				double endpoint = treelist[0].getTime(tip);	
+				
+				for (double t = 2001.3; t <= endpoint; t += 0.02) {
+				
+					Series sx;
+					for (vector<CoalescentTree>::iterator it = subtreelist.begin(); it != subtreelist.end(); it++ ) {
+						CoalescentTree ct = *it;
+						ct.timeSlice(t);
+						double x = ct.getMeanX();
+						sx.insert(x);
+					}		
+					double xmean = sx.mean();
+					if (xmean < 0.001 && xmean > -0.001) { xmean = 0.0; }
+					outStream << "\t{" << t << "," << xmean << "}";
+			
+				}
+				
+				outStream << endl;
+				
+			}
+		}		
 	
 		outStream.close();
 	

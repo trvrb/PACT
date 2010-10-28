@@ -51,6 +51,7 @@ public:
 	void renewTrunkRandom(double);			// renews definition of trunk, working back from a random tip
 	void pruneToTrunk();					// reduces CoalescentTree object to trunk
 	void pruneToLabel(string);				// reduces CoalescentTree object to only include a particular set of tips
+	void pruneToName(string);				// reduces CoalescentTree object to only include a particular tip	
 	void pruneToTime(double,double);		// reduces CoalescentTree object to only include tips in a certain time frame
 	void collapseLabels();					// sets all labels in CoalescentTree to 1
 	void trimEnds(double,double);			// reduces CoalescentTree object to only those nodes between

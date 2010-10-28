@@ -552,6 +552,42 @@ void CoalescentTree::pruneToLabel(string label) {
 				
 }
 
+/* reduces a tree to ancestors of a single tip */
+void CoalescentTree::pruneToName(string name) {
+
+	/* start by finding all tips with this label */
+	set<int> nodeset; 
+	tree<Node>::iterator it, jt;
+	
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ( (*it).getName() == name ) {
+		
+			/* move up tree adding nodes to label set */
+			jt = it;
+			while (nodetree.is_valid(jt)) {
+				nodeset.insert( (*jt).getNumber() );
+				jt = nodetree.parent(jt);
+			}
+		
+		}
+	}
+			
+	/* erase other nodes from the tree */
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		if (nodeset.end() == nodeset.find( (*it).getNumber() )) {
+			it = nodetree.erase(it);
+		}
+		else {
+    		++it;
+    	}
+    }
+        
+//	peelBack();     
+	reduce();
+				
+}
+
 /* reduces a tree to samples within a specific time frame */
 void CoalescentTree::pruneToTime(double start, double stop) {
 
@@ -750,9 +786,19 @@ void CoalescentTree::timeSlice(double slice) {
 			/* this pruning causes an internal node to become a leaf node */
 			if ((*it).getTime() > slice && (*jt).getTime() <= slice) {
 			
+			
+				// finding rate of location change
+				double xlocdiff = (*it).getX() - (*jt).getX();
+				double ylocdiff = (*it).getY() - (*jt).getY();
+				double timediff = (*it).getTime() - (*jt).getTime();
+				double xlocrate = xlocdiff / timediff;
+				double ylocrate = ylocdiff / timediff;
+			
 				// adjusting node
 				(*it).setTime( slice );
 				(*it).setLength( (*it).getTime() - (*jt).getTime() );
+				(*it).setX( (*jt).getX() + (*it).getLength() * xlocrate );
+				(*it).setY( (*jt).getY() + (*it).getLength() * ylocrate );
 				(*it).setLeaf(true);
 				nodetree.erase_children(it);
 				
