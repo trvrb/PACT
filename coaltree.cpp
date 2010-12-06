@@ -1634,6 +1634,26 @@ vector<double> CoalescentTree::getTipsY() {
 
 }
 
+void CoalescentTree::assignLocation() {
+
+	tree<Node>::iterator it;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		string loc = (*it).getLabel();
+//		if (loc == "africa" || loc == "australasia" || loc == "europe" || loc == "japan_korea" || loc == "north_america" || loc == "russia" || loc == "south_america" ) {
+//			(*it).setY(1.0);
+//		}
+//		else {
+//			(*it).setY(0.0);
+//		}
+		if (loc == "Y" || loc == "M" || loc == "Q" || loc == "N") {
+			(*it).setX(1.0);
+		}
+		else {
+			(*it).setX(0.0);
+		}
+	}
+
+}
 
 /* returns vector of tip names */
 vector<string> CoalescentTree::getTipNames() {

@@ -116,6 +116,7 @@ public:
 	double getMeanY();						// return mean Y location across all tips in the tree
 	vector<double> getTipsX();				// returns a vector of double for X position of every tip in tree
 	vector<double> getTipsY();				// returns a vector of double for Y position of every tip in tree	
+	void assignLocation();
 	
 	// RATE STATISTICS
 	double getMeanRate();					// return mean rate across all tips in the tree	
@@ -124,8 +125,7 @@ public:
 	vector<string> getTipNames();			// returns vector of tip names
 	double getTime(string);
 	string getLabel(string);
-	double timeToTrunk(string);				// time it takes for a named tip to coalesce with the trunk
-	
+	double timeToTrunk(string);				// time it takes for a named tip to coalesce with the trunk	
 									
 private:
 	RNG rgen;								// random number generator
