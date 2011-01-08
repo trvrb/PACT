@@ -69,6 +69,8 @@ public:
 	void printTree();						// print indented tree with coalescent times			
 	void printRuleList(string);				// print to file name in Mathematica rule list format
 											// used with Graphics primitives
+	void printRuleListWithOrdering(string,vector<string>);	// print to file name in Mathematica rule list format
+											// supply the tip ordering with vector of tip names											
 	void printParen();						// TODO: migration events
 											// print parentheses tree										
 
@@ -137,6 +139,7 @@ private:
 	void reduce();							// goes through tree and removes inconsequential nodes	
 	void peelBack();						// removes excess root from tree
 	void adjustCoords();					// sets coords in Nodes to allow tree drawing
+	void setCoords(vector<string>);			// sets coords based on supplied vector of tip names	
 	int getMaxNumber();						// return larger number in tree
 	int renumber(int);						// renumbers tree in preorder traversal starting from int 
 											// returning 1 greater than the max in the tree

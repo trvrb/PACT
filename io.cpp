@@ -294,7 +294,12 @@ void IO::printTree() {
 			index = treelist.size() - 1;
 		}
 		
-		treelist[index].printRuleList(outputFile);
+		if (!param.ordering) {
+			treelist[index].printRuleList(outputFile);
+		}
+		else {
+			treelist[index].printRuleListWithOrdering(outputFile,param.ordering_values);
+		}
 		
 	}
 
@@ -525,7 +530,8 @@ void IO::printSkylines() {
 					Series s;
 					for (int i = 0; i < treelist.size(); i++) {
 						CoalescentTree ct = treelist[i];
-						ct.trimEnds(t,t+step);
+						ct.trimEnds(t-25,t+step+25);
+				//		ct.trimEnds(t,t+step);
 						double n = ct.getCoalRate(*is);
 						s.insert(n);
 					}

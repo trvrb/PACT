@@ -88,6 +88,7 @@ Parameters::Parameters() {
 	skyline_locsample = false;
 	skyline_locgrid = false;	
 	
+	ordering = false;
 	
 	// check to see file exists
 	string paramString;
@@ -135,6 +136,7 @@ void Parameters::importLine(string line) {
     		vstring += *is;
     	else if (vstring.size() > 0) {
     		values.push_back( atof(vstring.c_str()) );
+    		svalues.push_back(vstring);
     		vstring = "";
     	}
 		
@@ -143,6 +145,9 @@ void Parameters::importLine(string line) {
 	if (vstring.size() > 0) {
 		values.push_back( atof(vstring.c_str()) );
 	}	
+	if (vstring.size() > 0) {
+		svalues.push_back(vstring);
+	}		
 		
 		
 	// SETTING PARAMETERS	
@@ -181,10 +186,7 @@ void Parameters::importLine(string line) {
 	
 	if (pstring == "prunetolabel") { 
 		if (values.size() == 1) {
-			prune_to_label = true; 
-			if (vstring.size() > 0) {
-				svalues.push_back( vstring.c_str() );
-			}				
+			prune_to_label = true; 			
 			prune_to_label_values = svalues;			
 		}
 	}	
@@ -263,7 +265,12 @@ void Parameters::importLine(string line) {
 	if (pstring == "skylineymean") { skyline_ymean = true; }
 	if (pstring == "skylineratemean") { skyline_ratemean = true; }
 	if (pstring == "skylinelocsample") { skyline_locsample = true; }	
-	if (pstring == "skylinelocgrid") { skyline_locgrid = true; }		
+	if (pstring == "skylinelocgrid") { skyline_locgrid = true; }	
+	
+	if (pstring == "ordering") { 
+		ordering = true; 				
+		ordering_values = svalues;	
+	}	
 	
 }
 
@@ -333,8 +340,8 @@ void Parameters::print() {
 		
 		if (rotate) {
 			cout << "rotate " << rotate_values[0] << endl;
-		}			
-			
+		}	
+						
 		cout << endl;
 	
 	}
@@ -390,6 +397,15 @@ void Parameters::print() {
 		if (skyline_locgrid) { cout << "loc grid" << endl; }		
 		cout << endl;
 	}
+	
+	// TIP ORDERING
+	if (ordering) {
+		cout << "Tip ordering:" << endl;
+		for (int i = 0; i < ordering_values.size(); i++) {
+			cout << ordering_values[i] << " ";
+		}
+		cout << endl;
+	}	
 	
 }
 

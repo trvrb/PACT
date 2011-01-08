@@ -106,6 +106,9 @@ public:
 	bool skyline_locsample;	
 	bool skyline_locgrid;		
 	
+	bool ordering;
+	vector<string> ordering_values;
+	
 private:
 	void importLine(string);			// reads a string and attempts to extract parameters from it
 	

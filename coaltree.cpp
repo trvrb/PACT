@@ -1086,6 +1086,76 @@ void CoalescentTree::printRuleList(string outputFile) {
 	  	  	
 }
 
+void CoalescentTree::printRuleListWithOrdering(string outputFile, vector<string> tipOrdering) {
+
+//	printTree();
+
+	/* initializing output stream */
+	ofstream outStream;
+	outStream.open( outputFile.c_str(),ios::app);
+
+	/* setting up y-axis ordering, x-axis is date */
+	setCoords(tipOrdering);
+	
+	tree<Node>::iterator it, jt;
+	
+	/* print leaf nodes */
+	/* a node may be a leaf on the current tree, but not a leaf on the original tree */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ((*it).getLeaf()) {
+			outStream << (*it).getNumber() << " ";
+		}
+	}
+	outStream << endl;	
+	
+	/* print trunk nodes */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ((*it).getTrunk()) {
+			outStream << (*it).getNumber() << " ";
+		}
+	}
+	outStream << endl;	
+			
+	/* print the tree in rule list (Mathematica-ready) format */
+	/* print only upward links */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {		// increment past root
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {
+			outStream << (*it).getNumber() << "->" << (*jt).getNumber() << " ";
+		}
+	}
+	outStream << endl;
+	
+	
+	/* print mapping of nodes to labels */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {	
+		outStream << (*it).getNumber() << "->\"" << (*it).getLabel() << "\" ";
+	}
+	outStream << endl;
+	
+	/* print mapping of nodes to coordinates */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		outStream << (*it).getNumber() << "->{" << fixed << (*it).getTime() << "," << (*it).getCoord() << "} ";	
+	}
+	outStream << endl;
+		  	  	
+	/* print mapping of nodes to names */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {	
+		if ((*it).getName() != "")
+			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
+	}
+	outStream << endl;  
+	
+	/* print mapping of nodes to X and Y locations */
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {	
+		outStream << (*it).getNumber() << "->{" << (*it).getX() << "," << (*it).getY() << "} ";	
+	}
+	outStream << endl;  	
+	  	  	
+	outStream.close();
+	  	  	
+}
+
 /* Print parentheses tree */
 void CoalescentTree::printParen() { 
 
@@ -1776,6 +1846,34 @@ void CoalescentTree::adjustCoords() {
 		}
 	}
 	
+	/* revise coords of internal nodes according to postorder traversal */
+  	tree<Node>::post_order_iterator post_it, post_jt, post_kt;
+  	for (post_it = nodetree.begin_post(); post_it != nodetree.end_post(); post_it++) {
+  		if (nodetree.number_of_children(post_it) == 1) {
+  			post_jt = nodetree.child(post_it,0);
+  			(*post_it).setCoord((*post_jt).getCoord());	
+  		}  		  	
+  		if (nodetree.number_of_children(post_it) == 2) {
+  			post_jt = nodetree.child(post_it,0);
+  			post_kt = nodetree.child(post_it,1);
+  			double avg = ( (*post_jt).getCoord() + (*post_kt).getCoord() ) / (double) 2;
+  			(*post_it).setCoord(avg);	
+  		}
+	}	
+
+}	
+
+/* Setting tip coordinates based on input vector of tip names */
+void CoalescentTree::setCoords(vector<string> tipOrdering) {
+
+	tree<Node>::iterator it, jt;
+
+	/* set coords of tips according to supplied vector of names */
+  	for (int i = 0; i < tipOrdering.size(); i++) {
+  		it = findNode(tipOrdering[i]);
+  		(*it).setCoord(i);
+  	}
+  		
 	/* revise coords of internal nodes according to postorder traversal */
   	tree<Node>::post_order_iterator post_it, post_jt, post_kt;
   	for (post_it = nodetree.begin_post(); post_it != nodetree.end_post(); post_it++) {
