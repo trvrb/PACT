@@ -35,6 +35,7 @@ public:
 
 	bool general();						// are any of the general parameters true?
 	bool manip();						// are any tree manipulation parameters true?
+	bool printtree();					// are any of the tree printing parameters true?
 	bool summary();						// are any summary parameters true?
 	bool tips();
 	bool skyline();						// are any skyline parameters true?
@@ -76,6 +77,7 @@ public:
 	vector<double> rotate_values;			// degrees	
 	
 	bool print_rule_tree;
+	bool print_all_trees;	
 	
 	bool summary_tmrca;		
 	bool summary_length;			

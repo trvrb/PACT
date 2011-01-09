@@ -256,6 +256,12 @@ CoalescentTree::CoalescentTree(string paren) {
 					(*it).setY(yloc);					
 				}	
 				
+				// LAYOUT
+				if (stringOne == "layout") {
+					double xloc = atof(stringTwo.c_str());
+					(*it).setX(xloc);				
+				}					
+				
 				// RATE
 				if (stringOne == "rate") {
 					double rate = atof(stringTwo.c_str());
@@ -584,7 +590,7 @@ void CoalescentTree::pruneToName(string name) {
     }
         
 //	peelBack();     
-	reduce();
+//	reduce();
 				
 }
 

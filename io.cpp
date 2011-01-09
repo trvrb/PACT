@@ -20,12 +20,14 @@ You should have received a copy of the GNU General Public License along with PAC
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 using std::ifstream;
 using std::ofstream;
 using std::cout;
 using std::endl;
 using std::ios;
 using std::unitbuf;
+using std::stringstream;
 
 #include <stdexcept>
 using std::runtime_error;
@@ -302,6 +304,34 @@ void IO::printTree() {
 		}
 		
 	}
+
+	if (param.print_all_trees) {
+
+		cout << "Printing trees with to trees/ directory" << endl;
+		
+		for (int i = 0; i < treelist.size(); i++) {
+
+			stringstream ss;
+			ss << i;
+			string outputFile = "trees/" + outputPrefix + "_" + ss.str() + ".rules";
+			
+			ofstream outStream;
+			outStream.open( outputFile.c_str(),ios::out);
+			outStream.close();
+			
+			CoalescentTree ct = treelist[i];
+					
+			if (!param.ordering) {
+				ct.printRuleList(outputFile);
+			}
+			else {
+				ct.printRuleListWithOrdering(outputFile,param.ordering_values);
+			}			
+			
+		}
+			
+	}
+
 
 }
 
@@ -813,14 +843,14 @@ void IO::printTips() {
 				for (vector<CoalescentTree>::iterator it = treelist.begin(); it != treelist.end(); it++ ) {
 					CoalescentTree ct = *it;
 					ct.pruneToName(tip);
-					ct.assignLocation();
+		//			ct.assignLocation();
 					subtreelist.push_back(ct);
 				}		
 					
-				double endpoint = treelist[0].getTime(tip);	
+		//		double endpoint = treelist[0].getTime(tip);	
+				double endpoint = 0;
 				
-	//			for (double t = 2001.3; t <= endpoint; t += 0.02) {
-				for (double t = 1998; t <= endpoint; t += 0.05) {
+				for (double t = -0.20001; t <= endpoint; t += 0.001) {
 				
 					Series sx;
 		//			Series sy;
@@ -834,7 +864,8 @@ void IO::printTips() {
 					}		
 					double xmean = sx.mean();
 		//			double ymean = sy.mean();
-					if (xmean < 0.001 && xmean > -0.001) { xmean = 0.0; }
+					if (xmean < 0.0001 && xmean > -0.0001) { xmean = 0.0; }
+					if (t < 0.0001 && t > -0.0001) { t = 0.0; }
 		//			if (ymean < 0.001 && ymean > -0.001) { ymean = 0.0; }
 		//			outStream << "\t{" << t << "," << xmean << "," << ymean << "}";
 					outStream << "\t{" << t << "," << xmean << "}";

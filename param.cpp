@@ -60,6 +60,7 @@ Parameters::Parameters() {
 	rotate = false;
 	
 	print_rule_tree = false;
+	print_all_trees = false;	
 	
 	summary_tmrca = false;		
 	summary_length = false;			
@@ -233,6 +234,10 @@ void Parameters::importLine(string line) {
 	if (pstring == "printruletree") { 
 		print_rule_tree = true; 
 	}	
+	
+	if (pstring == "printalltrees") { 
+		print_all_trees = true; 
+	}		
 
 	if (pstring == "summarytmrca") { summary_tmrca = true; }
 	if (pstring == "summarylength") { summary_length = true; }
@@ -347,9 +352,10 @@ void Parameters::print() {
 	}
 	
 	// TREE STRUCTURE
-	if (print_rule_tree) {
+	if ( printtree() ) {
 		cout << "Tree structure:" << endl;
-		cout << "print rule tree" << endl;
+		if (print_rule_tree) { cout << "print rule tree" << endl; }
+		if (print_all_trees) { cout << "print all trees" << endl; }
 		cout << endl;
 	}	
 	
@@ -421,6 +427,15 @@ bool Parameters::general() {
 bool Parameters::manip() {
 	bool check;
 	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice || rotate)
+		check = true;
+	else 
+		check = false;
+	return check;
+}
+
+bool Parameters::printtree() {
+	bool check;
+	if (print_rule_tree || print_all_trees)
 		check = true;
 	else 
 		check = false;
