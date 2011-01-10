@@ -92,7 +92,8 @@ public:
 	bool summary_tajima_d;	
 	
 	bool tips_time_to_trunk;
-	bool tips_x_loc_history;	
+	bool x_loc_history;
+	vector<double> x_loc_history_values;	// start, stop, step
 		
 	vector<double> skyline_values;			// start, stop, step
 	

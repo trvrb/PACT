@@ -72,7 +72,7 @@ Parameters::Parameters() {
 	summary_tajima_d = false;	
 	
 	tips_time_to_trunk = false;
-	tips_x_loc_history = false;	
+	x_loc_history = false;	
 	
 	skyline_tmrca = false;	
 	skyline_length = false;
@@ -256,7 +256,14 @@ void Parameters::importLine(string line) {
 	if (pstring == "summarytajimad") { summary_tajima_d = true; }
 	
 	if (pstring == "tipstimetotrunk") { tips_time_to_trunk = true; }	
-	if (pstring == "tipsxlochistory") { tips_x_loc_history = true; }		
+	
+	if (pstring == "tipsxlochistory") { 
+		if (values.size() == 3) {
+			x_loc_history = true; 
+			x_loc_history_values = values;	
+		}
+		
+	}		
 	
 	if (pstring == "skylinesettings") { 
 		if (values.size() == 3) { 
@@ -388,7 +395,9 @@ void Parameters::print() {
 	if ( tips() ) { 
 		cout << "Tip statistics:" << endl;
 		if (tips_time_to_trunk) { cout << "time to trunk" << endl; }
-		if (tips_x_loc_history) { cout << "x loc history" << endl; }		
+		if (x_loc_history) { 
+			cout << "x loc history " << x_loc_history_values[0] << " " << x_loc_history_values[1] << " " << x_loc_history_values[2] << endl; 
+		}		
 		cout << endl; 
 	}	
 
@@ -464,7 +473,7 @@ bool Parameters::summary() {
 
 bool Parameters::tips() {
 	bool check;
-	if (tips_time_to_trunk || tips_x_loc_history)
+	if (tips_time_to_trunk || x_loc_history)
 		check = true;
 	else 
 		check = false;

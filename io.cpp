@@ -836,9 +836,14 @@ void IO::printTips() {
 			}
 		}
 		
-		// XY LOC HISTORY //////////////
-		if (param.tips_x_loc_history) {
+		// X LOC HISTORY //////////////
+		if (param.x_loc_history) {
+		
 			cout << "Printing x loc history for tips to " << outputFile << endl;
+			double start = param.x_loc_history_values[0];
+			double stop = param.x_loc_history_values[1];
+			double step = param.x_loc_history_values[2];
+			
 			for (int n = 0; n < tipNames.size(); n++) {
 			
 				string tip = tipNames[n];
@@ -852,28 +857,19 @@ void IO::printTips() {
 		//			ct.assignLocation();
 					subtreelist.push_back(ct);
 				}		
-					
-		//		double endpoint = treelist[0].getTime(tip);	
-				double endpoint = 0;
-				
-				for (double t = -0.20001; t <= endpoint; t += 0.001) {
+									
+				for (double t = start; t <= stop; t += step) {
 				
 					Series sx;
-		//			Series sy;
 					for (vector<CoalescentTree>::iterator it = subtreelist.begin(); it != subtreelist.end(); it++ ) {
 						CoalescentTree ct = *it;
 						ct.timeSlice(t);
 						double x = ct.getMeanX();
-		//				double y = ct.getMeanY();
 						sx.insert(x);
-		//				sy.insert(y);
 					}		
 					double xmean = sx.mean();
-		//			double ymean = sy.mean();
 					if (xmean < 0.0001 && xmean > -0.0001) { xmean = 0.0; }
 					if (t < 0.0001 && t > -0.0001) { t = 0.0; }
-		//			if (ymean < 0.001 && ymean > -0.001) { ymean = 0.0; }
-		//			outStream << "\t{" << t << "," << xmean << "," << ymean << "}";
 					outStream << "\t{" << t << "," << xmean << "}";
 			
 				}
