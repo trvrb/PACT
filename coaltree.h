@@ -46,7 +46,7 @@ public:
 	// TREE MANIPULATION
 	void pushTimesBack(double);				// push dates to agree with a most recent sample date at t
 	void pushTimesBack(double,double);		// oldest sample and most recent sample	
-	void reduceTips(double);					// reduces tree to ancestors of a subset of tips
+	void reduceTips(double);				// reduces tree to ancestors of a subset of tips
 	void renewTrunk(double);				// renews definition of trunk, working back from all recent tips
 	void renewTrunkRandom(double);			// renews definition of trunk, working back from a random tip
 	void pruneToTrunk();					// reduces CoalescentTree object to trunk
@@ -64,6 +64,7 @@ public:
 											// pads CoalescentTre with additional nodes at each coalescent event
 											// included mainly for compatibility with TreePlot	
 	void rotateLoc(double);					// rotate X&Y locations around origin
+	void addTail(double);					// pads the tree with a node before the root, set backing by a specified amount of time	
 
 	// TREE STRUCTURE
 	void printTree();						// print indented tree with coalescent times			

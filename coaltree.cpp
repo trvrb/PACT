@@ -988,6 +988,33 @@ void CoalescentTree::rotateLoc(double deg) {
 
 }
 
+/* adds an additional node prior to root, takes all attributes from root accept time */
+void CoalescentTree::addTail(double setback) {
+
+	tree<Node>::iterator it, rt;
+	
+	// Pointer to root node
+	rt = nodetree.begin();
+
+	// create new root node
+	Node newNode(-1);
+	newNode.setLabel( (*rt).getLabel() );
+	newNode.setTime( (*rt).getTime() - setback );
+	newNode.setLength(0.0);
+	newNode.setX( (*rt).getX() );
+	newNode.setY( (*rt).getY() );
+	newNode.setCoord( (*rt).getCoord() );	
+	newNode.setLeaf(false);	
+	newNode.setTrunk(true);		
+	
+	// modify old root node
+	(*rt).setLength(setback);
+		
+	// wrap this new node so that it inherits the old node
+	nodetree.wrap(rt,newNode);	
+	
+}
+
 /* Print indented tree */
 void CoalescentTree::printTree() { 
 
@@ -1820,7 +1847,7 @@ void CoalescentTree::peelBack() {
 		(*nodetree.begin()).setLength(0.0);
 	}
 	
-}	
+}
 	
 void CoalescentTree::adjustCoords() {
 

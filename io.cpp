@@ -260,7 +260,13 @@ void IO::treeManip() {
 			if (param.rotate) {
 				double deg = (param.rotate_values)[0];
 				treelist[i].rotateLoc(deg);
-			}			
+			}	
+			
+			// ADD TAIL
+			if (param.add_tail) {
+				double setback = (param.add_tail_values)[0];
+				treelist[i].addTail(setback);
+			}				
 		
 		}
 

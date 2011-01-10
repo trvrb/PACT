@@ -76,6 +76,9 @@ public:
 	bool rotate;
 	vector<double> rotate_values;			// degrees	
 	
+	bool add_tail;
+	vector<double> add_tail_values;			// time		
+	
 	bool print_rule_tree;
 	bool print_all_trees;	
 	

@@ -229,6 +229,13 @@ void Parameters::importLine(string line) {
 			rotate = true; 
 			rotate_values = values;	
 		}
+	}	
+	
+	if (pstring == "addtail") { 
+		if (values.size() == 1) {
+			add_tail = true; 
+			add_tail_values = values;	
+		}
 	}		
 	
 	if (pstring == "printruletree") { 
@@ -346,6 +353,10 @@ void Parameters::print() {
 		if (rotate) {
 			cout << "rotate " << rotate_values[0] << endl;
 		}	
+		
+		if (add_tail) {
+			cout << "add tail " << add_tail_values[0] << endl;
+		}			
 						
 		cout << endl;
 	
@@ -426,7 +437,7 @@ bool Parameters::general() {
 
 bool Parameters::manip() {
 	bool check;
-	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice || rotate)
+	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail)
 		check = true;
 	else 
 		check = false;
