@@ -32,6 +32,7 @@ using std::multiset;
 #include <cmath>
 using std::isnan;
 using std::isinf;
+using std::sqrt;
 
 #include "series.h"
 
@@ -107,4 +108,32 @@ double Series::quantile(double p) {
 
 	return q;
 
+}
+
+/* returns standard deviation of stored values */
+double Series::sd() {
+
+	double sd = 0.0;
+	double seriesmean = mean();
+
+	if (values.size() != 0) {
+		for (multiset<double>::iterator is = values.begin(); is != values.end(); is++ ) {
+			sd += (*is - seriesmean) * (*is - seriesmean);
+		}
+		sd /= (double) (values.size() - 1);
+		sd = sqrt(sd);
+	}
+	else {
+		sd /= sd;
+	}
+	
+	return sd;
+		
+}
+
+/* returns x standard deviations up or down from the mean */
+double Series::sdrange(double x) {
+	
+	return mean() + x*sd();
+		
 }

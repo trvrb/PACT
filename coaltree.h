@@ -65,6 +65,7 @@ public:
 											// included mainly for compatibility with TreePlot	
 	void rotateLoc(double);					// rotate X&Y locations around origin
 	void addTail(double);					// pads the tree with a node before the root, set backing by a specified amount of time	
+	void setCoords(vector<string>);			// sets coords based on supplied vector of tip names	
 
 	// TREE STRUCTURE
 	void printTree();						// print indented tree with coalescent times			
@@ -98,7 +99,9 @@ public:
 	double getCoalWeight(string);			// total opportunity for coalescence on tree
 	double getCoalRate();
 	double getCoalRate(string);
-
+	int getCoalCountTrunk();				// count of coalescent events involving one trunk and one side branch lineage
+	double getCoalWeightTrunk();			// opportunity for coalescence on tree, scaling by n, rather than by n*(n-1)/2
+	
 	// MIGRATION STATISTICS
 	int getMigCount();
 	int getMigCount(string,string);	
@@ -139,8 +142,7 @@ private:
 	string initialDigits(string);			// return initial digits in a string, 34ATZ -> 34, 3454 -> 0
 	void reduce();							// goes through tree and removes inconsequential nodes	
 	void peelBack();						// removes excess root from tree
-	void adjustCoords();					// sets coords in Nodes to allow tree drawing
-	void setCoords(vector<string>);			// sets coords based on supplied vector of tip names	
+	void adjustCoords();					// sets coords in Nodes to allow tree drawing	
 	int getMaxNumber();						// return larger number in tree
 	int renumber(int);						// renumbers tree in preorder traversal starting from int 
 											// returning 1 greater than the max in the tree

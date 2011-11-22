@@ -266,6 +266,11 @@ void IO::treeManip() {
 			if (param.add_tail) {
 				double setback = (param.add_tail_values)[0];
 				treelist[i].addTail(setback);
+			}	
+			
+			// SET COORDS
+			if (param.ordering) {
+				treelist[i].setCoords(param.ordering_values);
 			}				
 		
 		}
@@ -401,13 +406,24 @@ void IO::printStatistics() {
 		// COALESCENCE /////////////////////
 		if (param.summary_coal_rates) {
 			cout << "Printing coalescent summary to " << outputFile << endl;	
-			for (is = lset.begin(); is != lset.end(); ++is) {
+			if (lset.size()>1) {
+				for (is = lset.begin(); is != lset.end(); ++is) {
+					Series s;
+					for (int i = 0; i < treelist.size(); i++) {
+						double n = treelist[i].getCoalRate(*is);
+						s.insert(n);
+					}
+					outStream << "coal_" << *is << "\t";
+					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+				}
+			}
+			else {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
-					double n = treelist[i].getCoalRate(*is);
+					double n = treelist[i].getCoalRate();
 					s.insert(n);
 				}
-				outStream << "coal_" << *is << "\t";
+				outStream << "coal\t";
 				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 			}
 		}
@@ -415,12 +431,20 @@ void IO::printStatistics() {
 		// MIGRATION ///////////////////////
 		if (param.summary_mig_rates) {		
 			cout << "Printing migration summary to " << outputFile << endl;
+			
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				double n = treelist[i].getMigRate();
+				s.insert(n);
+			}
+			outStream << "mig_all\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+						
 			for (is = lset.begin(); is != lset.end(); ++is) {
 				for (js = lset.begin(); js != lset.end(); ++js) {
 					string from = *is;
 					string to = *js;
 					if (from != to) {
-		
 						Series s;
 						for (int i = 0; i < treelist.size(); i++) {
 							double n = treelist[i].getMigRate(from,to);
@@ -433,6 +457,19 @@ void IO::printStatistics() {
 				}	
 			}
 		}
+
+		// SUBS RATE  //////////////
+		if (param.summary_sub_rates) {
+			cout << "Printing substitution rate summary to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getMeanRate();
+				s.insert(n);
+			}
+			outStream << "subrate" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+		}	
 
 		// DIVERSITY  //////////////
 		if (param.summary_diversity) {
@@ -849,7 +886,7 @@ void IO::printTips() {
 				string tip = tipNames[n];
 				outStream << "x_loc_history" << "\t";
 				outStream << tip << "\t";
-				
+								
 				vector<CoalescentTree> subtreelist;
 				for (vector<CoalescentTree>::iterator it = treelist.begin(); it != treelist.end(); it++ ) {
 					CoalescentTree ct = *it;
@@ -858,7 +895,9 @@ void IO::printTips() {
 					subtreelist.push_back(ct);
 				}		
 									
-				for (double t = start; t <= stop; t += step) {
+				double endTime = subtreelist[0].getPresentTime();
+									
+				for (double t = start; t <= endTime; t += step) {
 				
 					Series sx;
 					for (vector<CoalescentTree>::iterator it = subtreelist.begin(); it != subtreelist.end(); it++ ) {
@@ -867,18 +906,77 @@ void IO::printTips() {
 						double x = ct.getMeanX();
 						sx.insert(x);
 					}		
+			//		double xmean = sx.quantile(0.5);
+			//		double xlower = sx.quantile(0.25);
+			//		double xupper = sx.quantile(0.75);	
 					double xmean = sx.mean();
+					double xlower = sx.sdrange(-1);
+					double xupper = sx.sdrange(1);				
+					if (t < 0.0001 && t > -0.0001) { t = 0.0; }					
 					if (xmean < 0.0001 && xmean > -0.0001) { xmean = 0.0; }
-					if (t < 0.0001 && t > -0.0001) { t = 0.0; }
-					outStream << "\t{" << t << "," << xmean << "}";
+					if (xlower < 0.0001 && xlower > -0.0001) { xlower = 0.0; }
+					if (xupper < 0.0001 && xupper > -0.0001) { xupper = 0.0; }					
+					outStream << "\t{" << t << "," << xlower << "," << xmean << "," << xupper << "}";
+					
+				}
+				
+				outStream << endl;
+				
+			}
+		}
+		
+		// Y LOC HISTORY //////////////
+		if (param.y_loc_history) {
+		
+			cout << "Printing y loc history for tips to " << outputFile << endl;
+			double start = param.y_loc_history_values[0];
+			double stop = param.y_loc_history_values[1];
+			double step = param.y_loc_history_values[2];
 			
+			for (int n = 0; n < tipNames.size(); n++) {
+			
+				string tip = tipNames[n];
+				outStream << "y_loc_history" << "\t";
+				outStream << tip << "\t";
+								
+				vector<CoalescentTree> subtreelist;
+				for (vector<CoalescentTree>::iterator it = treelist.begin(); it != treelist.end(); it++ ) {
+					CoalescentTree ct = *it;
+					ct.pruneToName(tip);
+				//	ct.assignLocation();
+					subtreelist.push_back(ct);
+				}		
+									
+				double endTime = subtreelist[0].getPresentTime();
+									
+				for (double t = start; t <= endTime; t += step) {
+				
+					Series sy;
+					for (vector<CoalescentTree>::iterator it = subtreelist.begin(); it != subtreelist.end(); it++ ) {
+						CoalescentTree ct = *it;
+						ct.timeSlice(t);
+						double y = ct.getMeanY();
+						sy.insert(y);
+					}		
+			//		double ymean = sy.quantile(0.5);
+			//		double ylower = sy.quantile(0.025);
+			//		double yupper = sy.quantile(0.975);	
+					double ymean = sy.mean();
+					double ylower = sy.sdrange(-1);
+					double yupper = sy.sdrange(1);				
+					if (t < 0.0001 && t > -0.0001) { t = 0.0; }					
+					if (ymean < 0.0001 && ymean > -0.0001) { ymean = 0.0; }
+					if (ylower < 0.0001 && ylower > -0.0001) { ylower = 0.0; }
+					if (yupper < 0.0001 && yupper > -0.0001) { yupper = 0.0; }					
+					outStream << "\t{" << t << "," << ylower << "," << ymean << "," << yupper << "}";
+					
 				}
 				
 				outStream << endl;
 				
 			}
 		}		
-	
+		
 		outStream.close();
 	
 	}

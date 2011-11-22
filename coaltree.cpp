@@ -47,6 +47,8 @@ using std::atof;
 using std::atoi;
 
 #include <cmath>
+using std::sqrt;
+using std::pow;
 
 #include "coaltree.h"
 #include "node.h"
@@ -260,6 +262,44 @@ CoalescentTree::CoalescentTree(string paren) {
 				if (stringOne == "layout") {
 					double xloc = atof(stringTwo.c_str());
 					(*it).setX(xloc);				
+				}	
+				
+				// DIFFUSION
+				if (stringOne == "diffusion") {
+					double xloc = atof(stringTwo.c_str());
+					(*it).setX(xloc);				
+				}	
+				if (stringOne == "diffTrait") {
+					double xloc = atof(stringTwo.c_str());
+					(*it).setX(xloc);				
+				}					
+	
+				// AHT
+				if (stringOne == "AHT") {
+					double xloc = atof(stringTwo.c_str());
+					double yloc = atof(stringThree.c_str());
+					(*it).setX(xloc);
+					(*it).setY(yloc);					
+				}	
+				
+				// ACX_R
+				if (stringOne == "AC14_R") {
+					double yloc = atof(stringTwo.c_str());
+					(*it).setY(yloc);				
+				}				
+				
+				// AHTL
+				if (stringOne == "AHTL") {
+					double xloc = atof(stringTwo.c_str());
+					double yloc = atof(stringThree.c_str());
+					double z = atof(stringFour.c_str());
+					if (z < 0) {
+						(*it).setLabel("south");
+					} else {
+						(*it).setLabel("north");
+					}
+					(*it).setX(xloc);
+					(*it).setY(yloc);					
 				}					
 				
 				// RATE
@@ -298,7 +338,7 @@ CoalescentTree::CoalescentTree(string paren) {
 	
 	/* pushing the most recent sample up to time = 0 */
 	pushTimesBack(0);
-		
+			
 }
 
 /* return initial digits in a string, incremented by 1, return 0 on failure 34ATZ -> 35, 3454 -> 0 */
@@ -517,7 +557,7 @@ void CoalescentTree::pruneToTrunk() {
     	}
     }
             
-	reduce();
+//	reduce();
 			
 }
 
@@ -796,15 +836,19 @@ void CoalescentTree::timeSlice(double slice) {
 				// finding rate of location change
 				double xlocdiff = (*it).getX() - (*jt).getX();
 				double ylocdiff = (*it).getY() - (*jt).getY();
+				double coorddiff = (*it).getCoord() - (*jt).getCoord();
 				double timediff = (*it).getTime() - (*jt).getTime();
 				double xlocrate = xlocdiff / timediff;
 				double ylocrate = ylocdiff / timediff;
+		//		double coordrate = coorddiff / timediff;	
+				double coordrate = coorddiff / pow(timediff,0.75);
 			
 				// adjusting node
 				(*it).setTime( slice );
 				(*it).setLength( (*it).getTime() - (*jt).getTime() );
 				(*it).setX( (*jt).getX() + (*it).getLength() * xlocrate );
 				(*it).setY( (*jt).getY() + (*it).getLength() * ylocrate );
+				(*it).setCoord( (*jt).getCoord() + pow((*it).getLength(),0.75) * coordrate ); // 0.75
 				(*it).setLeaf(true);
 				nodetree.erase_children(it);
 				
@@ -1380,6 +1424,28 @@ int CoalescentTree::getCoalCount() {
 			count++;
 		}
 	}
+	
+	return count;
+
+}
+
+/* returns the count of coalescent events between side branch and trunk */
+int CoalescentTree::getCoalCountTrunk() {
+
+	/* count coalescent events, these are nodes with two children */
+	/* only include situations where one node is trunk and one node is side branch */
+	int count = 0;
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ((*it).getInclude() && nodetree.number_of_children(it) == 2) {	
+			tree<Node>::iterator jt,kt;
+			jt = nodetree.child(it,0);
+			kt = nodetree.child(it,1);
+			if ( ((*jt).getTrunk() && !(*kt).getTrunk()) || (!(*jt).getTrunk() && (*kt).getTrunk())  ) {
+				count++;
+			}
+		}
+	}
+	
 	return count;
 
 }
@@ -1425,7 +1491,39 @@ double CoalescentTree::getCoalWeight() {
 		}
 		
 	}	
+		
+	return weight;
+
+}
+
+/* returns the opportunity for coalescence over the whole tree */
+/* running this will padTree() may be faster and more accurate */
+double CoalescentTree::getCoalWeightTrunk() {
+
+	// setting step to be 1/1000 of the total length of the tree
+	double start = getRootTime();
+	double stop = getPresentTime();
+	double step = (stop - start) / (double) 1000;
 	
+	// step through tree counting concurrent lineages
+	double weight = 0.0;
+	for (double t = start; t <= stop; t += step) {
+	
+		int lineages = 0;
+		tree<Node>::iterator it, jt;
+		for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+			jt = nodetree.parent(it);
+			if ( (*it).getInclude() && nodetree.is_valid(jt) && (*it).getTime() >= t && (*jt).getTime() < t) {		
+				lineages++;
+			}
+		}
+		
+		if (lineages > 0) {
+			weight += lineages * step;
+		}
+		
+	}	
+		
 	return weight;
 
 }
@@ -1671,6 +1769,7 @@ double CoalescentTree::getMeanX() {
 	tree<Node>::leaf_iterator it;
 	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
 		xloc += (*it).getX();
+	//	xloc += (*it).getCoord();	
 		count++;
 	}
 	
@@ -1742,17 +1841,13 @@ void CoalescentTree::assignLocation() {
 	tree<Node>::iterator it;
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		string loc = (*it).getLabel();
+//		japan_korea, europe, southeast_asia, south_america, north_america, south_china, north_china, australasia, south_asia, africa, russia		
 //		if (loc == "africa" || loc == "australasia" || loc == "europe" || loc == "japan_korea" || loc == "north_america" || loc == "russia" || loc == "south_america" ) {
-//			(*it).setY(1.0);
-//		}
-//		else {
-//			(*it).setY(0.0);
-//		}
-		if (loc == "Y" || loc == "M" || loc == "Q" || loc == "N") {
-			(*it).setX(1.0);
+		if (loc == "japan_korea") {
+			(*it).setY(1.0);
 		}
 		else {
-			(*it).setX(0.0);
+			(*it).setY(0.0);
 		}
 	}
 
@@ -1882,15 +1977,20 @@ void CoalescentTree::adjustCoords() {
 	/* revise coords of internal nodes according to postorder traversal */
   	tree<Node>::post_order_iterator post_it, post_jt, post_kt;
   	for (post_it = nodetree.begin_post(); post_it != nodetree.end_post(); post_it++) {
-  		if (nodetree.number_of_children(post_it) == 1) {
+  		int childcount = nodetree.number_of_children(post_it);
+  		if (childcount == 1) {
   			post_jt = nodetree.child(post_it,0);
   			(*post_it).setCoord((*post_jt).getCoord());	
   		}  		  	
-  		if (nodetree.number_of_children(post_it) == 2) {
-  			post_jt = nodetree.child(post_it,0);
-  			post_kt = nodetree.child(post_it,1);
-  			double avg = ( (*post_jt).getCoord() + (*post_kt).getCoord() ) / (double) 2;
-  			(*post_it).setCoord(avg);	
+  		// ancestor is mean of children
+  		if (childcount > 1) {
+  			double avg = 0.0;
+  			for (int i = 0; i < childcount; i++) {
+  				post_jt = nodetree.child(post_it,i);
+  				avg += (*post_jt).getCoord();
+  			}
+  			avg /= (double) childcount;
+  			(*post_it).setCoord(avg);
   		}
 	}	
 

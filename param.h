@@ -86,7 +86,8 @@ public:
 	bool summary_length;			
 	bool summary_proportions;	
 	bool summary_coal_rates;		
-	bool summary_mig_rates;		
+	bool summary_mig_rates;	
+	bool summary_sub_rates;		
 	bool summary_diversity;		
 	bool summary_fst;				
 	bool summary_tajima_d;	
@@ -94,6 +95,10 @@ public:
 	bool tips_time_to_trunk;
 	bool x_loc_history;
 	vector<double> x_loc_history_values;	// start, stop, step
+	bool y_loc_history;
+	vector<double> y_loc_history_values;	// start, stop, step	
+	bool coord_history;
+	vector<double> coord_history_values;	// start, stop, step	
 		
 	vector<double> skyline_values;			// start, stop, step
 	

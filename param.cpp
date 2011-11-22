@@ -58,6 +58,7 @@ Parameters::Parameters() {
 	section_tree = false;	
 	time_slice = false;
 	rotate = false;
+	add_tail = false;
 	
 	print_rule_tree = false;
 	print_all_trees = false;	
@@ -73,6 +74,8 @@ Parameters::Parameters() {
 	
 	tips_time_to_trunk = false;
 	x_loc_history = false;	
+	y_loc_history = false;		
+	coord_history = false;		
 	
 	skyline_tmrca = false;	
 	skyline_length = false;
@@ -238,6 +241,11 @@ void Parameters::importLine(string line) {
 		}
 	}		
 	
+	if (pstring == "ordering") { 
+		ordering = true; 				
+		ordering_values = svalues;	
+	}		
+	
 	if (pstring == "printruletree") { 
 		print_rule_tree = true; 
 	}	
@@ -251,6 +259,7 @@ void Parameters::importLine(string line) {
 	if (pstring == "summaryproportions") { summary_proportions = true; }
 	if (pstring == "summarycoalrates") { summary_coal_rates = true; }
 	if (pstring == "summarymigrates") { summary_mig_rates = true; }
+	if (pstring == "summarysubrates") { summary_sub_rates = true; }	
 	if (pstring == "summarydiversity") { summary_diversity = true; }
 	if (pstring == "summaryfst") { summary_fst = true; }
 	if (pstring == "summarytajimad") { summary_tajima_d = true; }
@@ -258,6 +267,22 @@ void Parameters::importLine(string line) {
 	if (pstring == "tipstimetotrunk") { tips_time_to_trunk = true; }	
 	
 	if (pstring == "tipsxlochistory") { 
+		if (values.size() == 3) {
+			x_loc_history = true; 
+			x_loc_history_values = values;	
+		}
+		
+	}	
+
+	if (pstring == "tipsylochistory") { 
+		if (values.size() == 3) {
+			y_loc_history = true; 
+			y_loc_history_values = values;	
+		}
+		
+	}		
+
+	if (pstring == "coordhistory") { 
 		if (values.size() == 3) {
 			x_loc_history = true; 
 			x_loc_history_values = values;	
@@ -285,12 +310,7 @@ void Parameters::importLine(string line) {
 	if (pstring == "skylineratemean") { skyline_ratemean = true; }
 	if (pstring == "skylinelocsample") { skyline_locsample = true; }	
 	if (pstring == "skylinelocgrid") { skyline_locgrid = true; }	
-	
-	if (pstring == "ordering") { 
-		ordering = true; 				
-		ordering_values = svalues;	
-	}	
-	
+		
 }
 
 /* prints parameters */
@@ -313,7 +333,7 @@ void Parameters::print() {
 	if ( manip() ) {
 	
 		cout << "Tree manipulation:" << endl;
-	
+		
 		if (push_times_back) {
 			cout << "push times back ";
 			for (int i = 0; i < push_times_back_values.size(); i++) {
@@ -363,6 +383,15 @@ void Parameters::print() {
 		
 		if (add_tail) {
 			cout << "add tail " << add_tail_values[0] << endl;
+		}		
+		
+		// TIP ORDERING
+		if (ordering) {
+			cout << "Tip ordering:" << endl;
+			for (int i = 0; i < ordering_values.size(); i++) {
+				cout << ordering_values[i] << " ";
+			}
+			cout << endl;
 		}			
 						
 		cout << endl;
@@ -385,6 +414,7 @@ void Parameters::print() {
 		if (summary_proportions) { cout << "proportions" << endl; }
 		if (summary_coal_rates) { cout << "coal rates" << endl; }
 		if (summary_mig_rates) { cout << "mig rates" << endl; }
+		if (summary_sub_rates) { cout << "sub rates" << endl; }		
 		if (summary_diversity) { cout << "diversity" << endl; }
 		if (summary_fst) { cout << "fst" << endl; }	
 		if (summary_tajima_d) { cout << "tajima d" << endl; }	
@@ -397,7 +427,10 @@ void Parameters::print() {
 		if (tips_time_to_trunk) { cout << "time to trunk" << endl; }
 		if (x_loc_history) { 
 			cout << "x loc history " << x_loc_history_values[0] << " " << x_loc_history_values[1] << " " << x_loc_history_values[2] << endl; 
-		}		
+		}	
+		if (y_loc_history) { 
+			cout << "y loc history " << y_loc_history_values[0] << " " << y_loc_history_values[1] << " " << y_loc_history_values[2] << endl; 
+		}			
 		cout << endl; 
 	}	
 
@@ -424,15 +457,6 @@ void Parameters::print() {
 		cout << endl;
 	}
 	
-	// TIP ORDERING
-	if (ordering) {
-		cout << "Tip ordering:" << endl;
-		for (int i = 0; i < ordering_values.size(); i++) {
-			cout << ordering_values[i] << " ";
-		}
-		cout << endl;
-	}	
-	
 }
 
 bool Parameters::general() {
@@ -446,7 +470,7 @@ bool Parameters::general() {
 
 bool Parameters::manip() {
 	bool check;
-	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail)
+	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail || ordering)
 		check = true;
 	else 
 		check = false;
@@ -464,7 +488,7 @@ bool Parameters::printtree() {
 
 bool Parameters::summary() {
 	bool check;
-	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_diversity || summary_fst || summary_tajima_d)
+	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_sub_rates || summary_diversity || summary_fst || summary_tajima_d)
 		check = true;
 	else 
 		check = false;
@@ -473,7 +497,7 @@ bool Parameters::summary() {
 
 bool Parameters::tips() {
 	bool check;
-	if (tips_time_to_trunk || x_loc_history)
+	if (tips_time_to_trunk || x_loc_history || y_loc_history || coord_history)
 		check = true;
 	else 
 		check = false;
