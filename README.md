@@ -26,4 +26,4 @@ PACT requires two files to run:
 Available parameters can be found in parameters.txt.  Full documentation can be found in 
 pact_manual.pdf.
 
-Copyright 2011 Trevor Bedford.  Distributed uner the GPL v3.
+Copyright 2011 Trevor Bedford.  Distributed under the GPL v3.
