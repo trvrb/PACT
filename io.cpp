@@ -814,8 +814,8 @@ void IO::printSkylines() {
 				}
 				
 				double step = 0.25;
-				for (double x = -10.0; x <= 8.0; x += step) {
-					for (double y = -4.0; y <= 4.0; y += step) {
+				for (double x = -2.0; x <= 50.0; x += step) {
+					for (double y = -6.0; y <= 6.0; y += step) {
 					
 						int count = 0;
 						for (multiset< vector<double> >::iterator is = locset.begin(); is != locset.end(); is++ ) {
@@ -906,12 +906,12 @@ void IO::printTips() {
 						double x = ct.getMeanX();
 						sx.insert(x);
 					}		
-			//		double xmean = sx.quantile(0.5);
-			//		double xlower = sx.quantile(0.25);
-			//		double xupper = sx.quantile(0.75);	
-					double xmean = sx.mean();
-					double xlower = sx.sdrange(-1);
-					double xupper = sx.sdrange(1);				
+					double xmean = sx.quantile(0.5);
+					double xlower = sx.quantile(0.25);
+					double xupper = sx.quantile(0.75);	
+			//		double xmean = sx.mean();
+			//		double xlower = sx.sdrange(-1);
+			//		double xupper = sx.sdrange(1);				
 					if (t < 0.0001 && t > -0.0001) { t = 0.0; }					
 					if (xmean < 0.0001 && xmean > -0.0001) { xmean = 0.0; }
 					if (xlower < 0.0001 && xlower > -0.0001) { xlower = 0.0; }
@@ -958,12 +958,12 @@ void IO::printTips() {
 						double y = ct.getMeanY();
 						sy.insert(y);
 					}		
-			//		double ymean = sy.quantile(0.5);
-			//		double ylower = sy.quantile(0.025);
-			//		double yupper = sy.quantile(0.975);	
-					double ymean = sy.mean();
-					double ylower = sy.sdrange(-1);
-					double yupper = sy.sdrange(1);				
+					double ymean = sy.quantile(0.5);
+					double ylower = sy.quantile(0.025);
+					double yupper = sy.quantile(0.975);	
+			//		double ymean = sy.mean();
+			//		double ylower = sy.sdrange(-1);
+			//		double yupper = sy.sdrange(1);				
 					if (t < 0.0001 && t > -0.0001) { t = 0.0; }					
 					if (ymean < 0.0001 && ymean > -0.0001) { ymean = 0.0; }
 					if (ylower < 0.0001 && ylower > -0.0001) { ylower = 0.0; }
