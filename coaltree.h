@@ -111,6 +111,7 @@ public:
 	// DIVERSITY STATISTICS	
 	double getDiversity();					// return mean of (2 * time to common ancestor) for every pair of leaf nodes
 	double getDiversity(string);			// diversity only involving a particular label
+	double getDiversity(string, string);	// diversity for a particular pair of tips
 	double getDiversityWithin();			// diversity where both samples have the same label
 	double getDiversityBetween();			// diversity where both samples have different labels
 	double getFst();						// Fst = (divBetween - divWithin) / divBetween
@@ -123,6 +124,14 @@ public:
 	vector<double> getTipsX();				// returns a vector of double for X position of every tip in tree
 	vector<double> getTipsY();				// returns a vector of double for Y position of every tip in tree	
 	void assignLocation();
+	double getDiffusionCoefficient();		// returns the coefficient of diffusion across the tree
+	double getDiffusionCoefficientTrunk();
+	double getDiffusionCoefficientSideBranches();		
+	double getDiffusionCoefficientInternalBranches();	
+	double getDriftRate();					// returns the rate of drift of location X across the tree
+	double getDriftRateTrunk();
+	double getDriftRateSideBranches();
+	double getDriftRateInternalBranches();
 	
 	// RATE STATISTICS
 	double getMeanRate();					// return mean rate across all tips in the tree	

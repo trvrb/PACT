@@ -71,6 +71,7 @@ Parameters::Parameters() {
 	summary_diversity = false;		
 	summary_fst = false;				
 	summary_tajima_d = false;	
+	summary_diffusion_coefficient = false;	
 	
 	tips_time_to_trunk = false;
 	x_loc_history = false;	
@@ -93,6 +94,8 @@ Parameters::Parameters() {
 	skyline_locgrid = false;	
 	
 	ordering = false;
+	
+	pairs_diversity = false;
 	
 	// check to see file exists
 	string paramString;
@@ -263,6 +266,8 @@ void Parameters::importLine(string line) {
 	if (pstring == "summarydiversity") { summary_diversity = true; }
 	if (pstring == "summaryfst") { summary_fst = true; }
 	if (pstring == "summarytajimad") { summary_tajima_d = true; }
+	if (pstring == "summarydiffusioncoefficient") { summary_diffusion_coefficient = true; }
+	if (pstring == "summarydriftrate") { summary_drift_rate = true; }	
 	
 	if (pstring == "tipstimetotrunk") { tips_time_to_trunk = true; }	
 	
@@ -310,6 +315,13 @@ void Parameters::importLine(string line) {
 	if (pstring == "skylineratemean") { skyline_ratemean = true; }
 	if (pstring == "skylinelocsample") { skyline_locsample = true; }	
 	if (pstring == "skylinelocgrid") { skyline_locgrid = true; }	
+	
+	if (pstring == "pairsdiversity") { 
+		if (values.size() == 1) {
+			pairs_diversity = true; 
+			pairs_diversity_values = values;	
+		}
+	}	
 		
 }
 
@@ -457,6 +469,12 @@ void Parameters::print() {
 		cout << endl;
 	}
 	
+	// PAIR STATISTICS
+	if ( pairs() ) {
+		cout << "Pair statistics:" << endl;
+		if (pairs_diversity) { cout << "pairwise diversity" << endl; }		
+	}
+	
 }
 
 bool Parameters::general() {
@@ -488,7 +506,7 @@ bool Parameters::printtree() {
 
 bool Parameters::summary() {
 	bool check;
-	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_sub_rates || summary_diversity || summary_fst || summary_tajima_d)
+	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_sub_rates || summary_diversity || summary_fst || summary_tajima_d || summary_diffusion_coefficient)
 		check = true;
 	else 
 		check = false;
@@ -510,6 +528,15 @@ bool Parameters::skyline() {
 		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d || skyline_timetofix || skyline_xmean || skyline_ymean || skyline_ratemean || skyline_locsample || skyline_locgrid) )
 		check = true;
 	else 
+		check = false;
+	return check;
+}
+
+bool Parameters::pairs() {
+	bool check;
+	if (pairs_diversity)
+		check = true;
+	else
 		check = false;
 	return check;
 }

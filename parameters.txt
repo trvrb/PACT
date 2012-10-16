@@ -51,7 +51,14 @@ skyline diversity					# computes the diversity for time slices
 skyline fst							# computes the FST for time slices
 skyline tajima d					# computes Tajima's D for time slices
 
+### LOCATION STATISTICS
+summary diffusion coefficient		# summarize coefficient of diffusion by comparing Euclidean distance between nodes
+summary drift rate					# summarize rate of drift along branches
+
 ### TIP STATISTICS					# these statistics are carried out on each tip
 									# prints to out.tips
 tips time to trunk					# computes the time it takes for each tip to coalesce with the genealogy trunk
 
+### PAIR STATISTICS	
+
+pairs diversity						# find mean and variance of diveristy between each pair of tips

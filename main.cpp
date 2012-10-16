@@ -63,6 +63,7 @@ int main() {
 		trees.printStatistics();
 		trees.printTips();
 		trees.printSkylines();
+		trees.printPairs();
 	}
 	catch (runtime_error rex) {
 		cout << "<<< runtime_error >>>" << endl;

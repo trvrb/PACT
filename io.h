@@ -48,6 +48,7 @@ public:
 	void printStatistics();					// print coalescent statistics to .stats
 	void printTips();						// print tip statistics to .tips
 	void printSkylines();					// print skyline values to .skylines
+	void printPairs();						// pair pair statistics to .pairs
 																			
 private:
 

@@ -43,6 +43,9 @@ using std::vector;
 using std::set;
 using std::multiset;
 
+#include <cmath>
+using std::abs;
+
 #include "io.h"
 #include "coaltree.h"
 #include "series.h"
@@ -176,6 +179,12 @@ IO::IO() {
 		outStream.close();	
 	}
 	
+	if (param.pairs()) {
+		outputFile = outputPrefix + ".pairs";
+		outStream.open( outputFile.c_str(),ios::out);
+		outStream.close();	
+	}	
+	
 }
 
 /* go through treelist and perform tree manipulation operations */
@@ -209,7 +218,7 @@ void IO::treeManip() {
 			// RENEW TRUNK
 			if (param.renew_trunk) {
 				double time = (param.renew_trunk_values)[0];
-				treelist[i].renewTrunkRandom(time);
+				treelist[i].renewTrunk(time);
 			}
 						
 			// TRIM ENDS
@@ -509,6 +518,89 @@ void IO::printStatistics() {
 			outStream << "tajimad" << "\t";
 			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 		}			
+
+		// Diffusion coefficient  //////////////
+		if (param.summary_diffusion_coefficient) {
+			cout << "Printing coefficients of diffusion to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDiffusionCoefficient();
+				s.insert(n);
+			}
+			outStream << "diffusionCoefficient" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDiffusionCoefficientTrunk();
+				s.insert(n);
+			}
+			outStream << "diffusionCoefficientTrunk" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDiffusionCoefficientSideBranches();
+				s.insert(n);
+			}
+			outStream << "diffusionCoefficientSideBranches" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDiffusionCoefficientInternalBranches();
+				s.insert(n);
+			}
+			outStream << "diffusionCoefficientInternalBranches" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;			
+			
+		}	
+		
+	// Drift   //////////////
+		if (param.summary_drift_rate) {
+			cout << "Printing drift rate to " << outputFile << endl;
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDriftRate();
+				s.insert(n);
+			}
+			outStream << "driftRate" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDriftRateTrunk();
+				s.insert(n);
+			}
+			outStream << "driftRateTrunk" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDriftRateSideBranches();
+				s.insert(n);
+			}
+			outStream << "driftRateSideBranches" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDriftRateInternalBranches();
+				s.insert(n);
+			}
+			outStream << "driftRateInternalBranches" << "\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;			
+			
+		}			
+
 
 		outStream.close();
 	
@@ -981,4 +1073,58 @@ void IO::printTips() {
 	
 	}
 
+}
+
+/* go through treelist and summarize pair statistics */
+void IO::printPairs() {
+	
+	if (param.pairs()) {
+
+		/* initializing output stream */
+		string outputFile = outputPrefix + ".pairs";
+		ofstream outStream;
+		outStream.open( outputFile.c_str(),ios::app);
+		
+		outStream << "statistic\tnameA\tnameB\tlower\tmean\tupper" << endl; 
+		
+		/* get vector of tip names */
+		vector<string> tipNames = treelist[0].getTipNames();
+		
+		// PAIRWISE DIVERSITY //////////////
+		if (param.pairs_diversity) {
+		
+			double timeDiff = param.pairs_diversity_values[0];
+		
+			cout << "Printing pairwise diversity to " << outputFile << endl;
+			for (int nA = 0; nA < tipNames.size(); nA++) {
+				for (int nB = nA + 1; nB < tipNames.size(); nB++) {
+				
+					string tipA = tipNames[nA];
+					string tipB = tipNames[nB];
+					
+					double timeA = treelist[0].getTime(tipA);
+					double timeB = treelist[0].getTime(tipB);
+														
+					if (abs(timeA - timeB) < timeDiff) {
+									
+						Series s;
+						for (int i = 0; i < treelist.size(); i++) {
+							double n = treelist[i].getDiversity(tipA, tipB);
+							s.insert(n);
+						}
+						
+						outStream << "diversity" << "\t";
+						outStream << tipA << "\t";
+						outStream << tipB << "\t";								
+						outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+					
+					}
+				
+				}
+			}
+		}
+
+
+	}
+	
 }

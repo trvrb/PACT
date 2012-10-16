@@ -37,8 +37,9 @@ public:
 	bool manip();						// are any tree manipulation parameters true?
 	bool printtree();					// are any of the tree printing parameters true?
 	bool summary();						// are any summary parameters true?
-	bool tips();
+	bool tips();						// are any of the tip statistics true?
 	bool skyline();						// are any skyline parameters true?
+	bool pairs();						// are any of the pair statistics true?
 
 	// PARAMETERS
 	
@@ -91,6 +92,8 @@ public:
 	bool summary_diversity;		
 	bool summary_fst;				
 	bool summary_tajima_d;	
+	bool summary_diffusion_coefficient;
+	bool summary_drift_rate;
 	
 	bool tips_time_to_trunk;
 	bool x_loc_history;
@@ -119,6 +122,9 @@ public:
 	
 	bool ordering;
 	vector<string> ordering_values;
+	
+	bool pairs_diversity;
+	vector<double> pairs_diversity_values;	// time diff	
 	
 private:
 	void importLine(string);			// reads a string and attempts to extract parameters from it

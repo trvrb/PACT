@@ -1621,6 +1621,33 @@ double CoalescentTree::getMigRate(string from, string to) {
 	return getMigCount(from,to) / getLength(to);
 }
 
+/* return distance from tip A to tip B */
+double CoalescentTree::getDiversity(string tipA, string tipB) {
+
+	double div = 0.0;
+	tree<Node>::leaf_iterator it, jt, kt;	
+
+	/* find tipA */
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		if ( (*it).getName() == tipA ) {
+			break;
+		}
+	}
+	
+	/* find tipB */
+	for (jt = nodetree.begin_leaf(); jt != nodetree.end_leaf(); ++jt) {
+		if ( (*jt).getName() == tipB ) {
+			break;
+		}
+	}	
+
+	/* find common ancestor and calculate time from it to jt via common ancestor */
+	kt = commonAncestor(it,jt);
+	div = ( (*it).getTime() - (*kt).getTime() ) + ( (*jt).getTime() - (*kt).getTime() );
+
+	return div;	
+}
+
 /* return mean of (2 * time to common ancestor) for every pair of leaf nodes */
 double CoalescentTree::getDiversity() {
 
@@ -1756,6 +1783,230 @@ double CoalescentTree::getTajimaD() {
 	double tajima = (div - S/a1) / denom;	
 	
 	return tajima;
+
+}
+
+/* returns the coefficient of diffusion across the tree */
+double CoalescentTree::getDiffusionCoefficient() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double coefficient = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+		
+			double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
+			double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
+			double euclideanDist = sqrt(sqDistX + sqDistY);
+			
+			double time = (*it).getTime() - (*jt).getTime();
+			
+			coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+			count += 1;
+	
+		}
+	}
+	
+	coefficient /= count;
+	return coefficient;
+
+}
+
+/* returns the coefficient of diffusion across the trunk */
+double CoalescentTree::getDiffusionCoefficientTrunk() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double coefficient = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+			if ( (*it).getTrunk() && (*jt).getTrunk() ) {
+		
+				double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
+				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
+				double euclideanDist = sqrt(sqDistX + sqDistY);
+				
+				double time = (*it).getTime() - (*jt).getTime();
+				
+				coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+				count += 1;
+	
+			}
+		}
+	}
+	
+	coefficient /= count;
+	return coefficient;
+
+}
+
+/* returns the coefficient of diffusion across side branches */
+double CoalescentTree::getDiffusionCoefficientSideBranches() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double coefficient = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+			if ( !(*it).getTrunk() && !(*jt).getTrunk() ) {
+		
+				double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
+				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
+				double euclideanDist = sqrt(sqDistX + sqDistY);
+				
+				double time = (*it).getTime() - (*jt).getTime();
+				
+				coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+				count += 1;
+	
+			}
+		}
+	}
+	
+	coefficient /= count;
+	return coefficient;
+
+}
+
+/* returns the coefficient of diffusion across side branches */
+double CoalescentTree::getDiffusionCoefficientInternalBranches() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double coefficient = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+			if ( !(*it).getLeaf() && !(*it).getTrunk() && !(*jt).getTrunk() ) {
+		
+				double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
+				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
+				double euclideanDist = sqrt(sqDistX + sqDistY);
+				
+				double time = (*it).getTime() - (*jt).getTime();
+				
+				coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+				count += 1;
+	
+			}
+		}
+	}
+	
+	coefficient /= count;
+	return coefficient;
+
+}
+
+/* returns the rate of drift of x location across the tree */
+double CoalescentTree::getDriftRate() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double rate = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+		
+			double dist = (*it).getX() - (*jt).getX();			
+			double time = (*it).getTime() - (*jt).getTime();
+			
+			rate += dist / time;
+			count += 1;
+	
+		}
+	}
+	
+	rate /= count;
+	return rate;
+
+}
+
+/* returns the rate of drift of x location across the tree */
+double CoalescentTree::getDriftRateTrunk() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double rate = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+			if ( (*it).getTrunk() && (*jt).getTrunk() ) {
+		
+				double dist = (*it).getX() - (*jt).getX();			
+				double time = (*it).getTime() - (*jt).getTime();
+				
+				rate += dist / time;
+				count += 1;
+	
+			}
+		}
+	}
+	
+	rate /= count;
+	return rate;
+
+}
+
+/* returns the rate of drift of x location across the tree */
+double CoalescentTree::getDriftRateSideBranches() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double rate = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+			if ( !(*it).getTrunk() && !(*jt).getTrunk() ) {
+		
+				double dist = (*it).getX() - (*jt).getX();			
+				double time = (*it).getTime() - (*jt).getTime();
+				
+				rate += dist / time;
+				count += 1;
+	
+			}
+		}
+	}
+	
+	rate /= count;
+	return rate;
+
+}
+
+/* returns the rate of drift of x location across the tree */
+double CoalescentTree::getDriftRateInternalBranches() {
+
+	/* compare Euclidean distance between parent and child nodes */
+	tree<Node>::iterator it, jt;
+	double rate = 0;	
+	double count = 0;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {	
+			if ( !(*it).getLeaf() && !(*it).getTrunk() && !(*jt).getTrunk() ) {
+		
+				double dist = (*it).getX() - (*jt).getX();			
+				double time = (*it).getTime() - (*jt).getTime();
+				
+				rate += dist / time;
+				count += 1;
+	
+			}
+		}
+	}
+	
+	rate /= count;
+	return rate;
 
 }
 
