@@ -1,6 +1,6 @@
 /* 	
 	(P)osterior (A)nalysis of (C)oalescent (T)rees 
-	Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
+	Copyright 2009-2012 Trevor Bedford <t.bedford@ed.ac.uk>
 
 	This program is designed to interpret and manipulate labeled evolutionary trees.  Statistics 
 	regarding the structured coalescent may be calculated.
@@ -56,7 +56,7 @@ using std::out_of_range;
 int main() {
 			
 	try {
-		cout << "PACT 0.9.3 Copyright 2009-2010 Trevor Bedford" << endl << endl;			
+		cout << "PACT 0.9.4 Copyright 2009-2012 Trevor Bedford" << endl << endl;			
 		IO trees;
 		trees.treeManip();
 		trees.printTree();

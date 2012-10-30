@@ -1,5 +1,5 @@
 /* series.cpp
-Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
+Copyright 2009-2012 Trevor Bedford <t.bedford@ed.ac.uk>
 Member function definitions for Series class
 */
 

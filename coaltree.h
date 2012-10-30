@@ -1,5 +1,5 @@
 /* coaltree.h
-Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
+Copyright 2009-2012 Trevor Bedford <t.bedford@ed.ac.uk>
 CoalescentTree class definition
 This object stores and manipulates coalescent trees, rooted bifurcating trees with nodes mapped to time points
 */

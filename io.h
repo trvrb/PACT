@@ -1,5 +1,5 @@
 /* io.h
-Copyright 2009-2010 Trevor Bedford <bedfordt@umich.edu>
+Copyright 2009-2012 Trevor Bedford <t.bedford@ed.ac.uk>
 IO class definition
 This object reads a BEAST or Migrate treefile and performs calculations on the resulting vector of
 CoalescentTrees.
