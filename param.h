@@ -119,6 +119,7 @@ public:
 	bool skyline_ratemean;
 	bool skyline_locsample;	
 	bool skyline_locgrid;		
+	bool skyline_drift_rate_from_tips;
 	
 	bool ordering;
 	vector<string> ordering_values;

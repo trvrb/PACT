@@ -560,7 +560,7 @@ void IO::printStatistics() {
 			
 		}	
 		
-	// Drift   //////////////
+		// Drift   //////////////
 		if (param.summary_drift_rate) {
 			cout << "Printing drift rate to " << outputFile << endl;
 			Series s;
@@ -812,13 +812,12 @@ void IO::printSkylines() {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
 					CoalescentTree ct = treelist[i];
-					ct.timeSlice(t + step / (double) 2);
+					ct.timeSlice(t);
 					double n = ct.getMeanX();
 					s.insert(n);
 				}
 				outStream << "xmean" << "\t";
-				outStream << t + step / (double) 2 << "\t";
-//				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+				outStream << t << "\t";
 				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			}
 		}	
@@ -830,12 +829,12 @@ void IO::printSkylines() {
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
 					CoalescentTree ct = treelist[i];
-					ct.timeSlice(t + step / (double) 2);
+					ct.timeSlice(t);
 					double n = ct.getMeanY();
 					s.insert(n);
 				}
 				outStream << "ymean" << "\t";
-				outStream << t + step / (double) 2 << "\t";
+				outStream << t << "\t";
 				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			}
 		}
@@ -925,6 +924,38 @@ void IO::printSkylines() {
 				outStream << endl;
 			}
 		}					
+
+		// 1D DRIFT RATE FROM TIPS /////////////////////
+		if (param.skyline_drift_rate_from_tips) {
+			cout << "Printing skyline of 1D drift rate from tips " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					double n = ct.get1DRateFromTips(t, step);	// need to account for undefined cases
+					s.insert(n);
+				}
+				outStream << "1dratefromtips" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			}
+		}		
+		
+		// 2D DRIFT RATE FROM TIPS /////////////////////
+		if (param.skyline_drift_rate_from_tips) {
+			cout << "Printing skyline of 2D drift rate from tips " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					double n = ct.get2DRateFromTips(t, step);	// need to account for undefined cases
+					s.insert(n);
+				}
+				outStream << "2dratefromtips" << "\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			}
+		}			
 				
 		outStream.close();
 	

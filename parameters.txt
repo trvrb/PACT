@@ -52,8 +52,17 @@ skyline fst							# computes the FST for time slices
 skyline tajima d					# computes Tajima's D for time slices
 
 ### LOCATION STATISTICS
+
 summary diffusion coefficient		# summarize coefficient of diffusion by comparing Euclidean distance between nodes
 summary drift rate					# summarize rate of drift along branches
+
+skyline settings 2002 2007 0.1		# split the tree starting at 2002 and ending at 2007 in steps of 0.1
+skyline xmean						# compute mean of x location across slice of tree
+skyline ymean						# compute mean of y location across slice of tree
+skyline xdrift						# compute rate of change of x location going from time (t) back to to (t - step)
+
+skyline settings 0 10 0.05			
+skyline drift rate from tips		# compute rate of drift at a distance t back from each tip in the tree 
 
 ### TIP STATISTICS					# these statistics are carried out on each tip
 									# prints to out.tips

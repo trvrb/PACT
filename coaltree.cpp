@@ -2010,6 +2010,151 @@ double CoalescentTree::getDriftRateInternalBranches() {
 
 }
 
+/* walk back from a particular tip a particular amount of time and return child node whose parent spans this amount of time */
+tree<Node>::iterator CoalescentTree::getNodeBackFromTip (tree<Node>::iterator it, double timeWindow) {
+
+	double initialTime = (*it).getTime();
+	double finalTime = initialTime - timeWindow;	// timeWindow gives desired time
+				
+	// walk back through tree and return the first node whose parent has a time earlier than this time
+	tree<Node>::iterator jt = nodetree.parent(it);
+	while ( (*jt).getTime() > finalTime ) {
+		it = jt;
+		jt = nodetree.parent(it);
+		if (!nodetree.is_valid(jt)) {		// if we cannot reach a node with this criteria, return last child possible
+			break;
+		}
+	}
+
+	return it;
+
+}
+
+/* walk back from a particular tip, t amount of time and retrieve x location, interpolate as necessary */
+double CoalescentTree::getXBackFromTip (tree<Node>::iterator it, double timeWindow) {
+
+	double initialTime = (*it).getTime();
+	double finalTime = initialTime - timeWindow;	// timeWindow gives desired time
+		
+	it = getNodeBackFromTip(it, timeWindow);
+	tree<Node>::iterator jt = nodetree.parent(it);
+	
+	double xValue = 0;
+		
+	if (nodetree.is_valid(jt)) {
+	
+		double childTime = (*it).getTime();
+		double parentTime = (*jt).getTime();		
+		double childX = (*it).getX();
+		double parentX = (*jt).getX();		
+		double xRate = (childX - parentX) / (childTime - parentTime);
+		
+		double remainder = (finalTime - parentTime);
+		xValue = parentX + remainder * xRate;
+	
+	}
+		
+	return xValue;
+
+}
+
+/* walk back from a particular tip, t amount of time and retrieve x location, interpolate as necessary */
+double CoalescentTree::getYBackFromTip (tree<Node>::iterator it, double timeWindow) {
+
+	double initialTime = (*it).getTime();
+	double finalTime = initialTime - timeWindow;	// timeWindow gives desired time
+	
+	it = getNodeBackFromTip(it, timeWindow);
+	tree<Node>::iterator jt = nodetree.parent(it);
+	
+	double yValue = 0;
+		
+	if (nodetree.is_valid(jt)) {
+	
+		double childTime = (*it).getTime();
+		double parentTime = (*jt).getTime();		
+		double childY = (*it).getY();
+		double parentY = (*jt).getY();		
+		double yRate = (childY - parentY) / (childTime - parentTime);
+		
+		double remainder = (finalTime - parentTime);
+		yValue = parentY + remainder * yRate;
+	
+	}
+	
+	return yValue;
+
+}
+
+/* returns the rate of 1D drift of x location measured at a distance of offset from each tip */
+double CoalescentTree::get1DRateFromTips(double offset, double window) {
+
+	/* compare Euclidean distance between parent and child nodes */
+	double rate = 0;	
+	double count = 0;
+	
+	/* walk through every tip in the tree and step back to appropriate point */	
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ( (*it).getLeaf() ) {
+		
+			double startX = getXBackFromTip(it, offset);
+			double endX = getXBackFromTip(it, offset + window);
+			
+			if (startX != 0 && endX != 0) {
+		
+				double dist = startX - endX;	
+				rate += dist / window;
+				count += 1;
+			
+			}
+			
+		}
+	}
+		
+	rate /= count;
+	return rate;
+
+}
+
+/* returns the rate of Euclidean drift of xy location measured at a distance of offset from each tip */
+double CoalescentTree::get2DRateFromTips(double offset, double window) {
+
+	/* compare Euclidean distance between parent and child nodes */
+	double rate = 0;	
+	double count = 0;
+	
+	/* walk through every tip in the tree and step back to appropriate point */	
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ( (*it).getLeaf() ) {
+		
+			double startX = getXBackFromTip(it, offset);
+			double startY = getYBackFromTip(it, offset);
+			double endX = getXBackFromTip(it, offset + window);
+			double endY = getYBackFromTip(it, offset + window);	
+			
+			if (startX != 0 && endX != 0 && startY != 0 && endY != 0) {
+		
+				double sqDistX = (startX - endX) * (startX - endX);
+				double sqDistY = (startY - endY) * (startY - endY);
+				double euclideanDist = sqrt(sqDistX + sqDistY);	
+		
+				if (euclideanDist > -0.00001) {
+				
+					rate += euclideanDist / window;
+					count += 1;
+				
+				}
+			
+			}
+			
+		}
+	}
+		
+	rate /= count;
+	return rate;
+
+}
+
 /* return mean X location across all tips in the tree */
 double CoalescentTree::getMeanX() {
 

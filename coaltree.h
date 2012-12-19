@@ -132,6 +132,14 @@ public:
 	double getDriftRateTrunk();
 	double getDriftRateSideBranches();
 	double getDriftRateInternalBranches();
+
+	tree<Node>::iterator getNodeBackFromTip(tree<Node>::iterator, double);													
+	double getXBackFromTip(tree<Node>::iterator, double);	
+	double getYBackFromTip(tree<Node>::iterator, double);	
+	double get1DRateFromTips(double, double);	// returns the average rate of 1D drift at double distance 
+													// from tips in a window of size double	
+	double get2DRateFromTips(double, double);	// returns the average rate of Euclidean drift at double distance 
+													// from tips in a window of size double
 	
 	// RATE STATISTICS
 	double getMeanRate();					// return mean rate across all tips in the tree	
