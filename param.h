@@ -116,6 +116,7 @@ public:
 	bool skyline_timetofix;
 	bool skyline_xmean;
 	bool skyline_ymean;
+	bool skyline_xdrift;
 	bool skyline_ratemean;
 	bool skyline_locsample;	
 	bool skyline_locgrid;		

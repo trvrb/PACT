@@ -839,6 +839,26 @@ void IO::printSkylines() {
 			}
 		}
 		
+		// X DRIFT /////////////////////
+		if (param.skyline_xdrift) {
+			cout << "Printing X drift skyline to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree bt = treelist[i];
+					bt.timeSlice(t);
+					double b = bt.getMeanX();
+					CoalescentTree at = treelist[i];
+					at.timeSlice(t-step);
+					double a = at.getMeanX();
+					s.insert(b-a);
+				}
+				outStream << "xmean" << "\t";
+				outStream << t << "\t";
+				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			}
+		}			
+		
 		// RATE /////////////////////
 		if (param.skyline_ratemean) {
 			cout << "Printing rate mean skyline to " << outputFile << endl;
