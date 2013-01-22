@@ -86,6 +86,12 @@ double Series::mean() {
 		
 }
 
+/* returns median of stored values */
+double Series::median() {	
+	return quantile(0.5);
+}
+	
+
 /* returns quantile rank (p) of stored values */
 /* using the empirical distribution function with averaging */
 double Series::quantile(double p) {

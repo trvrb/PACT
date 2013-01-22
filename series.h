@@ -35,6 +35,7 @@ public:
 	
 	double at(int);							
 	double mean();							// returns arithmetic mean of stored values 
+	double median();						// returns the median of stored values 	
 	double quantile(double);				// returns the quantile rank of the stored values
 	double sd();							// returns standard deviation of the stored values
 	double sdrange(double);					// returns x standard deviations up or down from the mean

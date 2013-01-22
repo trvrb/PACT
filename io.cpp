@@ -529,7 +529,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficient" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -538,7 +538,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficientTrunk" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -547,21 +547,26 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficientSideBranches" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
-			
+			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+					
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
 				CoalescentTree ct = treelist[i];
-				double n = ct.getDiffusionCoefficientInternalBranches();
-				s.insert(n);
+				double n = ct.getDiffusionCoefficientTrunk();
+				double d = ct.getDiffusionCoefficientSideBranches();
+				s.insert(n/d);
 			}
-			outStream << "diffusionCoefficientInternalBranches" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;			
+			outStream << "diffusionCoefficientRatio" << "\t";
+			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;			
 			
 		}	
 		
 		// Drift   //////////////
 		if (param.summary_drift_rate) {
+		
+			double lowerQuantile = 0.25;
+			double upperQuantile = 0.75;
+		
 			cout << "Printing drift rate to " << outputFile << endl;
 			Series s;
 			for (int i = 0; i < treelist.size(); i++) {
@@ -570,7 +575,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRate" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -579,7 +584,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRateTrunk" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -588,7 +593,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRateSideBranches" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -597,7 +602,27 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRateInternalBranches" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;			
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;		
+
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDriftRateTrunk();
+				double d = ct.getDriftRateSideBranches();
+				s.insert(n/d);
+			}
+			outStream << "driftRateTSRatio" << "\t";
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;	
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDriftRateTrunk();
+				double d = ct.getDriftRateInternalBranches();
+				s.insert(n/d);
+			}
+			outStream << "driftRateTIRatio" << "\t";
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;					
 			
 		}			
 
@@ -853,7 +878,7 @@ void IO::printSkylines() {
 					double a = at.getMeanX();
 					s.insert(b-a);
 				}
-				outStream << "xmean" << "\t";
+				outStream << "xdrift" << "\t";
 				outStream << t << "\t";
 				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			}

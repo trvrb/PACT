@@ -1793,23 +1793,30 @@ double CoalescentTree::getDiffusionCoefficient() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
 		
 			double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
-			double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
-			double euclideanDist = sqrt(sqDistX + sqDistY);
-			
+			double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );			
 			double time = (*it).getTime() - (*jt).getTime();
 			
-			coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+			coefficient += (sqDistX + sqDistY) / (4.0*time);
+			
+			totalDist += sqDistX + sqDistY;
+			totalTime += time;
+			
 			count += 1;
 	
 		}
 	}
 	
 	coefficient /= count;
+	coefficient = totalDist / (4.0*totalTime);
 	return coefficient;
 
 }
@@ -1821,18 +1828,24 @@ double CoalescentTree::getDiffusionCoefficientTrunk() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;	
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
 			if ( (*it).getTrunk() && (*jt).getTrunk() ) {
 		
 				double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
-				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
-				double euclideanDist = sqrt(sqDistX + sqDistY);
-				
+				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );				
 				double time = (*it).getTime() - (*jt).getTime();
 				
-				coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+				coefficient += (sqDistX + sqDistY) / (4.0*time);
+				
+				totalDist += sqDistX + sqDistY;
+				totalTime += time;				
+				
 				count += 1;
 	
 			}
@@ -1840,6 +1853,7 @@ double CoalescentTree::getDiffusionCoefficientTrunk() {
 	}
 	
 	coefficient /= count;
+	coefficient = totalDist / (4.0*totalTime);	
 	return coefficient;
 
 }
@@ -1851,18 +1865,24 @@ double CoalescentTree::getDiffusionCoefficientSideBranches() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;	
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
 			if ( !(*it).getTrunk() && !(*jt).getTrunk() ) {
 		
 				double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
-				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
-				double euclideanDist = sqrt(sqDistX + sqDistY);
-				
+				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );				
 				double time = (*it).getTime() - (*jt).getTime();
 				
-				coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+				coefficient += (sqDistX + sqDistY) / (4.0*time);
+				
+				totalDist += sqDistX + sqDistY;
+				totalTime += time;					
+				
 				count += 1;
 	
 			}
@@ -1870,6 +1890,7 @@ double CoalescentTree::getDiffusionCoefficientSideBranches() {
 	}
 	
 	coefficient /= count;
+	coefficient = totalDist / (4.0*totalTime);		
 	return coefficient;
 
 }
@@ -1881,18 +1902,24 @@ double CoalescentTree::getDiffusionCoefficientInternalBranches() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;		
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
 			if ( !(*it).getLeaf() && !(*it).getTrunk() && !(*jt).getTrunk() ) {
 		
 				double sqDistX = ( (*it).getX() - (*jt).getX() ) * ( (*it).getX() - (*jt).getX() );
-				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );
-				double euclideanDist = sqrt(sqDistX + sqDistY);
-				
+				double sqDistY = ( (*it).getY() - (*jt).getY() ) * ( (*it).getY() - (*jt).getY() );				
 				double time = (*it).getTime() - (*jt).getTime();
 				
-				coefficient += (euclideanDist * euclideanDist) / (4.0*time);
+				coefficient += (sqDistX + sqDistY) / (4.0*time);
+				
+				totalDist += sqDistX + sqDistY;
+				totalTime += time;					
+				
 				count += 1;
 	
 			}
@@ -1900,6 +1927,7 @@ double CoalescentTree::getDiffusionCoefficientInternalBranches() {
 	}
 	
 	coefficient /= count;
+	coefficient = totalDist / (4.0*totalTime);		
 	return coefficient;
 
 }
@@ -1911,12 +1939,19 @@ double CoalescentTree::getDriftRate() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
 		
 			double dist = (*it).getX() - (*jt).getX();			
 			double time = (*it).getTime() - (*jt).getTime();
+			
+			totalDist += dist;
+			totalTime += time;
 			
 			rate += dist / time;
 			count += 1;
@@ -1925,6 +1960,7 @@ double CoalescentTree::getDriftRate() {
 	}
 	
 	rate /= count;
+	rate = totalDist / totalTime;
 	return rate;
 
 }
@@ -1936,6 +1972,10 @@ double CoalescentTree::getDriftRateTrunk() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;	
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
@@ -1943,6 +1983,9 @@ double CoalescentTree::getDriftRateTrunk() {
 		
 				double dist = (*it).getX() - (*jt).getX();			
 				double time = (*it).getTime() - (*jt).getTime();
+				
+				totalDist += dist;
+				totalTime += time;				
 				
 				rate += dist / time;
 				count += 1;
@@ -1952,6 +1995,7 @@ double CoalescentTree::getDriftRateTrunk() {
 	}
 	
 	rate /= count;
+	rate = totalDist / totalTime;	
 	return rate;
 
 }
@@ -1963,6 +2007,10 @@ double CoalescentTree::getDriftRateSideBranches() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;		
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
@@ -1970,6 +2018,9 @@ double CoalescentTree::getDriftRateSideBranches() {
 		
 				double dist = (*it).getX() - (*jt).getX();			
 				double time = (*it).getTime() - (*jt).getTime();
+				
+				totalDist += dist;
+				totalTime += time;					
 				
 				rate += dist / time;
 				count += 1;
@@ -1979,6 +2030,7 @@ double CoalescentTree::getDriftRateSideBranches() {
 	}
 	
 	rate /= count;
+	rate = totalDist / totalTime;		
 	return rate;
 
 }
@@ -1990,6 +2042,10 @@ double CoalescentTree::getDriftRateInternalBranches() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	
+	double totalDist = 0;
+	double totalTime = 0;	
+	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
 		if (nodetree.is_valid(jt)) {	
@@ -1997,6 +2053,9 @@ double CoalescentTree::getDriftRateInternalBranches() {
 		
 				double dist = (*it).getX() - (*jt).getX();			
 				double time = (*it).getTime() - (*jt).getTime();
+				
+				totalDist += dist;
+				totalTime += time;					
 				
 				rate += dist / time;
 				count += 1;
@@ -2006,6 +2065,7 @@ double CoalescentTree::getDriftRateInternalBranches() {
 	}
 	
 	rate /= count;
+	rate = totalDist / totalTime;			
 	return rate;
 
 }
