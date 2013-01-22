@@ -533,7 +533,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficient" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -542,7 +542,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficientTrunk" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -551,7 +551,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficientSideBranches" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -560,7 +560,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficientInternalBranches" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;			
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;			
 					
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -570,7 +570,7 @@ void IO::printStatistics() {
 				s.insert(n/d);
 			}
 			outStream << "diffusionCoefficientTSRatio" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;		
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;		
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -580,7 +580,7 @@ void IO::printStatistics() {
 				s.insert(n/d);
 			}
 			outStream << "diffusionCoefficientTIRatio" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;					
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;					
 			
 		}	
 		
@@ -598,7 +598,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRate" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -607,7 +607,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRateTrunk" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -616,7 +616,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRateSideBranches" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -625,7 +625,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "driftRateInternalBranches" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;		
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;		
 
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -635,7 +635,7 @@ void IO::printStatistics() {
 				s.insert(n/d);
 			}
 			outStream << "driftRateTSRatio" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;	
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;	
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -645,7 +645,7 @@ void IO::printStatistics() {
 				s.insert(n/d);
 			}
 			outStream << "driftRateTIRatio" << "\t";
-			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;					
+			outStream << s.quantile(lowerQuantile) << "\t" << s.mean() << "\t" << s.quantile(upperQuantile) << endl;					
 			
 		}			
 

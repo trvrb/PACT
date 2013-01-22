@@ -1793,6 +1793,8 @@ double CoalescentTree::getDiffusionCoefficient() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	double totalSqDist = 0;
+	double totalTime = 0;		
 		
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -1812,12 +1814,15 @@ double CoalescentTree::getDiffusionCoefficient() {
 			coefficient += sqDist / (4.0*time);
 //			coefficient += ( sqDist - mu*mu*time*time ) / (time);
 				
+			totalSqDist += sqDist;
+			totalTime += time;					
 			count += 1;
 	
 		}
 	}
 	
 	coefficient /= count;
+	coefficient = totalSqDist / (4.0*totalTime);	
 	return coefficient;
 
 }
@@ -1829,6 +1834,8 @@ double CoalescentTree::getDiffusionCoefficientTrunk() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	double totalSqDist = 0;
+	double totalTime = 0;	
 		
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -1849,6 +1856,8 @@ double CoalescentTree::getDiffusionCoefficientTrunk() {
 				coefficient += sqDist / (4.0*time);
 //				coefficient += ( sqDist - mu*mu*time*time ) / (time);
 					
+				totalSqDist += sqDist;
+				totalTime += time;					
 				count += 1;
 	
 			}
@@ -1856,6 +1865,7 @@ double CoalescentTree::getDiffusionCoefficientTrunk() {
 	}
 	
 	coefficient /= count;
+	coefficient = totalSqDist / (4.0*totalTime);	
 	return coefficient;
 
 }
@@ -1867,6 +1877,8 @@ double CoalescentTree::getDiffusionCoefficientSideBranches() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	double totalSqDist = 0;
+	double totalTime = 0;		
 		
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -1887,13 +1899,16 @@ double CoalescentTree::getDiffusionCoefficientSideBranches() {
 				coefficient += sqDist / (4.0*time);
 //				coefficient += ( sqDist - mu*mu*time*time ) / (time);
 					
+				totalSqDist += sqDist;
+				totalTime += time;					
 				count += 1;
 	
 			}
 		}
 	}
 	
-	coefficient /= count;	
+	coefficient /= count;
+	coefficient = totalSqDist / (4.0*totalTime);
 	return coefficient;
 
 }
@@ -1905,6 +1920,8 @@ double CoalescentTree::getDiffusionCoefficientInternalBranches() {
 	tree<Node>::iterator it, jt;
 	double coefficient = 0;	
 	double count = 0;
+	double totalSqDist = 0;
+	double totalTime = 0;		
 		
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -1925,6 +1942,8 @@ double CoalescentTree::getDiffusionCoefficientInternalBranches() {
 				coefficient += sqDist / (4.0*time);
 	//			coefficient += ( sqDist - mu*mu*time*time ) / (time);
 					
+				totalSqDist += sqDist;
+				totalTime += time;					
 				count += 1;
 	
 			}
@@ -1932,6 +1951,7 @@ double CoalescentTree::getDiffusionCoefficientInternalBranches() {
 	}
 	
 	coefficient /= count;	
+	coefficient = totalSqDist / (4.0*totalTime);	
 	return coefficient;
 
 }
