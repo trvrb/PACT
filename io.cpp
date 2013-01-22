@@ -521,6 +521,10 @@ void IO::printStatistics() {
 
 		// Diffusion coefficient  //////////////
 		if (param.summary_diffusion_coefficient) {
+
+			double lowerQuantile = 0.25;
+			double upperQuantile = 0.75;		
+		
 			cout << "Printing coefficients of diffusion to " << outputFile << endl;
 			Series s;
 			for (int i = 0; i < treelist.size(); i++) {
@@ -529,7 +533,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficient" << "\t";
-			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -538,7 +542,7 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficientTrunk" << "\t";
-			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
 			
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -547,7 +551,16 @@ void IO::printStatistics() {
 				s.insert(n);
 			}
 			outStream << "diffusionCoefficientSideBranches" << "\t";
-			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDiffusionCoefficientInternalBranches();
+				s.insert(n);
+			}
+			outStream << "diffusionCoefficientInternalBranches" << "\t";
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;			
 					
 			s.clear();
 			for (int i = 0; i < treelist.size(); i++) {
@@ -556,8 +569,18 @@ void IO::printStatistics() {
 				double d = ct.getDiffusionCoefficientSideBranches();
 				s.insert(n/d);
 			}
-			outStream << "diffusionCoefficientRatio" << "\t";
-			outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;			
+			outStream << "diffusionCoefficientTSRatio" << "\t";
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;		
+			
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				CoalescentTree ct = treelist[i];
+				double n = ct.getDiffusionCoefficientTrunk();
+				double d = ct.getDiffusionCoefficientInternalBranches();
+				s.insert(n/d);
+			}
+			outStream << "diffusionCoefficientTIRatio" << "\t";
+			outStream << s.quantile(lowerQuantile) << "\t" << s.median() << "\t" << s.quantile(upperQuantile) << endl;					
 			
 		}	
 		
