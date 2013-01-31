@@ -836,19 +836,21 @@ void CoalescentTree::timeSlice(double slice) {
 				// finding rate of location change
 				double xlocdiff = (*it).getX() - (*jt).getX();
 				double ylocdiff = (*it).getY() - (*jt).getY();
-				double coorddiff = (*it).getCoord() - (*jt).getCoord();
+				double xcoorddiff = (*it).getXCoord() - (*jt).getXCoord();
+				double ycoorddiff = (*it).getYCoord() - (*jt).getYCoord();				
 				double timediff = (*it).getTime() - (*jt).getTime();
 				double xlocrate = xlocdiff / timediff;
 				double ylocrate = ylocdiff / timediff;
-		//		double coordrate = coorddiff / timediff;	
-				double coordrate = coorddiff / pow(timediff,0.75);
+				double xcoordrate = xcoorddiff / timediff;;
+				double ycoordrate = ycoorddiff / timediff;;				
 			
 				// adjusting node
 				(*it).setTime( slice );
 				(*it).setLength( (*it).getTime() - (*jt).getTime() );
 				(*it).setX( (*jt).getX() + (*it).getLength() * xlocrate );
 				(*it).setY( (*jt).getY() + (*it).getLength() * ylocrate );
-				(*it).setCoord( (*jt).getCoord() + pow((*it).getLength(),0.75) * coordrate ); // 0.75
+				(*it).setXCoord( (*jt).getXCoord() + (*it).getLength() * xcoordrate );
+				(*it).setYCoord( (*jt).getYCoord() + (*it).getLength() * ycoordrate );
 				(*it).setLeaf(true);
 				nodetree.erase_children(it);
 				
@@ -1047,7 +1049,8 @@ void CoalescentTree::addTail(double setback) {
 	newNode.setLength(0.0);
 	newNode.setX( (*rt).getX() );
 	newNode.setY( (*rt).getY() );
-	newNode.setCoord( (*rt).getCoord() );	
+	newNode.setXCoord( (*rt).getXCoord() );	
+	newNode.setYCoord( (*rt).getYCoord() );		
 	newNode.setLeaf(false);	
 	newNode.setTrunk(true);		
 	
@@ -1136,13 +1139,13 @@ void CoalescentTree::printRuleList(string outputFile) {
 	
 	/* print mapping of nodes to labels */
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {	
-		outStream << (*it).getNumber() << "->\"" << (*it).getLabel() << "\" ";
+		outStream << (*it).getNumber() << "->" << (*it).getLabel() << " ";
 	}
 	outStream << endl;
 	
 	/* print mapping of nodes to coordinates */
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
-		outStream << (*it).getNumber() << "->{" << fixed << (*it).getTime() << "," << (*it).getCoord() << "} ";	
+		outStream << (*it).getNumber() << "->{" << (*it).getXCoord() << "," << (*it).getYCoord() << "} ";	
 	}
 	outStream << endl;
 		  	  	
@@ -1212,7 +1215,7 @@ void CoalescentTree::printRuleListWithOrdering(string outputFile, vector<string>
 	
 	/* print mapping of nodes to coordinates */
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
-		outStream << (*it).getNumber() << "->{" << fixed << (*it).getTime() << "," << (*it).getCoord() << "} ";	
+		outStream << (*it).getNumber() << "->{" << (*it).getXCoord() << "," << (*it).getYCoord() << "} ";	
 	}
 	outStream << endl;
 		  	  	
@@ -2241,7 +2244,6 @@ double CoalescentTree::getMeanX() {
 	tree<Node>::leaf_iterator it;
 	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
 		xloc += (*it).getX();
-	//	xloc += (*it).getCoord();	
 		count++;
 	}
 	
@@ -2437,13 +2439,15 @@ void CoalescentTree::adjustCoords() {
 	}
 
 	/* set coords of tips according to preorder traversal */
+	/* set x coords to match time */
   	int count = 0;
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
-	//	if (nodetree.depth(it) == 0) { count = 0; }		// this resets count for each subtree
 		if ( (*it).getLeaf() ) {
-			(*it).setCoord(count);	
+			(*it).setYCoord(count);	
 			count++;
 		}
+		double t = (*it).getTime();
+		(*it).setXCoord(t);
 	}
 	
 	/* revise coords of internal nodes according to postorder traversal */
@@ -2452,21 +2456,28 @@ void CoalescentTree::adjustCoords() {
   		int childcount = nodetree.number_of_children(post_it);
   		if (childcount == 1) {
   			post_jt = nodetree.child(post_it,0);
-  			(*post_it).setCoord((*post_jt).getCoord());	
+  			(*post_it).setYCoord((*post_jt).getYCoord());	
   		}  		  	
   		// ancestor is mean of children
   		if (childcount > 1) {
   			double avg = 0.0;
   			for (int i = 0; i < childcount; i++) {
   				post_jt = nodetree.child(post_it,i);
-  				avg += (*post_jt).getCoord();
+  				avg += (*post_jt).getYCoord();
   			}
   			avg /= (double) childcount;
-  			(*post_it).setCoord(avg);
+  			(*post_it).setYCoord(avg);
   		}
 	}	
 
 }	
+
+// go through tree and perform equal-angle algorithm to adjust ciruclar coordinates
+void CoalescentTree::adjustCircularCoords() {
+
+	// start at root
+
+}
 
 /* Setting tip coordinates based on input vector of tip names */
 void CoalescentTree::setCoords(vector<string> tipOrdering) {
@@ -2476,7 +2487,7 @@ void CoalescentTree::setCoords(vector<string> tipOrdering) {
 	/* set coords of tips according to supplied vector of names */
   	for (int i = 0; i < tipOrdering.size(); i++) {
   		it = findNode(tipOrdering[i]);
-  		(*it).setCoord(i);
+  		(*it).setYCoord(i);
   	}
   		
 	/* revise coords of internal nodes according to postorder traversal */
@@ -2484,13 +2495,13 @@ void CoalescentTree::setCoords(vector<string> tipOrdering) {
   	for (post_it = nodetree.begin_post(); post_it != nodetree.end_post(); post_it++) {
   		if (nodetree.number_of_children(post_it) == 1) {
   			post_jt = nodetree.child(post_it,0);
-  			(*post_it).setCoord((*post_jt).getCoord());	
+  			(*post_it).setYCoord((*post_jt).getYCoord());	
   		}  		  	
   		if (nodetree.number_of_children(post_it) == 2) {
   			post_jt = nodetree.child(post_it,0);
   			post_kt = nodetree.child(post_it,1);
-  			double avg = ( (*post_jt).getCoord() + (*post_kt).getCoord() ) / (double) 2;
-  			(*post_it).setCoord(avg);	
+  			double avg = ( (*post_jt).getYCoord() + (*post_kt).getYCoord() ) / (double) 2;
+  			(*post_it).setYCoord(avg);	
   		}
 	}	
 

@@ -51,14 +51,12 @@ public:
 	void printPairs();						// pair pair statistics to .pairs
 																			
 private:
-
 	Parameters param;						// parameters object, read from in.param
-
 	string inputFile;						// complete name of input tree file
 	string outputPrefix;					// prefix for output files .rules and .stats
-
 	vector<CoalescentTree> treelist;		// vector of coalescent trees
 	vector<double> problist;				// vector of assocatied probabilities
+	int getBestTree();						// return index of highest probability tree
 
 };
 

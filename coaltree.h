@@ -160,6 +160,7 @@ private:
 	void reduce();							// goes through tree and removes inconsequential nodes	
 	void peelBack();						// removes excess root from tree
 	void adjustCoords();					// sets coords in Nodes to allow tree drawing	
+	void adjustCircularCoords();			// sets coords in Nodes to allow tree unrooted drawing	
 	int getMaxNumber();						// return larger number in tree
 	int renumber(int);						// renumbers tree in preorder traversal starting from int 
 											// returning 1 greater than the max in the tree

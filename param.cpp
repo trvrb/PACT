@@ -60,7 +60,8 @@ Parameters::Parameters() {
 	rotate = false;
 	add_tail = false;
 	
-	print_rule_tree = false;
+	print_tree = false;
+	print_circular_tree = false;	
 	print_all_trees = false;	
 	
 	summary_tmrca = false;		
@@ -118,11 +119,7 @@ Parameters::Parameters() {
 //		cout << "Unable to find in.param" << endl; 
 //		cout << "Running with default parameters" << endl;
 //		cout << endl;
-		
-//		print_rule_tree = true;		
-//		summary_coal_rates = true;		
-//		summary_mig_rates = true;
-		
+				
 	}
 	
 }
@@ -252,9 +249,13 @@ void Parameters::importLine(string line) {
 		ordering_values = svalues;	
 	}		
 	
-	if (pstring == "printruletree") { 
-		print_rule_tree = true; 
+	if (pstring == "printruletree" || pstring == "printtree") { 
+		print_tree = true; 
 	}	
+	
+	if (pstring == "printcirculartree") { 
+		print_circular_tree = true; 
+	}		
 	
 	if (pstring == "printalltrees") { 
 		print_all_trees = true; 
@@ -419,7 +420,8 @@ void Parameters::print() {
 	// TREE STRUCTURE
 	if ( printtree() ) {
 		cout << "Tree structure:" << endl;
-		if (print_rule_tree) { cout << "print rule tree" << endl; }
+		if (print_tree) { cout << "print tree" << endl; }
+		if (print_circular_tree) { cout << "print circular tree" << endl; }		
 		if (print_all_trees) { cout << "print all trees" << endl; }
 		cout << endl;
 	}	
@@ -506,7 +508,7 @@ bool Parameters::manip() {
 
 bool Parameters::printtree() {
 	bool check;
-	if (print_rule_tree || print_all_trees)
+	if (print_tree || print_circular_tree || print_all_trees)
 		check = true;
 	else 
 		check = false;

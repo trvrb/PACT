@@ -80,7 +80,8 @@ public:
 	bool add_tail;
 	vector<double> add_tail_values;			// time		
 	
-	bool print_rule_tree;
+	bool print_tree;
+	bool print_circular_tree;	
 	bool print_all_trees;	
 	
 	bool summary_tmrca;		

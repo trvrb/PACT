@@ -155,7 +155,7 @@ IO::IO() {
 	ofstream outStream;
 	string outputFile;
 
-	if (param.print_rule_tree) {
+	if (param.print_tree) {
 		outputFile = outputPrefix + ".rules";
 		outStream.open( outputFile.c_str(),ios::out);
 		outStream.close();
@@ -291,37 +291,21 @@ void IO::treeManip() {
 /* go through problist and treelist and print highest posterior probability tree */
 void IO::printTree() {
 
-	if (param.print_rule_tree) {
+	if (param.print_tree || param.print_circular_tree) {
 
 		string outputFile = outputPrefix + ".rules";
-		cout << "Printing tree with highest posterior probability to " << outputFile << endl;
-	
-		// output tree with highest likelihood
-		// if likelihoods don't exist, output final tree
+		cout << "Printing tree with highest posterior probability to " << outputFile << endl;		
+		int index = getBestTree();
 		
-		int index;
-		if (problist.size() == treelist.size()) {
-			
-			double ll = problist[0];
-			index = 0;
-			for (int i = 1; i < problist.size(); i++) {
-				if (problist[i] > ll) {
-					ll = problist[i];
-					index = i;
-				}
-			}
-			
-		}
-		else {
-			index = treelist.size() - 1;
-		}
-		
-		if (!param.ordering) {
+		if (!param.ordering && !param.print_circular_tree) {
 			treelist[index].printRuleList(outputFile);
 		}
-		else {
+		else if (param.ordering && !param.print_circular_tree) {
 			treelist[index].printRuleListWithOrdering(outputFile,param.ordering_values);
 		}
+		else if (!param.ordering && param.print_circular_tree) {
+			treelist[index].printRuleList(outputFile);
+		}		
 		
 	}
 
@@ -1247,4 +1231,28 @@ void IO::printPairs() {
 
 	}
 	
+}
+
+/* go through problist and treelist and return index of highest posterior probability tree */
+int IO::getBestTree() {
+
+	int index;
+	if (problist.size() == treelist.size()) {
+		
+		double ll = problist[0];
+		index = 0;
+		for (int i = 1; i < problist.size(); i++) {
+			if (problist[i] > ll) {
+				ll = problist[i];
+				index = i;
+			}
+		}
+		
+	}
+	else {
+		index = treelist.size() - 1;
+	}
+	
+	return index;
+
 }

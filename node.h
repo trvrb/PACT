@@ -42,7 +42,8 @@ public:
 	double getX();
 	double getY();
 	double getRate();	
-	double getCoord();
+	double getXCoord();
+	double getYCoord();
 	bool getLeaf();
 	bool getTrunk();
 	bool getInclude();
@@ -56,7 +57,8 @@ public:
 	void setX(double);
 	void setY(double);	
 	void setRate(double);		
-	void setCoord(double);
+	void setXCoord(double);
+	void setYCoord(double);	
 	void setLeaf(bool);
 	void setTrunk(bool);
 	void setInclude(bool);
@@ -67,10 +69,11 @@ private:
 	double length;					// length of the branch leading into the node
 	double time;					// date of the node	
 	string label;					// arbitrary label associated with node
-	double xloc;					// x-axis location of the node
-	double yloc;					// y-axis location of the node	
+	double xLoc;					// x-axis location of the node
+	double yLoc;					// y-axis location of the node	
 	double rate;					// rate of branch leading into the node
-	double coord;					// y-axis coordinate, used for tree drawing
+	double xCoord;					// x-axis coordinate, used for tree drawing
+	double yCoord;					// y-axis coordinate, used for tree drawing	
 	bool leaf;						// is this node a leaf?
 	bool trunk;						// is this node part of the trunk?
 	bool include;					// include this node when performing calculations?

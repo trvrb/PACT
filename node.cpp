@@ -24,46 +24,42 @@ using std::string;
 #include "node.h"
 
 Node::Node() {
-	
 	number = -1;
 	name = "";
 	length = 0.0;
 	time = 0.0;
 	label = "1";
-	xloc = 0.0;
-	yloc = 0.0;	
+	xLoc = 0.0;
+	yLoc = 0.0;	
 	rate = 0.0;
-	coord = 0.0;
+	xCoord = 0.0;
+	yCoord = 0.0;
 	leaf = false;
 	trunk = false;
 	include = true;
-		
 }
 
 Node::Node(int n) {
-	
 	number = n;
 	name = "";
 	length = 0.0;
 	time = 0.0;
 	label = "1";
-	xloc = 0.0;
-	yloc = 0.0;		
+	xLoc = 0.0;
+	yLoc = 0.0;		
 	rate = 0.0;
-	coord = 0.0;
+	xCoord = 0.0;
+	yCoord = 0.0;
 	leaf = false;
 	trunk = false;
 	include = true;
-		
 }
 
 // overloaded comparison operator
 bool Node::operator==(Node &other) {
-
 	int i = (*this).getNumber();
 	int j = other.getNumber();
 	return i == j;
-
 }
 
 /* Get functions */
@@ -72,10 +68,11 @@ string Node::getName() { return name; }
 double Node::getLength() { return length; }
 double Node::getTime() { return time; }
 string Node::getLabel() { return label; }
-double Node::getX() { return xloc; }
-double Node::getY() { return yloc; }
+double Node::getX() { return xLoc; }
+double Node::getY() { return yLoc; }
 double Node::getRate() { return rate; }
-double Node::getCoord() { return coord; }
+double Node::getXCoord() { return xCoord; }
+double Node::getYCoord() { return yCoord; }
 bool Node::getLeaf() { return leaf; }
 bool Node::getTrunk() { return trunk; }
 bool Node::getInclude() { return include; }
@@ -86,10 +83,11 @@ void Node::setName(string n) { name = n; }
 void Node::setLength(double n) { length = n; }
 void Node::setTime(double n) { time = n; }
 void Node::setLabel(string n) { label = n; }
-void Node::setX(double n) { xloc = n; }
-void Node::setY(double n) { yloc = n; }
+void Node::setX(double n) { xLoc = n; }
+void Node::setY(double n) { yLoc = n; }
 void Node::setRate(double n) { rate = n; }
-void Node::setCoord(double n) { coord = n; }
+void Node::setXCoord(double n) { xCoord = n; }
+void Node::setYCoord(double n) { yCoord = n; }
 void Node::setLeaf(bool n) { leaf = n; }
 void Node::setTrunk(bool n) { trunk = n; }
 void Node::setInclude(bool n) { include = n; }
