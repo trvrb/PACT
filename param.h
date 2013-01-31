@@ -118,6 +118,7 @@ public:
 	bool skyline_ymean;
 	bool skyline_xdrift;
 	bool skyline_ratemean;
+	bool skyline_xtrunkdiff;
 	bool skyline_locsample;	
 	bool skyline_locgrid;		
 	bool skyline_drift_rate_from_tips;

@@ -140,7 +140,7 @@ public:
 													// from tips in a window of size double	
 	double get2DRateFromTips(double, double);	// returns the average rate of Euclidean drift at double distance 
 													// from tips in a window of size double
-	
+														
 	// RATE STATISTICS
 	double getMeanRate();					// return mean rate across all tips in the tree	
 

@@ -518,7 +518,7 @@ void IO::printStatistics() {
 			outStream << "tajimad" << "\t";
 			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 		}			
-
+		
 		// Diffusion coefficient  //////////////
 		if (param.summary_diffusion_coefficient) {
 
@@ -886,7 +886,7 @@ void IO::printSkylines() {
 				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			}
 		}
-		
+				
 		// X DRIFT /////////////////////
 		if (param.skyline_xdrift) {
 			cout << "Printing X drift skyline to " << outputFile << endl;
@@ -923,6 +923,27 @@ void IO::printSkylines() {
 				outStream << s.quantile(0.25) << "\t" << s.mean() << "\t" << s.quantile(0.75) << endl;
 			}
 		}	
+		
+		// X LOCATION TRUNK DIFFERENCE /////////////////////
+		if (param.skyline_xtrunkdiff) {
+			cout << "Printing X trunk different to " << outputFile << endl;
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.timeSlice(t);
+					double all = ct.getMeanX();
+					ct = treelist[i];
+					ct.pruneToTrunk();
+					ct.timeSlice(t);
+					double trunk = ct.getMeanX();
+					s.insert(trunk-all);
+				}
+				outStream << "xtrunkdiff" << "\t";
+				outStream << t << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}			
 		
 		// LOC SAMPLE /////////////////////
 		if (param.skyline_locsample) {

@@ -1963,6 +1963,8 @@ double CoalescentTree::getDriftRate() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	double totalDist = 0;
+	double totalTime = 0;		
 		
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -1973,11 +1975,14 @@ double CoalescentTree::getDriftRate() {
 					
 			rate += dist / time;
 			count += 1;
+			totalDist += dist;
+			totalTime += time;
 	
 		}
 	}
 	
 	rate /= count;
+	rate = totalDist / totalTime;
 	return rate;
 
 }
@@ -1989,6 +1994,8 @@ double CoalescentTree::getDriftRateTrunk() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	double totalDist = 0;
+	double totalTime = 0;		
 		
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -2000,12 +2007,15 @@ double CoalescentTree::getDriftRateTrunk() {
 								
 				rate += dist / time;
 				count += 1;
+				totalDist += dist;
+				totalTime += time;				
 	
 			}
 		}
 	}
 	
 	rate /= count;
+	rate = totalDist / totalTime;	
 	return rate;
 
 }
@@ -2017,6 +2027,8 @@ double CoalescentTree::getDriftRateSideBranches() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	double totalDist = 0;
+	double totalTime = 0;		
 	
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -2028,12 +2040,15 @@ double CoalescentTree::getDriftRateSideBranches() {
 								
 				rate += dist / time;
 				count += 1;
+				totalDist += dist;
+				totalTime += time;					
 	
 			}
 		}
 	}
 	
 	rate /= count;	
+	rate = totalDist / totalTime;	
 	return rate;
 
 }
@@ -2045,6 +2060,8 @@ double CoalescentTree::getDriftRateInternalBranches() {
 	tree<Node>::iterator it, jt;
 	double rate = 0;	
 	double count = 0;
+	double totalDist = 0;
+	double totalTime = 0;		
 		
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		jt = nodetree.parent(it);
@@ -2056,12 +2073,15 @@ double CoalescentTree::getDriftRateInternalBranches() {
 									
 				rate += dist / time;
 				count += 1;
+				totalDist += dist;
+				totalTime += time;					
 	
 			}
 		}
 	}
 	
 	rate /= count;		
+	rate = totalDist / totalTime;	
 	return rate;
 
 }
