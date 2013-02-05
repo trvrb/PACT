@@ -49,6 +49,9 @@ using std::atoi;
 #include <cmath>
 using std::sqrt;
 using std::pow;
+using std::sin;
+using std::cos;
+using std::atan2;
 
 #include "coaltree.h"
 #include "node.h"
@@ -1096,7 +1099,7 @@ Output is:
 	coordinate rules 
 	tip name rules
 */	
-void CoalescentTree::printRuleList(string outputFile) {
+void CoalescentTree::printRuleList(string outputFile, bool isCircular) {
 
 //	printTree();
 
@@ -1105,7 +1108,12 @@ void CoalescentTree::printRuleList(string outputFile) {
 	outStream.open( outputFile.c_str(),ios::app);
 
 	/* setting up y-axis ordering, x-axis is date */
-	adjustCoords();
+	if (isCircular) {
+		adjustCircularCoords();
+	}
+	else {
+		adjustCoords();
+	}
 	
 	tree<Node>::iterator it, jt;
 	
@@ -1113,7 +1121,7 @@ void CoalescentTree::printRuleList(string outputFile) {
 	/* a node may be a leaf on the current tree, but not a leaf on the original tree */
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
 		if ((*it).getLeaf()) {
-			outStream << (*it).getNumber() << " ";
+			outStream << fixed << (*it).getNumber() << " ";
 		}
 	}
 	outStream << endl;	
@@ -1145,7 +1153,7 @@ void CoalescentTree::printRuleList(string outputFile) {
 	
 	/* print mapping of nodes to coordinates */
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {
-		outStream << (*it).getNumber() << "->{" << (*it).getXCoord() << "," << (*it).getYCoord() << "} ";	
+		outStream << (*it).getNumber() << "->{" << (*it).getXCoord() << "," << (*it).getYCoord() << "} ";
 	}
 	outStream << endl;
 		  	  	
@@ -2475,8 +2483,76 @@ void CoalescentTree::adjustCoords() {
 // go through tree and perform equal-angle algorithm to adjust ciruclar coordinates
 void CoalescentTree::adjustCircularCoords() {
 
-	// start at root
+	tree<Node>::iterator it, jt;	
 
+	// start at root, it has coordinate {0,0}
+	it = nodetree.begin();
+	(*it).setXCoord(0);
+	(*it).setYCoord(0);	
+	
+	int numberOfTips = 0; 
+	for (tree<Node>::leaf_iterator lit = nodetree.begin_leaf(); lit != nodetree.end_leaf(); ++lit) {
+		numberOfTips++;
+	}
+	double angleForEachTip = 6.28318531 / numberOfTips;
+			
+	while(it != nodetree.end()) {
+		jt = nodetree.next_sibling(it);
+		if (nodetree.is_valid(jt)) {		// it left sibling and jt is right sibling
+		
+			double basis = 0;
+			double parentX = 0;
+			double parentY = 0;			
+			tree<Node>::iterator pt = nodetree.parent(it);
+			tree<Node>::iterator ppt = nodetree.parent(pt);
+			if (nodetree.is_valid(pt)) { 	
+				parentX = (*pt).getXCoord();	
+				parentY = (*pt).getYCoord();					
+			}
+			if (nodetree.is_valid(pt) && nodetree.is_valid(ppt)) { 
+				double deltaX = (*pt).getXCoord() - (*ppt).getXCoord();
+				double deltaY = (*pt).getYCoord() - (*ppt).getYCoord();
+				if (deltaX != 0) {
+					basis = atan2(deltaY,deltaX);
+				}
+			}
+		
+			double leftSector = angleForEachTip * (double) countDescendants(it);
+			double rightSector = angleForEachTip * (double) countDescendants(jt);			
+			double totalSector = leftSector + rightSector;
+			double leftAngle = basis + 0.5*totalSector - 0.5*leftSector; 
+			double rightAngle = basis - 0.5*totalSector + 0.5*rightSector; 			
+			double leftX = parentX + (*it).getLength() * cos(leftAngle);
+			double leftY = parentY + (*it).getLength() * sin(leftAngle);	
+			double rightX = parentX + (*jt).getLength() * cos(rightAngle);
+			double rightY = parentY + (*jt).getLength() * sin(rightAngle);
+					
+			(*it).setXCoord(leftX);
+			(*it).setYCoord(leftY);
+			(*jt).setXCoord(rightX);
+			(*jt).setYCoord(rightY);			
+			
+		}
+		// else, it is right sibling, do nothing						
+		++it;
+	}
+
+
+}
+
+// count tip descendended from a node
+int CoalescentTree::countDescendants(tree<Node>::iterator top) {
+	int descendants = 0;
+   	tree<Node>::pre_order_iterator it=top, eit=top;
+   	eit.skip_children();
+   	++eit;
+   	while (it!=eit) {
+   		if ((*it).getLeaf()) {
+      		++descendants;
+      	}
+      	++it;
+    }
+	return descendants;
 }
 
 /* Setting tip coordinates based on input vector of tip names */

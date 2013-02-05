@@ -155,7 +155,7 @@ IO::IO() {
 	ofstream outStream;
 	string outputFile;
 
-	if (param.print_tree) {
+	if (param.printtree()) {
 		outputFile = outputPrefix + ".rules";
 		outStream.open( outputFile.c_str(),ios::out);
 		outStream.close();
@@ -298,13 +298,13 @@ void IO::printTree() {
 		int index = getBestTree();
 		
 		if (!param.ordering && !param.print_circular_tree) {
-			treelist[index].printRuleList(outputFile);
+			treelist[index].printRuleList(outputFile, false);
 		}
 		else if (param.ordering && !param.print_circular_tree) {
 			treelist[index].printRuleListWithOrdering(outputFile,param.ordering_values);
 		}
 		else if (!param.ordering && param.print_circular_tree) {
-			treelist[index].printRuleList(outputFile);
+			treelist[index].printRuleList(outputFile, true);
 		}		
 		
 	}
@@ -326,7 +326,7 @@ void IO::printTree() {
 			CoalescentTree ct = treelist[i];
 					
 			if (!param.ordering) {
-				ct.printRuleList(outputFile);
+				ct.printRuleList(outputFile, false);
 			}
 			else {
 				ct.printRuleListWithOrdering(outputFile,param.ordering_values);

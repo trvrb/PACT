@@ -69,8 +69,8 @@ public:
 
 	// TREE STRUCTURE
 	void printTree();						// print indented tree with coalescent times			
-	void printRuleList(string);				// print to file name in Mathematica rule list format
-											// used with Graphics primitives
+	void printRuleList(string,bool);		// print to file name in Mathematica rule list format
+											// used with Graphics primitives, specify whether linear or circular
 	void printRuleListWithOrdering(string,vector<string>);	// print to file name in Mathematica rule list format
 											// supply the tip ordering with vector of tip names											
 	void printParen();						// TODO: migration events
@@ -161,6 +161,7 @@ private:
 	void peelBack();						// removes excess root from tree
 	void adjustCoords();					// sets coords in Nodes to allow tree drawing	
 	void adjustCircularCoords();			// sets coords in Nodes to allow tree unrooted drawing	
+	int countDescendants(tree<Node>::iterator);		// counts the number of tips descended from a node
 	int getMaxNumber();						// return larger number in tree
 	int renumber(int);						// renumbers tree in preorder traversal starting from int 
 											// returning 1 greater than the max in the tree
