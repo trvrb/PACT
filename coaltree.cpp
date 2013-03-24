@@ -267,6 +267,12 @@ CoalescentTree::CoalescentTree(string paren) {
 					(*it).setX(xloc);				
 				}	
 				
+				// LATITUDE
+				if (stringOne == "latitude") {
+					double xloc = atof(stringTwo.c_str());
+					(*it).setX(xloc);				
+				}					
+				
 				// DIFFUSION
 				if (stringOne == "diffusion") {
 					double xloc = atof(stringTwo.c_str());
@@ -1160,7 +1166,7 @@ void CoalescentTree::printRuleList(string outputFile, bool isCircular) {
 	/* print mapping of nodes to names */
 	for (it = nodetree.begin(); it != nodetree.end(); ++it) {	
 		if ((*it).getName() != "")
-			outStream << (*it).getNumber() << "->\"" << (*it).getName() << "\" ";
+			outStream << (*it).getNumber() << "->" << (*it).getName() << " ";
 	}
 	outStream << endl;  
 	
