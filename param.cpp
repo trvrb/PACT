@@ -72,7 +72,8 @@ Parameters::Parameters() {
 	summary_diversity = false;		
 	summary_fst = false;				
 	summary_tajima_d = false;	
-	summary_diffusion_coefficient = false;	
+	summary_diffusion_coefficient = false;
+	summary_persistence = false;
 	
 	tips_time_to_trunk = false;
 	x_loc_history = false;	
@@ -271,7 +272,8 @@ void Parameters::importLine(string line) {
 	if (pstring == "summaryfst") { summary_fst = true; }
 	if (pstring == "summarytajimad") { summary_tajima_d = true; }
 	if (pstring == "summarydiffusioncoefficient") { summary_diffusion_coefficient = true; }
-	if (pstring == "summarydriftrate") { summary_drift_rate = true; }	
+	if (pstring == "summarydriftrate") { summary_drift_rate = true; }
+	if (pstring == "summarypersistence") { summary_persistence = true; }	
 	
 	if (pstring == "tipstimetotrunk") { tips_time_to_trunk = true; }	
 	
@@ -438,6 +440,7 @@ void Parameters::print() {
 		if (summary_diversity) { cout << "diversity" << endl; }
 		if (summary_fst) { cout << "fst" << endl; }	
 		if (summary_tajima_d) { cout << "tajima d" << endl; }	
+		if (summary_persistence) { cout << "persistence" << endl; }			
 		cout << endl; 
 	}
 
@@ -517,7 +520,7 @@ bool Parameters::printtree() {
 
 bool Parameters::summary() {
 	bool check;
-	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_sub_rates || summary_diversity || summary_fst || summary_tajima_d || summary_diffusion_coefficient)
+	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_sub_rates || summary_diversity || summary_fst || summary_tajima_d || summary_diffusion_coefficient || summary_persistence)
 		check = true;
 	else 
 		check = false;

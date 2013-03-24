@@ -107,6 +107,8 @@ public:
 	int getMigCount(string,string);	
 	double getMigRate();			
 	double getMigRate(string,string);
+	double getPersistence();				// return average time from a tip to a node with different label
+	double getPersistence(string);			// return average time from a tip with particular label to a node with different label
 	
 	// DIVERSITY STATISTICS	
 	double getDiversity();					// return mean of (2 * time to common ancestor) for every pair of leaf nodes

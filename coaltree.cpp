@@ -1638,6 +1638,76 @@ double CoalescentTree::getMigRate(string from, string to) {
 	return getMigCount(from,to) / getLength(to);
 }
 
+/* return average time from a tip to a node with different label */
+double CoalescentTree::getPersistence() {
+	
+	double persist = 0.0;
+	double total = 0.0;
+	tree<Node>::leaf_iterator it;	
+	tree<Node>::iterator jt;
+	
+	// walk back from each tip in the tree
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		bool compare = false;	
+		double tipTime;
+		double ancTime;
+		jt = nodetree.parent(it);
+		while ( nodetree.is_valid(jt) ) {
+			if ( (*it).getLabel() != (*jt).getLabel() ) {
+				compare = true;
+				tipTime = (*it).getTime();
+				ancTime = (*jt).getTime();
+				break;
+			}
+			jt = nodetree.parent(jt);
+		}
+		if (compare == true) {
+			persist += (tipTime - ancTime);
+			total += 1.0;
+		}
+	}
+	
+	persist /= total;
+	return persist;
+	
+}
+
+/* return average time from a tip with particular label to a node with different label */
+double CoalescentTree::getPersistence(string l) {
+	
+	double persist = 0.0;
+	double total = 0.0;
+	tree<Node>::leaf_iterator it;	
+	tree<Node>::iterator jt;
+	
+	// walk back from each tip in the tree
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		if ( (*it).getLabel() == l ) {
+			bool compare = false;	
+			double tipTime;
+			double ancTime;
+			jt = nodetree.parent(it);
+			while ( nodetree.is_valid(jt) ) {
+				if ( (*it).getLabel() != (*jt).getLabel() ) {
+					compare = true;
+					tipTime = (*it).getTime();
+					ancTime = (*jt).getTime();
+					break;
+				}
+				jt = nodetree.parent(jt);
+			}
+			if (compare == true) {
+				persist += (tipTime - ancTime);
+				total += 1.0;
+			}
+		}
+	}
+	
+	persist /= total;
+	return persist;
+	
+}
+
 /* return distance from tip A to tip B */
 double CoalescentTree::getDiversity(string tipA, string tipB) {
 

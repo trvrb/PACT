@@ -503,6 +503,30 @@ void IO::printStatistics() {
 			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 		}			
 		
+		// PERSISTENCE ///////////////////////
+		if (param.summary_persistence) {		
+			cout << "Printing persistence summary to " << outputFile << endl;
+			
+			Series s;
+			for (int i = 0; i < treelist.size(); i++) {
+				double n = treelist[i].getPersistence();
+				s.insert(n);
+			}
+			outStream << "persistence_all\t";
+			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+						
+			for (is = lset.begin(); is != lset.end(); ++is) {
+				string label = *is;
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					double n = treelist[i].getPersistence(label);
+					s.insert(n);
+				}
+				outStream << "persistence_" << label << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+		}		
+		
 		// Diffusion coefficient  //////////////
 		if (param.summary_diffusion_coefficient) {
 

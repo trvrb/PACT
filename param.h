@@ -95,6 +95,7 @@ public:
 	bool summary_tajima_d;	
 	bool summary_diffusion_coefficient;
 	bool summary_drift_rate;
+	bool summary_persistence;
 	
 	bool tips_time_to_trunk;
 	bool x_loc_history;
