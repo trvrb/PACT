@@ -260,6 +260,11 @@ void IO::treeManip() {
 				treelist[i].pruneToTime(start,stop);
 			}				
 
+			// PAD MIGRATION EVENTS
+			if (param.pad_migration_events) {
+				treelist[i].padMigrationEvents();
+			}	
+
 			// COLLAPSE LABELS
 			if (param.collapse_labels) {
 				treelist[i].collapseLabels();

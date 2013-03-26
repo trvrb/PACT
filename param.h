@@ -65,6 +65,8 @@ public:
 	
 	bool collapse_labels;
 	
+	bool pad_migration_events;
+	
 	bool trim_ends;
 	vector<double> trim_ends_values;		// start, stop
 	

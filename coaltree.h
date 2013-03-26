@@ -53,6 +53,7 @@ public:
 	void pruneToLabel(string);				// reduces CoalescentTree object to only include a particular set of tips
 	void pruneToName(string);				// reduces CoalescentTree object to only include a particular tip	
 	void pruneToTime(double,double);		// reduces CoalescentTree object to only include tips in a certain time frame
+	void padMigrationEvents();				// pads ancestral state tree with migration events
 	void collapseLabels();					// sets all labels in CoalescentTree to 1
 	void trimEnds(double,double);			// reduces CoalescentTree object to only those nodes between
 											// time start and time stop	
@@ -164,7 +165,7 @@ private:
 	void adjustCoords();					// sets coords in Nodes to allow tree drawing	
 	void adjustCircularCoords();			// sets coords in Nodes to allow tree unrooted drawing	
 	int countDescendants(tree<Node>::iterator);		// counts the number of tips descended from a node
-	int getMaxNumber();						// return larger number in tree
+	int getMaxNumber();						// return largest number in tree
 	int renumber(int);						// renumbers tree in preorder traversal starting from int 
 											// returning 1 greater than the max in the tree
 	tree<Node>::iterator findNode(int);		// return iterator to a Node in nodetree based upon matching number

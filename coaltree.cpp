@@ -231,7 +231,6 @@ CoalescentTree::CoalescentTree(string paren) {
 					// push current node back by distance equal to migLength
 					double newLength = (*it).getLength() - migLength;
 					(*it).setLength(migLength);
-			//		(*it).setLabel(to); 				// this should happen automatically
 		
 					// create new intermediate node
 					Node migNode(nodeCount);
@@ -250,7 +249,7 @@ CoalescentTree::CoalescentTree(string paren) {
 				if (stringOne == "states") {
 					string loc = stringTwo.c_str();
 					(*it).setLabel(loc);
-					labelset.insert(loc);
+					labelset.insert(loc);		
 				}
 				
 				// ANTIGENIC
@@ -679,6 +678,45 @@ void CoalescentTree::pruneToTime(double start, double stop) {
 				
 }
 
+/* goes through an ancestral state tree and pads with migration events as an approximation of Markov jumps */
+void CoalescentTree::padMigrationEvents() {
+
+	int nodeCount = getMaxNumber();
+
+	tree<Node>::iterator it, jt;
+	it = nodetree.begin();
+	while(it != nodetree.end()) {	
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {
+		
+			/* pads nodes which change state and parent shows a bifurcation */		
+			if ( (*it).getLabel() != (*jt).getLabel() && nodetree.number_of_children(jt) == 2 ) {
+			
+				// find migration time and modify child node length
+				double totalLength = (*it).getLength();
+				double firstLength = rgen.uniform(0, totalLength);
+				double secondLength = totalLength - firstLength;
+				(*it).setLength(secondLength);	
+				
+				// create new intermediate node
+				Node migNode(nodeCount);
+				migNode.setLabel((*jt).getLabel());
+				migNode.setLength(firstLength);
+				migNode.setTime((*it).getTime() - secondLength);
+				nodeCount++;						
+				
+				// wrap this new node so that it inherits the old node
+				it = nodetree.wrap(it, migNode);					
+			
+			}
+			
+		}	
+		
+		++it;
+		
+	}
+
+}
 
 /* sets all labels in tree to 1 */
 void CoalescentTree::collapseLabels() {

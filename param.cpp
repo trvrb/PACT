@@ -53,6 +53,7 @@ Parameters::Parameters() {
 	prune_to_trunk = false;
 	prune_to_time = false;
 	prune_to_label = false;
+	pad_migration_events = false;
 	collapse_labels = false;
 	trim_ends = false;
 	section_tree = false;	
@@ -205,6 +206,10 @@ void Parameters::importLine(string line) {
 			prune_to_time_values = values;
 		}
 	}		
+
+	if (pstring == "padmigrationevents") { 
+		pad_migration_events = true;
+	}	
 	
 	if (pstring == "collapselabels") { 
 		collapse_labels = true;
@@ -393,6 +398,10 @@ void Parameters::print() {
 		if (prune_to_time) {
 			cout << "prune to time " << prune_to_time_values[0] << " " << prune_to_time_values[1] << endl;
 		}		
+
+		if (pad_migration_events) {
+			cout << "pad migration events" << endl;
+		}	
 		
 		if (collapse_labels) {
 			cout << "collapse labels" << endl;
@@ -502,7 +511,7 @@ bool Parameters::general() {
 
 bool Parameters::manip() {
 	bool check;
-	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail || ordering)
+	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || pad_migration_events || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail || ordering)
 		check = true;
 	else 
 		check = false;
