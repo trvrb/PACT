@@ -89,6 +89,7 @@ public:
 	double getLength();						// return total tree length
 	double getLength(string);				// return length with this label
 	double getLabelPro(string);				// return proportion of tree with label
+	double getRootLabelPro(string);			// return proportion of root (0 or 1) with label	
 	double getTrunkPro();					// proportion of tree that can trace its history from present day samples
 	set<string> getLabelSet();				// return labelset
 	

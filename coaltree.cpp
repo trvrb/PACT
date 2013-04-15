@@ -252,6 +252,12 @@ CoalescentTree::CoalescentTree(string paren) {
 					labelset.insert(loc);		
 				}
 				
+				if (stringOne == "location") {
+					string loc = stringTwo.c_str();
+					(*it).setLabel(loc);
+					labelset.insert(loc);		
+				}				
+				
 				// ANTIGENIC
 				if (stringOne == "antigenic") {
 					double xloc = atof(stringTwo.c_str());
@@ -1439,6 +1445,18 @@ double CoalescentTree::getLength(string l) {
 	}	
 	return length;
 
+}
+
+/* get proportion of root with label */
+double CoalescentTree::getRootLabelPro(string l) { 
+	
+	double pro = 0.0;
+	tree<Node>::iterator rt = nodetree.begin();
+	if ( (*rt).getLabel() == l) {
+		pro = 1.0;
+	}
+	return pro;
+	
 }
 
 /* get proportion of tree with label */

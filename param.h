@@ -88,6 +88,7 @@ public:
 	
 	bool summary_tmrca;		
 	bool summary_length;			
+	bool summary_root_proportions;	
 	bool summary_proportions;	
 	bool summary_coal_rates;		
 	bool summary_mig_rates;	

@@ -67,6 +67,7 @@ Parameters::Parameters() {
 	
 	summary_tmrca = false;		
 	summary_length = false;			
+	summary_root_proportions = false;		
 	summary_proportions = false;	
 	summary_coal_rates = false;		
 	summary_mig_rates = false;		
@@ -269,6 +270,7 @@ void Parameters::importLine(string line) {
 
 	if (pstring == "summarytmrca") { summary_tmrca = true; }
 	if (pstring == "summarylength") { summary_length = true; }
+	if (pstring == "summaryrootproportions") { summary_root_proportions = true; }
 	if (pstring == "summaryproportions") { summary_proportions = true; }
 	if (pstring == "summarycoalrates") { summary_coal_rates = true; }
 	if (pstring == "summarymigrates") { summary_mig_rates = true; }
@@ -442,6 +444,7 @@ void Parameters::print() {
 		cout << "Summary statistics:" << endl;
 		if (summary_tmrca) { cout << "tmrca" << endl; }
 		if (summary_length) { cout << "length" << endl; }
+		if (summary_root_proportions) { cout << "root proportions" << endl; }
 		if (summary_proportions) { cout << "proportions" << endl; }
 		if (summary_coal_rates) { cout << "coal rates" << endl; }
 		if (summary_mig_rates) { cout << "mig rates" << endl; }
@@ -529,7 +532,7 @@ bool Parameters::printtree() {
 
 bool Parameters::summary() {
 	bool check;
-	if (summary_tmrca || summary_length || summary_proportions || summary_coal_rates || summary_mig_rates || summary_sub_rates || summary_diversity || summary_fst || summary_tajima_d || summary_diffusion_coefficient || summary_persistence)
+	if (summary_tmrca || summary_length || summary_root_proportions || summary_proportions || summary_coal_rates || summary_mig_rates || summary_sub_rates || summary_diversity || summary_fst || summary_tajima_d || summary_diffusion_coefficient || summary_persistence)
 		check = true;
 	else 
 		check = false;

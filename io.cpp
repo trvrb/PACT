@@ -386,6 +386,21 @@ void IO::printStatistics() {
 			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 		}		
 
+		// ROOT PROPORTIONS //////////////
+		if (param.summary_root_proportions) {
+			cout << "Printing root proportion summary to " << outputFile << endl;
+			for (is = lset.begin(); is != lset.end(); ++is) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					double n = ct.getRootLabelPro(*is);
+					s.insert(n);
+				}
+				outStream << "rootpro_" << *is << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;		
+			}
+		}
+
 		// LABEL PROPORTIONS //////////////
 		if (param.summary_proportions) {
 			cout << "Printing trunk proportion summary to " << outputFile << endl;
@@ -756,8 +771,7 @@ void IO::printSkylines() {
 					Series s;
 					for (int i = 0; i < treelist.size(); i++) {
 						CoalescentTree ct = treelist[i];
-						ct.trimEnds(t-25,t+step+25);
-				//		ct.trimEnds(t,t+step);
+						ct.trimEnds(t,t+step);
 						double n = ct.getCoalRate(*is);
 						s.insert(n);
 					}
