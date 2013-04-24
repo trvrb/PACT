@@ -115,6 +115,7 @@ public:
 	bool skyline_proportions;
 	bool skyline_coal_rates;
 	bool skyline_mig_rates;
+	bool skyline_pro_history_from_tips;
 	bool skyline_diversity;
 	bool skyline_fst;
 	bool skyline_tajima_d;

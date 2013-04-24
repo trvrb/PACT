@@ -92,6 +92,7 @@ public:
 	double getRootLabelPro(string);			// return proportion of root (0 or 1) with label	
 	double getTrunkPro();					// proportion of tree that can trace its history from present day samples
 	set<string> getLabelSet();				// return labelset
+	double getLabelProFromTips(string,double);		// return proportion of tree with label	at time back from tips
 	
 	// COALESCENT STATISTICS
 	// problem with weight calculation for sectioned data

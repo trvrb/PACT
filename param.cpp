@@ -87,6 +87,7 @@ Parameters::Parameters() {
 	skyline_proportions = false;
 	skyline_coal_rates = false;
 	skyline_mig_rates = false;
+	skyline_pro_history_from_tips = false;
 	skyline_diversity = false;
 	skyline_fst = false;
 	skyline_tajima_d = false;
@@ -319,6 +320,7 @@ void Parameters::importLine(string line) {
 	if (pstring == "skylineproportions") { skyline_proportions = true; }
 	if (pstring == "skylinecoalrates") { skyline_coal_rates = true; }
 	if (pstring == "skylinemigrates") { skyline_mig_rates = true; }
+	if (pstring == "skylineprohistoryfromtips") { skyline_pro_history_from_tips = true; }
 	if (pstring == "skylinediversity") { skyline_diversity = true; }
 	if (pstring == "skylinefst") { skyline_fst = true; }
 	if (pstring == "skylinetajimad") { skyline_tajima_d = true; }
@@ -480,6 +482,7 @@ void Parameters::print() {
 		if (skyline_proportions) { cout << "proportions" << endl; }
 		if (skyline_coal_rates) { cout << "coal rates" << endl; }
 		if (skyline_mig_rates) { cout << "mig rates" << endl; }
+		if (skyline_pro_history_from_tips) { cout << "pro history from tips" << endl; }		
 		if (skyline_diversity) { cout << "diversity" << endl; }
 		if (skyline_fst) { cout << "fst" << endl; }	
 		if (skyline_tajima_d) { cout << "tajima d" << endl; }
@@ -551,7 +554,7 @@ bool Parameters::tips() {
 bool Parameters::skyline() {
 	bool check;
 	if ( skyline_values.size() == 3 &&
-		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_diversity || skyline_fst || skyline_tajima_d || skyline_timetofix || skyline_xmean || skyline_ymean || skyline_xdrift || skyline_ratemean || skyline_xtrunkdiff || skyline_locsample || skyline_locgrid || skyline_drift_rate_from_tips) )
+		(skyline_tmrca || skyline_length || skyline_proportions || skyline_coal_rates || skyline_mig_rates || skyline_pro_history_from_tips || skyline_diversity || skyline_fst || skyline_tajima_d || skyline_timetofix || skyline_xmean || skyline_ymean || skyline_xdrift || skyline_ratemean || skyline_xtrunkdiff || skyline_locsample || skyline_locgrid || skyline_drift_rate_from_tips) )
 		check = true;
 	else 
 		check = false;
