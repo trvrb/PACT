@@ -1514,6 +1514,32 @@ double CoalescentTree::getLabelProFromTips(string l, double timeWindow) {
 
 }
 
+/* returns the proportion of branches with a particular label back from tips */
+double CoalescentTree::getLabelProFromTips(string l, double timeWindow, string startingLabel) {
+
+	double pro = 0;	
+	double count = 0;
+	
+	/* walk through every tip in the tree and step back to appropriate point */	
+	for (tree<Node>::iterator it = nodetree.begin(); it != nodetree.end(); ++it) {
+		if ( (*it).getLeaf()  && (*it).getLabel() == startingLabel ) {
+		
+			tree<Node>::iterator jt = getNodeBackFromTip(it, timeWindow);
+			string label = (*jt).getLabel();
+		
+			if (l == label) {
+				pro += 1.0;
+			}
+			count += 1.0;
+			
+		}
+	}
+		
+	pro /= count;
+	return pro;
+
+}
+
 /* returns the count of coalescent events */
 int CoalescentTree::getCoalCount() {
 

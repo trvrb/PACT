@@ -810,24 +810,27 @@ void IO::printSkylines() {
 			}
 		}		
 		
-		// MIGRATION HISTORY FROM TIPS ///////////////////////
+		// PROPORTION HISTORY FROM TIPS ///////////////////////
 		if (param.skyline_pro_history_from_tips) {		
 			cout << "Printing proportion history skyline to " << outputFile << endl;
 			for (is = lset.begin(); is != lset.end(); ++is) {
-				string label = *is;
-				for (double t = start; t + step <= stop; t += step) {
+				for (js = lset.begin(); js != lset.end(); ++js) {			
+					string startingLabel = *is;
+					string endingLabel = *js;
+					for (double t = start; t + step <= stop; t += step) {
+		
+						Series s;
+						for (int i = 0; i < treelist.size(); i++) {
+							CoalescentTree ct = treelist[i];
+							double n = ct.getLabelProFromTips(endingLabel, t, startingLabel);
+							s.insert(n);
+						}
+						outStream << "prohist_" << startingLabel << "_" << endingLabel << "\t";
+						outStream << t + step / (double) 2 << "\t";
+						outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
 	
-					Series s;
-					for (int i = 0; i < treelist.size(); i++) {
-						CoalescentTree ct = treelist[i];
-						double n = ct.getLabelProFromTips(label,t);
-						s.insert(n);
 					}
-					outStream << "prohist_" << label << "\t";
-					outStream << t + step / (double) 2 << "\t";
-					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
-
-				}	
+				}
 			}
 		}				
 		
