@@ -1,7 +1,3 @@
-===============================================
-(P)osterior (An)nalysis of (C)oalescent (T)rees
-===============================================
-
 The program PACT computes a variety of statistics from a sample of genealogical trees. It is meant 
 to extend the functionality of already existing coalescent inference programs such as Migrate, 
 BEAST, IM  and LAMARC. PACT reads genealogies in NEWICK format and performs various operations on 
