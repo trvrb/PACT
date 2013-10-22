@@ -1,0 +1,9 @@
+push times back 2002 2007.997
+renew trunk 1
+print rule tree
+summary tmrca
+summary coal rates
+summary mig rates
+skyline settings 2002 2008 0.01
+skyline proportions
+tips time to trunk
