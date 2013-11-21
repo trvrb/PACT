@@ -60,6 +60,9 @@ public:
 	bool prune_to_label;
 	vector<string> prune_to_label_values;	// label
 	
+	bool prune_to_tips;
+	vector<string> prune_to_tips_values;	// list of tips
+	
 	bool prune_to_time;
 	vector<double> prune_to_time_values;	// start, stop	
 	

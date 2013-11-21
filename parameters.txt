@@ -14,6 +14,7 @@ reduce tips 0.2						# takes only 20% of the tips of the tree at random
 renew trunk 1						# updates trunk, working backwards from all samples within 1 year of most recent
 prune to trunk						# reduces tree to just the trunk
 prune to label 1					# reduces tree to just the tips with label 1
+prune to tips 0MURTOQ 0BFBESB ...	# reduces tree to just the tips specified, requires tips to begin with A-Z or 0-9		
 collapse labels						# drops all separate labels, every sample considered part of the same population
 trim ends 2003 2004					# reduces tree to only those branches dated between 2003 and 2004
 section tree 2002 0.25 1			# reduces tree into sections, starting at 2002, leaving windows 0.25 in width 

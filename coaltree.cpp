@@ -613,6 +613,38 @@ void CoalescentTree::pruneToLabel(string label) {
 				
 }
 
+/* reduces a tree to specified set of tips */
+void CoalescentTree::pruneToTips(vector<string> tipsToInclude) {
+
+	/* start by finding all tips in the set */
+	set<int> nodeset; 
+	tree<Node>::iterator it, jt;
+	
+  	for (int i = 0; i < tipsToInclude.size(); i++) {
+  		it = findNode(tipsToInclude[i]);
+  		/* move up tree adding nodes to label set */
+		jt = it;
+		while (nodetree.is_valid(jt)) {
+			nodeset.insert( (*jt).getNumber() );
+			jt = nodetree.parent(jt);
+		}
+  	}
+				
+	/* erase other nodes from the tree */
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		if (nodeset.end() == nodeset.find( (*it).getNumber() )) {
+			it = nodetree.erase(it);
+		}
+		else {
+    		++it;
+    	}
+    }
+         
+	reduce();
+
+}	
+
 /* reduces a tree to ancestors of a single tip */
 void CoalescentTree::pruneToName(string name) {
 

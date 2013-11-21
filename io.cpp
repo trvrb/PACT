@@ -248,6 +248,11 @@ void IO::treeManip() {
 				treelist[i].pruneToLabel(label);
 			}	
 			
+			// PRUNE TO TIPS
+			if (param.prune_to_tips) {
+				treelist[i].pruneToTips(param.prune_to_tips_values);
+			}				
+			
 			// PRUNE TO TRUNK
 			if (param.prune_to_trunk) {
 				treelist[i].pruneToTrunk();

@@ -49,8 +49,9 @@ public:
 	void reduceTips(double);				// reduces tree to ancestors of a subset of tips
 	void renewTrunk(double);				// renews definition of trunk, working back from all recent tips
 	void renewTrunkRandom(double);			// renews definition of trunk, working back from a random tip
-	void pruneToTrunk();					// reduces CoalescentTree object to trunk
-	void pruneToLabel(string);				// reduces CoalescentTree object to only include a particular set of tips
+	void pruneToTrunk();					// reduces tree to trunk
+	void pruneToLabel(string);				// reduces tree to only include tips with specified label
+	void pruneToTips(vector<string>);		// reduces tree to specified set of tips	
 	void pruneToName(string);				// reduces CoalescentTree object to only include a particular tip	
 	void pruneToTime(double,double);		// reduces CoalescentTree object to only include tips in a certain time frame
 	void padMigrationEvents();				// pads ancestral state tree with migration events
