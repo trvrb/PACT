@@ -20,6 +20,6 @@ PACT requires two files to run:
     in.trees (NEWICK trees)
   
 Available parameters can be found in parameters.txt.  Full documentation can be found in 
-pact_manual.pdf.
+[`pact_manual.pdf`](pact_manual.pdf).
 
 Copyright 2011 Trevor Bedford.  Distributed under the GPL v3.
