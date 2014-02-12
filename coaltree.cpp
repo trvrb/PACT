@@ -256,7 +256,13 @@ CoalescentTree::CoalescentTree(string paren) {
 					string loc = stringTwo.c_str();
 					(*it).setLabel(loc);
 					labelset.insert(loc);		
-				}				
+				}	
+				
+				if (stringOne == "Compartment") {
+					string loc = stringTwo.c_str();
+					(*it).setLabel(loc);
+					labelset.insert(loc);		
+				}								
 				
 				// ANTIGENIC
 				if (stringOne == "antigenic") {
@@ -571,7 +577,7 @@ void CoalescentTree::pruneToTrunk() {
     	}
     }
             
-	peelBack();            
+//	peelBack();            
 	reduce();
 			
 }
