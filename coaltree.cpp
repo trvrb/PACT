@@ -661,15 +661,16 @@ void CoalescentTree::removeTips(vector<string> tipsToExclude) {
 	tree<Node>::iterator it, jt;
 	
 	for (int i=0; i < tipsToExclude.size(); i++) {
-		it = findNode(tipsToExclude[i]);
+		it = findNode(tipsToExclude[i]);	
 		int num = (*it).getNumber();
 		nodeset.insert(num);
 	}
-					
+										
 	/* erase specified nodes from the tree */	
 	it = nodetree.begin();
 	while(it != nodetree.end()) {
-		if (nodeset.end() != nodeset.find( (*it).getNumber() )) {	// if found
+		int num = (*it).getNumber();
+		if (nodeset.find(num) != nodeset.end()) {	 // if found
 			it = nodetree.erase(it);
 		}
 		else {
