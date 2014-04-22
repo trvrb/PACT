@@ -52,6 +52,7 @@ public:
 	void pruneToTrunk();					// reduces tree to trunk
 	void pruneToLabel(string);				// reduces tree to only include tips with specified label
 	void pruneToTips(vector<string>);		// reduces tree to specified set of tips	
+	void removeTips(vector<string>);		// removes specified set of tips from tree		
 	void pruneToName(string);				// reduces CoalescentTree object to only include a particular tip	
 	void pruneToTime(double,double);		// reduces CoalescentTree object to only include tips in a certain time frame
 	void padMigrationEvents();				// pads ancestral state tree with migration events
@@ -113,7 +114,9 @@ public:
 	double getMigRate();			
 	double getMigRate(string,string);
 	double getPersistence();				// return average time from a tip to a node with different label
+	double getPersistenceQuantile(double);	// return quantile across tips of persistence time
 	double getPersistence(string);			// return average time from a tip with particular label to a node with different label
+	double getPersistenceQuantile(double, string);	// return quantile across tips of persistence time
 	
 	// DIVERSITY STATISTICS	
 	double getDiversity();					// return mean of (2 * time to common ancestor) for every pair of leaf nodes

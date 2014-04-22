@@ -56,6 +56,7 @@ using std::atan2;
 #include "coaltree.h"
 #include "node.h"
 #include "tree.hh"
+#include "series.h"
 
 /* Constructor function to initialize private data */
 /* Takes NEWICK parentheses tree as string input */
@@ -640,6 +641,35 @@ void CoalescentTree::pruneToTips(vector<string> tipsToInclude) {
 	it = nodetree.begin();
 	while(it != nodetree.end()) {
 		if (nodeset.end() == nodeset.find( (*it).getNumber() )) {
+			it = nodetree.erase(it);
+		}
+		else {
+    		++it;
+    	}
+    }
+         
+	reduce();
+
+}	
+
+/* removes a specified set of tips from tree */
+void CoalescentTree::removeTips(vector<string> tipsToExclude) {
+
+
+	/* start by finding numbers of all excluded tips */
+	set<int> nodeset; 
+	tree<Node>::iterator it, jt;
+	
+	for (int i=0; i < tipsToExclude.size(); i++) {
+		it = findNode(tipsToExclude[i]);
+		int num = (*it).getNumber();
+		nodeset.insert(num);
+	}
+					
+	/* erase specified nodes from the tree */	
+	it = nodetree.begin();
+	while(it != nodetree.end()) {
+		if (nodeset.end() != nodeset.find( (*it).getNumber() )) {	// if found
 			it = nodetree.erase(it);
 		}
 		else {
@@ -1819,6 +1849,38 @@ double CoalescentTree::getPersistence() {
 	
 }
 
+/* return quantile time from a tip to a node with different label */
+double CoalescentTree::getPersistenceQuantile(double q) {
+	
+	Series s;
+	tree<Node>::leaf_iterator it;	
+	tree<Node>::iterator jt;
+	
+	// walk back from each tip in the tree
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		bool compare = false;	
+		double tipTime;
+		double ancTime;
+		jt = nodetree.parent(it);
+		while ( nodetree.is_valid(jt) ) {
+			if ( (*it).getLabel() != (*jt).getLabel() ) {
+				compare = true;
+				tipTime = (*it).getTime();
+				ancTime = (*jt).getTime();
+				break;
+			}
+			jt = nodetree.parent(jt);
+		}
+		if (compare == true) {
+			double t = (tipTime - ancTime);
+			s.insert(t);
+		}
+	}
+	
+	return s.quantile(q);
+	
+}
+
 /* return average time from a tip with particular label to a node with different label */
 double CoalescentTree::getPersistence(string l) {
 	
@@ -1852,6 +1914,40 @@ double CoalescentTree::getPersistence(string l) {
 	
 	persist /= total;
 	return persist;
+	
+}
+
+/* return quantile time from a tip with particular label to a node with different label */
+double CoalescentTree::getPersistenceQuantile(double q, string l) {
+	
+	Series s;
+	tree<Node>::leaf_iterator it;	
+	tree<Node>::iterator jt;
+	
+	// walk back from each tip in the tree
+	for (it = nodetree.begin_leaf(); it != nodetree.end_leaf(); ++it) {
+		if ( (*it).getLabel() == l ) {
+			bool compare = false;	
+			double tipTime;
+			double ancTime;
+			jt = nodetree.parent(it);
+			while ( nodetree.is_valid(jt) ) {
+				if ( (*it).getLabel() != (*jt).getLabel() ) {
+					compare = true;
+					tipTime = (*it).getTime();
+					ancTime = (*jt).getTime();
+					break;
+				}
+				jt = nodetree.parent(jt);
+			}
+			if (compare == true) {
+				double t = (tipTime - ancTime);
+				s.insert(t);				
+			}
+		}
+	}
+	
+	return s.quantile(q);
 	
 }
 

@@ -54,6 +54,7 @@ Parameters::Parameters() {
 	prune_to_time = false;
 	prune_to_label = false;
 	prune_to_tips = false;
+	remove_tips = false;	
 	pad_migration_events = false;
 	collapse_labels = false;
 	trim_ends = false;
@@ -206,7 +207,12 @@ void Parameters::importLine(string line) {
 	if (pstring == "prunetotips") { 
 		prune_to_tips = true; 			
 		prune_to_tips_values = svalues;	
-	}		
+	}	
+	
+	if (pstring == "removetips") { 
+		remove_tips = true; 			
+		remove_tips_values = svalues;	
+	}			
 	
 	if (pstring == "prunetotime") { 
 		if (values.size() == 2) {
@@ -409,6 +415,14 @@ void Parameters::print() {
 			}
 			cout << endl;			
 		}
+		
+		if (remove_tips) {
+			cout << "remove tips:" << endl;
+			for (int i = 0; i < remove_tips_values.size(); i++) {
+				cout << remove_tips_values[i] << " ";
+			}
+			cout << endl;			
+		}		
 	
 		if (prune_to_trunk) {
 			cout << "prune to trunk" << endl;
@@ -532,7 +546,7 @@ bool Parameters::general() {
 
 bool Parameters::manip() {
 	bool check;
-	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || prune_to_tips || pad_migration_events || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail || ordering)
+	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || prune_to_tips || remove_tips || pad_migration_events || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail || ordering)
 		check = true;
 	else 
 		check = false;

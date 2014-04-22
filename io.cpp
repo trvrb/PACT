@@ -251,7 +251,12 @@ void IO::treeManip() {
 			// PRUNE TO TIPS
 			if (param.prune_to_tips) {
 				treelist[i].pruneToTips(param.prune_to_tips_values);
-			}				
+			}	
+			
+			// REMOVE TIPS
+			if (param.remove_tips) {
+				treelist[i].removeTips(param.remove_tips_values);
+			}							
 			
 			// PRUNE TO TRUNK
 			if (param.prune_to_trunk) {
@@ -537,18 +542,49 @@ void IO::printStatistics() {
 				double n = treelist[i].getPersistence();
 				s.insert(n);
 			}
+			double avg = s.mean();
+			s.clear();
+			for (int i = 0; i < treelist.size(); i++) {
+				double n = treelist[i].getPersistenceQuantile(0.25);
+				s.insert(n);
+			}
+			double lower = s.mean();
+			s.clear();	
+			for (int i = 0; i < treelist.size(); i++) {
+				double n = treelist[i].getPersistenceQuantile(0.75);
+				s.insert(n);
+			}
+			double upper = s.mean();
+			s.clear();			
+			
 			outStream << "persistence_all\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			outStream << lower << "\t" << avg << "\t" << upper << endl;
 						
 			for (is = lset.begin(); is != lset.end(); ++is) {
 				string label = *is;
+
 				Series s;
 				for (int i = 0; i < treelist.size(); i++) {
 					double n = treelist[i].getPersistence(label);
 					s.insert(n);
 				}
+				double avg = s.mean();
+				s.clear();
+				for (int i = 0; i < treelist.size(); i++) {
+					double n = treelist[i].getPersistenceQuantile(0.25, label);
+					s.insert(n);
+				}
+				double lower = s.mean();
+				s.clear();	
+				for (int i = 0; i < treelist.size(); i++) {
+					double n = treelist[i].getPersistenceQuantile(0.75, label);
+					s.insert(n);
+				}
+				double upper = s.mean();
+				s.clear();		
+
 				outStream << "persistence_" << label << "\t";
-				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+				outStream << lower << "\t" << avg << "\t" << upper << endl;
 			}
 		}		
 		
