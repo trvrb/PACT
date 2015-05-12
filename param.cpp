@@ -61,6 +61,7 @@ Parameters::Parameters() {
 	section_tree = false;	
 	time_slice = false;
 	rotate = false;
+	accumulate = false;	
 	add_tail = false;
 	
 	print_tree = false;
@@ -255,6 +256,10 @@ void Parameters::importLine(string line) {
 			rotate = true; 
 			rotate_values = values;	
 		}
+	}
+	
+	if (pstring == "accumulate") { 
+		accumulate = true;
 	}	
 	
 	if (pstring == "addtail") { 
@@ -351,7 +356,7 @@ void Parameters::importLine(string line) {
 			pairs_diversity = true; 
 			pairs_diversity_values = values;	
 		}
-	}	
+	}		
 		
 }
 
@@ -442,7 +447,11 @@ void Parameters::print() {
 		
 		if (rotate) {
 			cout << "rotate " << rotate_values[0] << endl;
-		}	
+		}
+		
+		if (accumulate) {
+			cout << "accumulate" << endl;
+		}			
 		
 		if (add_tail) {
 			cout << "add tail " << add_tail_values[0] << endl;
@@ -546,7 +555,7 @@ bool Parameters::general() {
 
 bool Parameters::manip() {
 	bool check;
-	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || prune_to_tips || remove_tips || pad_migration_events || collapse_labels || trim_ends || section_tree || time_slice || rotate || add_tail || ordering)
+	if (push_times_back || reduce_tips || renew_trunk || prune_to_trunk || prune_to_label || prune_to_tips || remove_tips || pad_migration_events || collapse_labels || trim_ends || section_tree || time_slice || rotate || accumulate || add_tail || ordering)
 		check = true;
 	else 
 		check = false;

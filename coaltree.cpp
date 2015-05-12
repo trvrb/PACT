@@ -259,6 +259,12 @@ CoalescentTree::CoalescentTree(string paren) {
 					labelset.insert(loc);		
 				}	
 				
+				if (stringOne == "cluster") {
+					string loc = stringTwo.c_str();
+					(*it).setLabel(loc);
+					labelset.insert(loc);		
+				}					
+				
 				if (stringOne == "Compartment") {
 					string loc = stringTwo.c_str();
 					(*it).setLabel(loc);
@@ -273,6 +279,18 @@ CoalescentTree::CoalescentTree(string paren) {
 					(*it).setY(yloc);					
 				}	
 				
+				// NONSYNONYMOUS
+				if (stringOne == "N") {
+					double xloc = atof(stringTwo.c_str());
+					(*it).setX(xloc);
+				}
+				
+				// SYNONYMOUS
+				if (stringOne == "S") {
+					double yloc = atof(stringTwo.c_str());
+					(*it).setY(yloc);
+				}				
+				
 				// LAYOUT
 				if (stringOne == "layout") {
 					double xloc = atof(stringTwo.c_str());
@@ -283,7 +301,7 @@ CoalescentTree::CoalescentTree(string paren) {
 				if (stringOne == "latitude") {
 					double xloc = atof(stringTwo.c_str());
 					(*it).setX(xloc);				
-				}					
+				}									
 				
 				// DIFFUSION
 				if (stringOne == "diffusion") {
@@ -1156,6 +1174,25 @@ void CoalescentTree::rotateLoc(double deg) {
 	}	
 
 }
+
+/* walk down tree and replace xloc and yloc with accumulated totals */
+void CoalescentTree::accumulateLoc() {
+	tree<Node>::iterator it, jt;
+	for (it = nodetree.begin(); it != nodetree.end(); ++it ) {
+		jt = nodetree.parent(it);
+		if (nodetree.is_valid(jt)) {
+			double xloc = (*it).getX();
+			double yloc = (*it).getY();		
+			double parent_xloc = (*jt).getX();
+			double parent_yloc = (*jt).getY();
+			xloc = xloc + parent_xloc;
+			yloc = yloc + parent_yloc;
+			(*it).setX(xloc);
+			(*it).setY(yloc);			
+		}
+	}
+}
+
 
 /* adds an additional node prior to root, takes all attributes from root accept time */
 void CoalescentTree::addTail(double setback) {

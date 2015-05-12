@@ -83,7 +83,9 @@ public:
 	vector<double> time_slice_values;		// time
 	
 	bool rotate;
-	vector<double> rotate_values;			// degrees	
+	vector<double> rotate_values;			// degrees
+	
+	bool accumulate;	
 	
 	bool add_tail;
 	vector<double> add_tail_values;			// time		

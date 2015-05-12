@@ -284,7 +284,12 @@ void IO::treeManip() {
 			if (param.rotate) {
 				double deg = (param.rotate_values)[0];
 				treelist[i].rotateLoc(deg);
-			}	
+			}
+			
+			// ACCUMULATE
+			if (param.accumulate) {
+				treelist[i].accumulateLoc();
+			}				
 			
 			// ADD TAIL
 			if (param.add_tail) {
@@ -497,14 +502,26 @@ void IO::printStatistics() {
 		// DIVERSITY  //////////////
 		if (param.summary_diversity) {
 			cout << "Printing diversity summary to " << outputFile << endl;
-			Series s;
-			for (int i = 0; i < treelist.size(); i++) {
-				CoalescentTree ct = treelist[i];
-				double n = ct.getDiversity();
-				s.insert(n);
+			if (lset.size()>1) {
+				for (is = lset.begin(); is != lset.end(); ++is) {
+					Series s;
+					for (int i = 0; i < treelist.size(); i++) {
+						double n = treelist[i].getDiversity(*is);
+						s.insert(n);
+					}
+					outStream << "div_" << *is << "\t";
+					outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+				}
 			}
-			outStream << "div" << "\t";
-			outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			else {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					double n = treelist[i].getDiversity();
+					s.insert(n);
+				}
+				outStream << "div" << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
 		}	
 		
 		// FST  //////////////
@@ -1291,7 +1308,7 @@ void IO::printTips() {
 void IO::printPairs() {
 	
 	if (param.pairs()) {
-
+		
 		/* initializing output stream */
 		string outputFile = outputPrefix + ".pairs";
 		ofstream outStream;
@@ -1306,7 +1323,7 @@ void IO::printPairs() {
 		if (param.pairs_diversity) {
 		
 			double timeDiff = param.pairs_diversity_values[0];
-		
+					
 			cout << "Printing pairwise diversity to " << outputFile << endl;
 			for (int nA = 0; nA < tipNames.size(); nA++) {
 				for (int nB = nA + 1; nB < tipNames.size(); nB++) {

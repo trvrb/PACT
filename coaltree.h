@@ -67,6 +67,7 @@ public:
 											// pads CoalescentTre with additional nodes at each coalescent event
 											// included mainly for compatibility with TreePlot	
 	void rotateLoc(double);					// rotate X&Y locations around origin
+	void accumulateLoc();					// accumulate X&Y traits across tree (converts branch displacements to node traits)	
 	void addTail(double);					// pads the tree with a node before the root, set backing by a specified amount of time	
 	void setCoords(vector<string>);			// sets coords based on supplied vector of tip names	
 
