@@ -844,6 +844,20 @@ void IO::printSkylines() {
 		// MIGRATION ///////////////////////
 		if (param.skyline_mig_rates) {		
 			cout << "Printing migration skyline to " << outputFile << endl;
+			
+			for (double t = start; t + step <= stop; t += step) {
+				Series s;
+				for (int i = 0; i < treelist.size(); i++) {
+					CoalescentTree ct = treelist[i];
+					ct.trimEnds(t,t+step);				
+					double n = ct.getMigRate();
+					s.insert(n);
+				}
+				outStream << "mig_all\t";
+				outStream << t + step / (double) 2 << "\t";
+				outStream << s.quantile(0.025) << "\t" << s.mean() << "\t" << s.quantile(0.975) << endl;
+			}
+			
 			for (is = lset.begin(); is != lset.end(); ++is) {
 				for (js = lset.begin(); js != lset.end(); ++js) {	
 					string from = *is;

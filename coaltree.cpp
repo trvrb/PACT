@@ -297,6 +297,12 @@ CoalescentTree::CoalescentTree(string paren) {
 					(*it).setX(xloc);				
 				}	
 				
+				// iSNV
+				if (stringOne == "iSNV") {
+					double xloc = atof(stringTwo.c_str());
+					(*it).setX(xloc);				
+				}					
+				
 				// LATITUDE
 				if (stringOne == "latitude") {
 					double xloc = atof(stringTwo.c_str());

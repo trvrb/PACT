@@ -146,7 +146,7 @@ void Parameters::importLine(string line) {
 			break; 
 		else if (*is >= 'a' && *is <= 'z' && vstring.size() == 0)
     		pstring += *is;
-		else if ( (*is >= '0' && *is <= '9') || (*is >= 'a' && *is <= 'z') || (*is >= 'A' && *is <= 'Z') || *is == '.' || *is == '-' || *is == '/' || *is == '_')
+		else if ( (*is >= '0' && *is <= '9') || (*is >= 'a' && *is <= 'z') || (*is >= 'A' && *is <= 'Z') || *is == '.' || *is == '-' || *is == '/' || *is == '_' || *is == '|')
     		vstring += *is;
     	else if (vstring.size() > 0) {
     		values.push_back( atof(vstring.c_str()) );
